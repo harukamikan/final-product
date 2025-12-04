@@ -7,12 +7,44 @@ use App\Models\Goal;
 
 class GoalController extends Controller
 {
-    /**
-     * 編集画面を表示
-     */
+    public function create()
+    {
+        return view('goals.create');
+    }
+
+    public function store(Request $request)
+    {
+        $request->validate([
+            'title' => 'required|string|max:255',
+            'deadline' => 'required|date',
+            'category' => 'nullable|string|max:255',
+            'target_value' => 'nullable|string|max:255',
+            'current_value' => 'nullable|integer',
+            'criteria' => 'nullable|string',
+            'memo' => 'nullable|string',
+        ]);
+
+        Goal::create([
+            'user_id' => auth()->id(),
+            'title' => $request->title,
+            'deadline' => $request->deadline,
+            'category' => $request->category,
+            'target_value' => $request->target_value,
+            'current_value' => $request->current_value,
+            'criteria' => $request->criteria,
+            'memo' => $request->memo,
+        ]);
+
+        return redirect()->route('goals.create')->with('success', '目標を追加しました！');
+    }
+
+    public function index()
+    {
+        return view('goals.index');
+    }
+
     public function edit($id)
     {
-        // 今はダミーデータで動かす（後でDBと繋げる）
         $goal = (object)[
             'id' => $id,
             'title' => 'ブログ',
@@ -20,35 +52,27 @@ class GoalController extends Controller
             'category' => 'ブログ',
             'target_value' => '毎日単語100個',
             'current_value' => 0,
-            'achievement_criteria' => '資格取得など',
-            'memo' => '',
-            'priority' => '高'
+            'criteria' => '資格取得など',
+            'memo' => ''
         ];
         
         return view('goals.edit', compact('goal'));
     }
 
-    /**
-     * 更新処理
-     */
     public function update(Request $request, $id)
     {
-        // バリデーション
         $validated = $request->validate([
             'title' => 'required|max:255',
             'deadline' => 'required|date',
-            'category' => 'required',
+            'category' => 'nullable|string|max:255',
             'target_value' => 'nullable|max:255',
             'current_value' => 'nullable|integer',
-            'achievement_criteria' => 'nullable|max:255',
-            'memo' => 'nullable',
-            'priority' => 'required|in:低,中,高'
+            'criteria' => 'nullable|string',
+            'memo' => 'nullable'
         ]);
 
-        // 今はダミー（後でDBに保存する処理を書く）
         // Goal::find($id)->update($validated);
         
-        // 更新成功メッセージと共にリダイレクト
         return redirect()->route('goals.index')
             ->with('success', '目標を更新しました！');
     }

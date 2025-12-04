@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\GoalController;
 
@@ -7,11 +8,21 @@ Route::get('/', function () {
     return view('welcome');
 });
 
-// 目標編集機能（Ryouta担当）
+Route::get('/dashboard', function () {
+    return view('dashboard');
+})->middleware(['auth', 'verified'])->name('dashboard');
+
+Route::middleware('auth')->group(function () {
+    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
+    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
+    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+});
+
+// Goal routes
+Route::get('/goals', [GoalController::class, 'index'])->name('goals.index');
+Route::get('/goals/create', [GoalController::class, 'create'])->name('goals.create');
+Route::post('/goals', [GoalController::class, 'store'])->name('goals.store');
 Route::get('/goals/{id}/edit', [GoalController::class, 'edit'])->name('goals.edit');
 Route::put('/goals/{id}', [GoalController::class, 'update'])->name('goals.update');
 
-// 一覧画面へのリダイレクト用（仮）
-Route::get('/goals', function() {
-    return '目標一覧画面（まだ作成中）';
-})->name('goals.index');
+require __DIR__.'/auth.php';
