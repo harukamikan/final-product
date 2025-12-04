@@ -120,6 +120,7 @@
                 <label for="memo">メモ</label>
                 <textarea id="memo" name="memo" placeholder="自由記述">{{ old('memo', $goal->memo) }}</textarea>
             </div>
+
             
             <div class="button-group">
                 <button type="submit">更新する</button>
