@@ -112,22 +112,13 @@
             </div>
             
             <div class="form-group">
-                <label for="achievement_criteria">達成基準</label>
-                <input type="text" id="achievement_criteria" name="achievement_criteria" value="{{ old('achievement_criteria', $goal->achievement_criteria) }}" placeholder="何を達成すると「完了」とみなすか">
+                <label for="criteria">達成基準</label>
+                <input type="text" id="criteria" name="criteria" value="{{ old('criteria', $goal->criteria) }}" placeholder="何を達成すると「完了」とみなすか">
             </div>
             
             <div class="form-group">
                 <label for="memo">メモ</label>
                 <textarea id="memo" name="memo" placeholder="自由記述">{{ old('memo', $goal->memo) }}</textarea>
-            </div>
-            
-            <div class="form-group">
-                <label for="priority">優先度</label>
-                <select id="priority" name="priority">
-                    <option value="低" {{ old('priority', $goal->priority) == '低' ? 'selected' : '' }}>低</option>
-                    <option value="中" {{ old('priority', $goal->priority) == '中' ? 'selected' : '' }}>中</option>
-                    <option value="高" {{ old('priority', $goal->priority) == '高' ? 'selected' : '' }}>高</option>
-                </select>
             </div>
             
             <div class="button-group">
