@@ -47,3 +47,31 @@ Route::post('/slack/activity', function (Request $request) {
         'text' => "✅ 活動を登録しました！\n種別: {$type}\nURL: {$url}"
     ]);
 });
+
+Route::post('/slack/list', function (Request $request) {
+    // 仮でUser::first()を使う
+    $user = User::first();
+    
+    $activities = Activity::where('user_id', $user->id)
+        ->orderBy('created_at', 'desc')
+        ->limit(10)
+        ->get();
+    
+    if ($activities->isEmpty()) {
+        return response()->json([
+            'text' => "📝 登録されている活動はまだありません。\n`/activity [種別] [URL]` で登録できます！"
+        ]);
+    }
+    
+    $text = "📋 *最近の活動（最新10件）*\n\n";
+    foreach ($activities as $activity) {
+        $date = $activity->created_at->format('Y/m/d');
+        $text .= "• [{$activity->type}] {$activity->url}\n";
+        $text .= "  登録日: {$date}\n\n";
+    }
+    
+    return response()->json([
+        'response_type' => 'in_channel',
+        'text' => $text
+    ]);
+});
