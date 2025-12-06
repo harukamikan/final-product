@@ -3,7 +3,7 @@
 @section('content')
     <div class="py-12">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-            <h2 class="text-2xl font-bold mb-6">技術評価ダッシュボード</h2>
+            <h2 class="text-2xl font-bold mb-6">ようこそ、{{ auth()->user()->name }}さん！</h2>
 
             <!-- マイル統計 -->
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
