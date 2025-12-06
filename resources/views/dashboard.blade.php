@@ -57,7 +57,7 @@
                                      </div>
                                      <div>
                                          <a href="/goals/{{ $goal->id }}/edit" class="text-indigo-600 hover:text-indigo-800 text-sm font-semibold">
-                                             編集 →
+                                             編集
                                          </a>
                                      </div>
                                  </div>
@@ -71,7 +71,7 @@
                      <div class="text-center py-8 text-gray-500">
                          <p class="mb-4">まだ目標が登録されていません</p>
                          <a href="/goals/create" class="text-indigo-600 hover:text-indigo-800 font-semibold">
-                             最初の目標を作成 →
+                             最初の目標を作成
                          </a>
                      </div>
                  @endif
@@ -80,7 +80,7 @@
 
                     <div class="mt-6 text-center">
                         <a href="/activities" class="text-indigo-600 hover:text-indigo-800 font-semibold">
-                            すべての活動を見る →
+                            すべての活動を見る
                         </a>
                     </div>
                 </div>
