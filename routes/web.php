@@ -3,6 +3,7 @@
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\GoalController;
+use App\Http\Controllers\MissionController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -16,6 +17,10 @@ Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+    Route::get('/missions/blog-url', [MissionController::class, 'showBlogUrlForm'])
+        ->name('missions.blog-url.form');
+    Route::post('/missions/blog-url', [MissionController::class, 'submitBlogUrl'])
+        ->name('missions.blog-url.submit');
 });
 
 // Goal routes

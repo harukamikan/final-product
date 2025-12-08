@@ -19,7 +19,7 @@ return new class extends Migration
         $table->date('date')->nullable(); // 日付（登壇・イベント用）
         $table->string('url')->nullable(); // URL
         $table->timestamps();
-      });
+    });
     }
 
     /**
