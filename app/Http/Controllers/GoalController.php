@@ -45,18 +45,10 @@ class GoalController extends Controller
 
     public function edit($id)
     {
-        $goal = (object)[
-            'id' => $id,
-            'title' => 'ブログ',
-            'deadline' => '2025-03-01',
-            'category' => 'ブログ',
-            'target_value' => '毎日単語100個',
-            'current_value' => 0,
-            'criteria' => '資格取得など',
-            'memo' => ''
-        ];
-        
+        $goal = Goal::findOrFail($id);
+    
         return view('goals.edit', compact('goal'));
+            
     }
 
     public function update(Request $request, $id)
@@ -71,7 +63,7 @@ class GoalController extends Controller
             'memo' => 'nullable'
         ]);
 
-        // Goal::find($id)->update($validated);
+         Goal::find($id)->update($validated);
         
         return redirect()->route('goals.index')
             ->with('success', '目標を更新しました！');
