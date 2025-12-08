@@ -19,7 +19,7 @@
                 <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                     <div class="p-6 text-center">
                         <h3 class="text-gray-600 text-sm font-semibold uppercase mb-2">総マイル</h3>
-                        <div class="text-5xl font-bold text-indigo-600 mb-2">150</div>
+                        <div class="text-5xl font-bold text-indigo-600 mb-2">{{ $totalMiles }}</div>
                         <p class="text-gray-500 text-sm">累計獲得マイル</p>
                     </div>
                 </div>
@@ -27,7 +27,13 @@
                 <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                     <div class="p-6 text-center">
                         <h3 class="text-gray-600 text-sm font-semibold uppercase mb-2">現在のランク</h3>
-                        <div class="text-3xl font-bold text-yellow-500 mb-2">🥈 シルバー</div>
+                        <div class="text-3xl font-bold text-yellow-500 mb-2">
+                            @if($rank == 'ゴールド') 🥇
+                            @elseif($rank == 'シルバー') 🥈
+                            @else 🥉
+                            @endif
+                            {{ $rank }}
+                        </div>
                         <p class="text-gray-500 text-sm">次のランクまで あと50マイル</p>
                     </div>
                 </div>
