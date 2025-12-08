@@ -2,7 +2,9 @@
 nixPkgs = ['php84', 'php84Extensions.mbstring', 'php84Extensions.pdo', 'php84Packages.composer', 'nodejs']
 
 [phases.install]
-cmds = ['composer install --no-dev --optimize-autoloader --no-scripts']
+cmds = [
+  'composer install --no-dev --optimize-autoloader --no-scripts --ignore-platform-reqs'
+]
 
 [phases.build]
 cmds = ['php artisan config:cache']
