@@ -5,6 +5,15 @@
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
             <h2 class="text-2xl font-bold mb-6">ようこそ、{{ auth()->user()->name }}さん！</h2>
 
+            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg mb-6">
+                <div class="p-6">
+                    <h3 class="font-semibold text-lg text-gray-800 mb-4">📋 今期の半期目標</h3>
+                    <div class="border-l-4 border-indigo-500 bg-indigo-50 p-4 rounded-r">
+                        <div class="text-gray-800 text-lg">技術ブログの執筆を通じて社内外への情報発信を強化し、エンジニアブランディングを向上させる</div>
+                    </div>
+                </div>
+            </div>
+
             <!-- マイル統計 -->
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
                 <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
