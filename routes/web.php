@@ -5,10 +5,14 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\GoalController;
 use App\Http\Controllers\MissionController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\SlackAuthController;
 
 Route::get('/', function () {
     return view('welcome');
 });
+
+Route::get('/auth/slack/redirect', [SlackAuthController::class, 'redirect'])->name('slack.login');
+Route::get('/auth/slack/callback', [SlackAuthController::class, 'callback'])->name('slack.callback');
 
 Route::get('/dashboard', [DashboardController::class, 'index'])
     ->middleware(['auth', 'verified'])
