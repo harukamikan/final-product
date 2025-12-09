@@ -9,7 +9,7 @@
 @section('content')
     <div class="py-12">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-            <h2 class="text-2xl font-bold mb-6">ようこそ、{{ auth()->user()->name }}さん！</h2>
+            <h2 class="text-2xl font-bold mb-6 text-pink-200">ようこそ、{{ auth()->user()->name }}さん！</h2>
 
             <div class="bg-white overflow-hidden shadow-2xl card-shadow sm:rounded-lg mb-6">
                 <div class="p-6">
