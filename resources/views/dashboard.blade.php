@@ -1,11 +1,17 @@
 @extends('layouts.app')
 
+<style>
+    .card-shadow {
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.12) !important;
+    }
+</style>
+
 @section('content')
     <div class="py-12">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
             <h2 class="text-2xl font-bold mb-6">ようこそ、{{ auth()->user()->name }}さん！</h2>
 
-            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg mb-6">
+            <div class="bg-white overflow-hidden shadow-2xl card-shadow sm:rounded-lg mb-6">
                 <div class="p-6">
                     <h3 class="font-semibold text-lg text-gray-800 mb-4">📋 今期の半期目標</h3>
                     <div class="border-l-4 border-indigo-500 bg-indigo-50 p-4 rounded-r">
@@ -16,7 +22,7 @@
 
             <!-- マイル統計 -->
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-                <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
+                <div class="bg-white overflow-hidden shadow-2xl card-shadow sm:rounded-lg">
                     <div class="p-6 text-center">
                         <h3 class="text-gray-600 text-sm font-semibold uppercase mb-2">総マイル</h3>
                         <div class="text-5xl font-bold text-indigo-600 mb-2">{{ $totalMiles }}</div>
@@ -24,7 +30,7 @@
                     </div>
                 </div>
 
-                <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
+                <div class="bg-white overflow-hidden shadow-2xl card-shadow sm:rounded-lg">
                     <div class="p-6 text-center">
                         <h3 class="text-gray-600 text-sm font-semibold uppercase mb-2">現在のランク</h3>
                         <div class="text-3xl font-bold text-yellow-500 mb-2">
@@ -55,7 +61,7 @@
                     </div>
                 </div>
 
-                <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
+                <div class="bg-white overflow-hidden shadow-2xl card-shadow sm:rounded-lg">
                     <div class="p-6 text-center">
                         <h3 class="text-gray-600 text-sm font-semibold uppercase mb-2">今月の活動</h3>
                         <div class="text-5xl font-bold text-indigo-600 mb-2">{{ $thisMonthGoals }}</div>
@@ -66,13 +72,13 @@
 
             <!-- 新しい活動を記録ボタン -->
             <div class="mb-6">
-                <a href="/goals/create" class="inline-flex items-center px-4 py-2 bg-indigo-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-indigo-700">
+                <a href="/goals/create" class="inline-flex items-center px-4 py-2 bg-white text-indigo-600 border-2 border-indigo-600 rounded-md font-semibold text-xs uppercase tracking-widest hover:bg-indigo-600 hover:text-white transition-all">
                   ➕ 新しい活動を記録
                 </a>
             </div>
 
             <!-- 最近の活動 -->
-            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
+            <div class="bg-white overflow-hidden shadow-2xl card-shadow sm:rounded-lg">
             <div class="p-6">
                 <h3 class="font-semibold text-lg text-gray-800 mb-4">📝 最近の記録</h3>
         
@@ -80,7 +86,7 @@
                     <div class="space-y-4">
                          @foreach($recentGoals as $goal)
                              <!-- 目標カード -->
-                             <div class="border-l-4 border-indigo-500 bg-gray-50 p-4 rounded-r-lg hover:shadow-md transition">
+                             <div class="border-l-4 border-indigo-500 bg-white border-2 border-gray-100 p-5 rounded-lg shadow-lg hover:shadow-xl transition-all duration-200">
                                  <div class="flex justify-between items-start">
                                      <div>
                                          <div class="font-semibold text-gray-800">{{ $goal->category }}</div>
@@ -111,7 +117,7 @@
          </div>
 
                     <div class="mt-6 text-center">
-                        <a href="/activities" class="text-indigo-600 hover:text-indigo-800 font-semibold">
+                        <a href="/activities" class="inline-block px-4 py-2 bg-white text-indigo-600 border-2 border-indigo-600 rounded-md font-semibold text-sm hover:bg-indigo-600 hover:text-white transition-all">
                             すべての活動を見る
                         </a>
                     </div>

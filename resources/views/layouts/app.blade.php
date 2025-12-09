@@ -12,9 +12,8 @@
     
 </head>
 
-<body class="bg-gray-100">
+<body style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh;">
 
-<!-- ========== ここから追加 ========== -->
     <nav class="bg-white border-b border-gray-200 shadow-sm">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between h-16">
