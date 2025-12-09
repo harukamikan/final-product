@@ -34,7 +34,24 @@
                             @endif
                             {{ $rank }}
                         </div>
-                        <p class="text-gray-500 text-sm">次のランクまで あと50マイル</p>
+                        
+                        @php
+                            $nextRank = $rank == 'ブロンズ' ? 'シルバー' : ($rank == 'シルバー' ? 'ゴールド' : '最高ランク');
+                            $nextMiles = $rank == 'ブロンズ' ? 200 : ($rank == 'シルバー' ? 500 : 500);
+                            $remaining = max(0, $nextMiles - $totalMiles);
+                            $progress = min(100, ($totalMiles / $nextMiles) * 100);
+                        @endphp
+                        
+                        @if($rank != 'ゴールド')
+                            <div class="mt-4">
+                                <div class="w-full bg-gray-200 rounded-full h-3 mb-2">
+                                    <div class="bg-indigo-600 h-3 rounded-full transition-all duration-300" style="width: {{ $progress }}%"></div>
+                                </div>
+                                <p class="text-gray-600 text-sm">{{ $nextRank }}まで あと{{ $remaining }}マイル ({{ $totalMiles }}/{{ $nextMiles }})</p>
+                            </div>
+                        @else
+                            <p class="text-gray-500 text-sm mt-2">最高ランク達成！🎉</p>
+                        @endif
                     </div>
                 </div>
 
