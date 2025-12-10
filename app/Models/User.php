@@ -45,4 +45,16 @@ class User extends Authenticatable
             'password' => 'hashed',
         ];
     }
+
+    public function missions()
+    {
+        return $this->hasMany(UserMission::class);
+    }
+
+    public function mileHistories()
+    {
+        return $this->hasMany(MileHistory::class);
+    }
 }
+
+

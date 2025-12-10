@@ -15,10 +15,11 @@ return new class extends Migration
         $table->id();
         $table->foreignId('user_id')->constrained()->cascadeOnDelete();
         $table->foreignId('mission_id')->constrained()->cascadeOnDelete();
-        $table->enum('status', ['pending', 'completed'])->default('pending');
+        $table->unsignedInteger('progress_count')->default(0);
         $table->string('proof_url')->nullable();  // QiitaのURLなど
         $table->timestamp('completed_at')->nullable();
         $table->timestamps();
+        $table->unique(['user_id', 'mission_id']); // 同じミッションを1行で管理
 });
 
     }
