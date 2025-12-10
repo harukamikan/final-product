@@ -6,6 +6,9 @@ use App\Http\Controllers\GoalController;
 use App\Http\Controllers\MissionController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\SlackAuthController;
+use App\Http\Controllers\Admin\MissionCreater;
+use App\Http\Controllers\UserMissionController;
+use App\Http\Controllers\MissionListController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -26,7 +29,17 @@ Route::middleware('auth')->group(function () {
         ->name('missions.blog-url.form');
     Route::post('/missions/blog-url', [MissionController::class, 'submitBlogUrl'])
         ->name('missions.blog-url.submit');
+    Route::middleware(['auth']) // 権限まわりはプロジェクトに合わせて
+    ->prefix('admin')
+    ->name('admin.')
+    ->group(function () {
+        Route::resource('missions', MissionCreater::class);
+    });
+    Route::post('/missions/{mission}/complete', [UserMissionController::class, 'complete'])
+        ->name('missions.complete');
+    Route::get('/missions', [MissionListController::class, 'index'])->name('missions.index');
 });
+
 
 // Goal routes
 Route::get('/goals', [GoalController::class, 'index'])->name('goals.index');
