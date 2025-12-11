@@ -20,16 +20,7 @@ class SlackAuthController extends Controller
     try {
         $slackUser = Socialite::driver('slack')->stateless()->user();
         
-        // デバッグ: Slackから取得した情報を確認
-        dd([
-            'token' => $slackUser->token,
-            'id' => $slackUser->id,
-            'name' => $slackUser->name,
-            'nickname' => $slackUser->nickname,
-            'email' => $slackUser->email,
-            'user_array' => $slackUser->user, // この中身が重要
-            'getRaw' => $slackUser->getRaw(), // 生データ全部
-        ]);
+        // dd()を削除！
         
     } catch (\Exception $e) {
         return redirect('/login')->with('error', 'Slack認証に失敗しました。');
@@ -43,12 +34,8 @@ class SlackAuthController extends Controller
 
     $email = $slackUser->email ?? ($slackUser->id . '@slack.local');
     
-    // 名前の取得を改善
-    $name = $slackUser->user['real_name'] 
-         ?? $slackUser->user['profile']['real_name']
-         ?? $slackUser->name 
-         ?? $slackUser->nickname 
-         ?? 'Slack User';
+    // 名前の取得 - シンプルに修正
+    $name = $slackUser->name ?? 'Slack User';
 
     if (!$user) {
         $user = User::create([
@@ -58,10 +45,10 @@ class SlackAuthController extends Controller
             'password'  => bcrypt(Str::random(16)),
         ]);
     } else {
-        if (!$user->slack_id) {
-            $user->slack_id = $slackUser->id;
-            $user->save();
-        }
+        // 既存ユーザーの名前も更新
+        $user->name = $name;
+        $user->slack_id = $slackUser->id;
+        $user->save();
     }
 
     Auth::login($user, true);
