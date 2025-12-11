@@ -22,12 +22,13 @@ class SlackAuthController extends Controller
         
         // デバッグ: Slackから取得した情報を確認
         dd([
+            'token' => $slackUser->token,
             'id' => $slackUser->id,
             'name' => $slackUser->name,
             'nickname' => $slackUser->nickname,
             'email' => $slackUser->email,
-            'user' => $slackUser->user, // 追加情報
-            'all' => $slackUser, // 全データ
+            'user_array' => $slackUser->user, // この中身が重要
+            'getRaw' => $slackUser->getRaw(), // 生データ全部
         ]);
         
     } catch (\Exception $e) {
