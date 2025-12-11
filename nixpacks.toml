@@ -8,8 +8,13 @@ cmds = [
 
 [phases.build]
 cmds = [
+  'echo "=== Build Phase Started ==="',
+  'echo "Checking DATABASE_URL..."',
+  'echo $DATABASE_URL',
   'php artisan config:cache',
-  'php artisan migrate --force'
+  'echo "=== Running Migrations ==="',
+  'php artisan migrate --force --verbose',
+  'echo "=== Build Phase Complete ==="'
 ]
 
 [start]
