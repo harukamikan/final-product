@@ -89,4 +89,6 @@ Route::post('/slack/list', function (Request $request) {
         'response_type' => 'in_channel',
         'text' => $text
     ]);
+
+    
 });
