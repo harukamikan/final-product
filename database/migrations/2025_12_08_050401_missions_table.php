@@ -15,7 +15,7 @@ return new class extends Migration
 
     Schema::create('missions', function (Blueprint $table) {
         $table->id();
-        $table->string('key')->unique(); // 'write_tech_blog' みたいな識別子
+        $table->string('key'); // 'write_tech_blog' みたいな識別子
         $table->string('title');
         $table->text('description')->nullable();
 

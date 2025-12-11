@@ -21,15 +21,28 @@ class MissionCreater extends Controller
     }
 
     public function store(Request $request)
-    {
-        $data = $this->validateData($request);
+{
+    $data = $this->validateData($request);
 
-        Mission::create($data);
+    $missionType = $data['mission_type'];
+    $config      = $this->resolveMissionConfig($missionType);
 
-        return redirect()
-            ->route('admin.missions.index')
-            ->with('success', 'ミッションを作成しました。');
-    }
+    $missionData = [
+        'key'            => $config['key'],
+        'trigger_type'   => $config['trigger_type'],
+        'title'          => $data['title'],
+        'description'    => $data['description'] ?? null,
+        'required_count' => $data['required_count'],
+        'reward_miles'   => $data['reward_miles'],
+        'repeatable'     => $data['repeatable'],
+    ];
+
+    Mission::create($missionData);
+
+    return redirect()
+        ->route('admin.missions.index')
+        ->with('success', 'ミッションを作成しました。');
+}
 
     public function edit(Mission $mission)
     {
@@ -37,15 +50,29 @@ class MissionCreater extends Controller
     }
 
     public function update(Request $request, Mission $mission)
-    {
-        $data = $this->validateData($request, $mission->id);
+{
+    $data = $this->validateData($request, $mission->id);
 
-        $mission->update($data);
+    $missionType = $data['mission_type'];
+    $config      = $this->resolveMissionConfig($missionType);
 
-        return redirect()
-            ->route('admin.missions.index')
-            ->with('success', 'ミッションを更新しました。');
-    }
+    $missionData = [
+        'key'            => $config['key'],
+        'trigger_type'   => $config['trigger_type'],
+        'title'          => $data['title'],
+        'description'    => $data['description'] ?? null,
+        'required_count' => $data['required_count'],
+        'reward_miles'   => $data['reward_miles'],
+        'repeatable'     => $data['repeatable'],
+    ];
+
+    $mission->update($missionData);
+
+    return redirect()
+        ->route('admin.missions.index')
+        ->with('success', 'ミッションを更新しました。');
+}
+
 
     public function destroy(Mission $mission)
     {
@@ -59,13 +86,37 @@ class MissionCreater extends Controller
     private function validateData(Request $request, ?int $id = null): array
     {
         return $request->validate([
-            'key'            => ['required', 'string', 'max:255', 'unique:missions,key,' . $id],
-            'title'          => ['required', 'string', 'max:255'],
-            'description'    => ['nullable', 'string'],
-            'trigger_type'   => ['required', 'string', 'max:255'],
-            'required_count' => ['required', 'integer', 'min:1'],
-            'reward_miles'   => ['required', 'integer', 'min:0'],
-            'repeatable'     => ['required', 'boolean'],
+        'mission_type'   => ['required', 'in:write_tech_blog,event_speaker,event_organizer,acquire_certificate'],
+        'title'          => ['required', 'string', 'max:255'],
+        'description'    => ['nullable', 'string'],
+        'required_count' => ['required', 'integer', 'min:1'],
+        'reward_miles'   => ['required', 'integer', 'min:0'],
+        'repeatable'     => ['required', 'boolean'],
         ]);
     }
+
+    private function resolveMissionConfig(string $missionType): array
+{
+    // mission_type ごとの key と trigger_type をここで定義
+    return match ($missionType) {
+        'write_tech_blog' => [
+            'key'          => 'write_tech_blog',
+            'trigger_type' => 'tech_blog_posted',
+        ],
+        'event_speaker' => [
+            'key'          => 'event_speaker',
+            'trigger_type' => 'google_form_submitted',
+        ],
+        'event_organizer' => [
+            'key'          => 'event_organizer',
+            'trigger_type' => 'google_form_submitted',
+        ],
+        'acquire_certificate' => [
+            'key'          => 'acquire_certificate',
+            'trigger_type' => 'google_form_submitted',
+        ],
+        default => throw new \InvalidArgumentException('Unknown mission type: ' . $missionType),
+    };
+}
+
 }

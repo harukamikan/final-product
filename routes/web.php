@@ -29,7 +29,11 @@ Route::middleware('auth')->group(function () {
         ->name('missions.blog-url.form');
     Route::post('/missions/blog-url', [MissionController::class, 'submitBlogUrl'])
         ->name('missions.blog-url.submit');
-    Route::middleware(['auth']) // 権限まわりはプロジェクトに合わせて
+    Route::get('/missions/google-form', [MissionController::class, 'showGoogleForm'])
+    ->name('missions.google_form.form');
+    Route::post('/missions/google-form', [MissionController::class, 'storeGoogleForm'])
+        ->name('missions.google_form.store');
+    Route::middleware(['auth']) // 管理者限定にする場合は、ここに管理者ミドルウェアを追加
     ->prefix('admin')
     ->name('admin.')
     ->group(function () {
@@ -38,6 +42,9 @@ Route::middleware('auth')->group(function () {
     Route::post('/missions/{mission}/complete', [UserMissionController::class, 'complete'])
         ->name('missions.complete');
     Route::get('/missions', [MissionListController::class, 'index'])->name('missions.index');
+    Route::get('/missions/completed', [MissionListController::class, 'completed'])
+    ->name('missions.completed');
+
 });
 
 
