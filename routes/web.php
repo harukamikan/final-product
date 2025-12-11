@@ -9,6 +9,8 @@ use App\Http\Controllers\SlackAuthController;
 use App\Http\Controllers\Admin\MissionCreater;
 use App\Http\Controllers\UserMissionController;
 use App\Http\Controllers\MissionListController;
+use App\Http\Controllers\RankingController;
+
 
 Route::get('/', function () {
     return view('welcome');
@@ -30,14 +32,17 @@ Route::middleware('auth')->group(function () {
     Route::post('/missions/blog-url', [MissionController::class, 'submitBlogUrl'])
         ->name('missions.blog-url.submit');
     Route::middleware(['auth']) // 権限まわりはプロジェクトに合わせて
-    ->prefix('admin')
-    ->name('admin.')
-    ->group(function () {
-        Route::resource('missions', MissionCreater::class);
-    });
+        ->prefix('admin')
+        ->name('admin.')
+        ->group(function () {
+            Route::resource('missions', MissionCreater::class);
+        });
     Route::post('/missions/{mission}/complete', [UserMissionController::class, 'complete'])
         ->name('missions.complete');
     Route::get('/missions', [MissionListController::class, 'index'])->name('missions.index');
+
+    Route::get('/ranking', [RankingController::class, 'index'])
+        ->name('ranking.index');
 });
 
 
@@ -48,4 +53,4 @@ Route::post('/goals', [GoalController::class, 'store'])->name('goals.store');
 Route::get('/goals/{id}/edit', [GoalController::class, 'edit'])->name('goals.edit');
 Route::put('/goals/{id}', [GoalController::class, 'update'])->name('goals.update');
 
-require __DIR__.'/auth.php';
+require __DIR__ . '/auth.php';
