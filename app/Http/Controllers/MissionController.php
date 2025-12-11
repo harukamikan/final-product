@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Services\MissionService;
+use App\Models\Mission;
 
 class MissionController extends Controller
 {
@@ -18,8 +19,14 @@ class MissionController extends Controller
             'url' => ['required', 'url'],
         ]);
 
-        $missionService->completeWriteTechBlogMission($request->user(), $request->url);
+        // ブログ投稿トリガーを発火
+        $missionService->handleTrigger(
+            $request->user(),
+            'tech_blog_posted',
+            ['url' => $request->url]
+        );
 
         return back()->with('status', '技術系ブログ投稿ミッションを達成しました！');
     }
+
 }

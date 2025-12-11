@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use App\Models\User;
 
 class UserMission extends Model
 {
@@ -12,8 +13,8 @@ class UserMission extends Model
     protected $fillable = [
         'user_id',
         'mission_id',
-        'status',
         'proof_url',
+        'progress_count',
         'completed_at',
     ];
 
@@ -35,5 +36,9 @@ class UserMission extends Model
     public function mission()
     {
         return $this->belongsTo(Mission::class);
+    }
+        public function isCompleted(): bool
+    {
+        return !is_null($this->completed_at);
     }
 }
