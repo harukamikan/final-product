@@ -18,16 +18,16 @@
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between h-16">
                 <div class="flex space-x-8">
-                    <a href="/dashboard" class="inline-flex items-center px-1 pt-1 text-sm font-medium text-gray-900 border-b-2 border-indigo-500">
+                    <a href="/dashboard" class="inline-flex items-center px-1 pt-1 text-sm font-medium {{ request()->is('dashboard') ? 'text-gray-900 border-b-2 border-indigo-500' : 'text-gray-500 hover:text-gray-700 hover:border-gray-300' }}">
                         ホーム
                     </a>
-                    <a href="/missions" class="inline-flex items-center px-1 pt-1 text-sm font-medium text-gray-500 hover:text-gray-700 hover:border-gray-300">
+                    <a href="/missions" class="inline-flex items-center px-1 pt-1 text-sm font-medium {{ request()->is('missions*') ? 'text-gray-900 border-b-2 border-indigo-500' : 'text-gray-500 hover:text-gray-700 hover:border-gray-300' }}">
                         ミッション
                     </a>
-                    <a href="/stats" class="inline-flex items-center px-1 pt-1 text-sm font-medium text-gray-500 hover:text-gray-700 hover:border-gray-300">
+                    <a href="/stats" class="inline-flex items-center px-1 pt-1 text-sm font-medium {{ request()->is('stats*') ? 'text-gray-900 border-b-2 border-indigo-500' : 'text-gray-500 hover:text-gray-700 hover:border-gray-300' }}">
                         統計
                     </a>
-                    <a href="/activities" class="inline-flex items-center px-1 pt-1 text-sm font-medium text-gray-500 hover:text-gray-700 hover:border-gray-300">
+                    <a href="/activities" class="inline-flex items-center px-1 pt-1 text-sm font-medium {{ request()->is('activities*') ? 'text-gray-900 border-b-2 border-indigo-500' : 'text-gray-500 hover:text-gray-700 hover:border-gray-300' }}">
                         活動記録
                     </a>
                 </div>

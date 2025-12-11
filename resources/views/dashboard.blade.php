@@ -21,25 +21,33 @@
             </div>
 
             <!-- マイル統計 -->
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+            <div class="grid grid-cols-3 gap-2 mb-6">
+                <style>
+                    @media (max-width: 640px) {
+                        .rank-text { font-size: 1.2rem !important; }
+                        .rank-icon { font-size: 1.5rem; }
+                    } 
+                </style>
                 <div class="bg-white overflow-hidden shadow-2xl card-shadow sm:rounded-lg">
                     <div class="p-6 text-center">
                         <h3 class="text-gray-600 text-sm font-semibold uppercase mb-2">総マイル</h3>
                         <div class="text-5xl font-bold text-indigo-600 mb-2">{{ $totalMiles }}</div>
-                        <p class="text-gray-500 text-sm">累計獲得マイル</p>
+                        <p class="text-gray-500 text-sm whitespace-nowrap">累計獲得マイル</p>
                     </div>
                 </div>
 
                 <div class="bg-white overflow-hidden shadow-2xl card-shadow sm:rounded-lg">
                     <div class="p-6 text-center">
                         <h3 class="text-gray-600 text-sm font-semibold uppercase mb-2">現在のランク</h3>
-                        <div class="text-3xl font-bold text-yellow-500 mb-2">
+                        <div class="rank-text font-bold text-yellow-500 mb-2 whitespace-nowrap flex items-center justify-center gap-1">
+                        <span class="rank-icon">
                             @if($rank == 'ゴールド') 🥇
                             @elseif($rank == 'シルバー') 🥈
                             @else 🥉
                             @endif
-                            {{ $rank }}
-                        </div>
+                            </span>
+                            <span>{{ $rank }}</span>
+                         </div>
                         
                         @php
                             $nextRank = $rank == 'ブロンズ' ? 'シルバー' : ($rank == 'シルバー' ? 'ゴールド' : '最高ランク');
