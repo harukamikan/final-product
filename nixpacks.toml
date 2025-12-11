@@ -1,21 +1,18 @@
 [phases.setup]
-nixPkgs = ['php84', 'php84Extensions.mbstring', 'php84Extensions.pdo', 'php84Packages.composer', 'nodejs']
+nixPkgs = ["php84", "php84Extensions.mbstring", "php84Extensions.pdo", "php84Packages.composer", "nodejs"]
 
 [phases.install]
 cmds = [
-  'composer install --no-dev --optimize-autoloader --no-scripts --ignore-platform-reqs'
+    "composer install --no-dev --optimize-autoloader --no-scripts --ignore-platform-reqs",
+    "npm ci"
 ]
 
 [phases.build]
 cmds = [
-  'echo "=== Build Phase Started ==="',
-  'echo "Checking DATABASE_URL..."',
-  'echo $DATABASE_URL',
-  'php artisan config:cache',
-  'echo "=== Running Migrations ==="',
-  'php artisan migrate --force --verbose',
-  'echo "=== Build Phase Complete ==="'
+    "npm run build",
+    "php artisan config:cache",
+    "php artisan migrate --force --verbose"
 ]
 
 [start]
-cmd = 'php artisan serve --host=0.0.0.0 --port=${PORT:-8080}'
+cmd = "php artisan serve --host=0.0.0.0 --port=${PORT:-8080}"
