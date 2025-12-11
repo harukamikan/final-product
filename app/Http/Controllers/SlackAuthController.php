@@ -21,7 +21,7 @@ class SlackAuthController extends Controller
         $slackUser = Socialite::driver('slack')->stateless()->user();
         
         // dd()を削除！
-        
+        // デバッグ完了、通常処理に戻す 
     } catch (\Exception $e) {
         return redirect('/login')->with('error', 'Slack認証に失敗しました。');
     }
