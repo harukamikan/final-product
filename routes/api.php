@@ -12,7 +12,20 @@ Route::post('/slack/test', function (Request $request) {
         'text' => 'Hello from Laravel! 🎉'
     ]);
 });
+
 Route::post('/slack/activity', function (Request $request) {
+    // Slackから送られてきたユーザーIDを取得
+    $slackUserId = $request->input('user_id');
+    
+    // SlackユーザーIDでLaravelユーザーを検索
+    $user = User::where('slack_id', $slackUserId)->first();
+    
+    if (!$user) {
+        return response()->json([
+            'text' => '❌ ユーザーが見つかりません。先にWebページでSlackログインしてください: https://final-product-production.up.railway.app/login'
+        ]);
+    }
+    
     // Slackから送られてきたデータを取得
     $text = $request->input('text'); // 例: "ブログ https://example.com"
     
@@ -20,12 +33,6 @@ Route::post('/slack/activity', function (Request $request) {
     $parts = explode(' ', $text, 2);
     $type = $parts[0] ?? '';  // 種別（ブログ、資格など）
     $url = $parts[1] ?? '';   // URL
-    // 仮で最初のユーザーを使用（後でSlackのユーザーと紐付ける）
-    $user = User::first();
-    
-    if (!$user) {
-        return response()->json(['text' => '❌ ユーザーが見つかりません']);
-    }
     
     // データベースに保存
     $activity = Activity::create([
@@ -33,14 +40,13 @@ Route::post('/slack/activity', function (Request $request) {
         'type' => $type,
         'url' => $url,
     ]);
-
-   
-
-    // ログに記録（後でDBに保存する）
+    
+    // ログに記録
     \Log::info('Activity received:', [
         'type' => $type,
         'url' => $url,
-        'user' => $request->input('user_name')
+        'slack_user_id' => $slackUserId,
+        'user_id' => $user->id
     ]);
     
     return response()->json([
@@ -49,8 +55,17 @@ Route::post('/slack/activity', function (Request $request) {
 });
 
 Route::post('/slack/list', function (Request $request) {
-    // 仮でUser::first()を使う
-    $user = User::first();
+    // Slackから送られてきたユーザーIDを取得
+    $slackUserId = $request->input('user_id');
+    
+    // SlackユーザーIDでLaravelユーザーを検索
+    $user = User::where('slack_id', $slackUserId)->first();
+    
+    if (!$user) {
+        return response()->json([
+            'text' => '❌ ユーザーが見つかりません。先にWebページでSlackログインしてください: https://final-product-production.up.railway.app/login'
+        ]);
+    }
     
     $activities = Activity::where('user_id', $user->id)
         ->orderBy('created_at', 'desc')
@@ -63,7 +78,7 @@ Route::post('/slack/list', function (Request $request) {
         ]);
     }
     
-    $text = "📋 *最近の活動（最新10件）*\n\n";
+    $text = "📋 *あなたの最近の活動（最新10件）*\n\n";
     foreach ($activities as $activity) {
         $date = $activity->created_at->format('Y/m/d');
         $text .= "• [{$activity->type}] {$activity->url}\n";
@@ -74,4 +89,6 @@ Route::post('/slack/list', function (Request $request) {
         'response_type' => 'in_channel',
         'text' => $text
     ]);
+
+    
 });
