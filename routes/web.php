@@ -36,3 +36,8 @@ Route::get('/goals/{id}/edit', [GoalController::class, 'edit'])->name('goals.edi
 Route::put('/goals/{id}', [GoalController::class, 'update'])->name('goals.update');
 
 require __DIR__.'/auth.php';
+
+Route::get('/debug/users', function () {
+    $users = \App\Models\User::all(['id', 'name', 'email', 'slack_id']);
+    return response()->json($users);
+})->middleware('auth');
