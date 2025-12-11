@@ -21,12 +21,13 @@ class SlackAuthController extends Controller
         $slackUser = Socialite::driver('slack')->stateless()->user();
         
         // デバッグ: Slackから取得した情報を確認
-        \Log::info('Slack User Info:', [
+        dd([
             'id' => $slackUser->id,
             'name' => $slackUser->name,
             'nickname' => $slackUser->nickname,
             'email' => $slackUser->email,
             'user' => $slackUser->user, // 追加情報
+            'all' => $slackUser, // 全データ
         ]);
         
     } catch (\Exception $e) {
