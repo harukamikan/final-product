@@ -6,9 +6,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Goal App</title>
 
-    {{-- Tailwind CDN（簡易UI表示用） --}}
-    <script src="https://cdn.tailwindcss.com"></script>
+    {{-- Vite（Tailwind + Alpine + JS） --}}
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
+
 
 <body class="bg-gray-100">
 
