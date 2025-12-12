@@ -16,22 +16,36 @@ class MissionService
      *
      * @param User   $user
      * @param string $triggerType  // 'tech_blog_posted' など
-     * @param array  $payload      // 必要ならURLなどを渡す
+     * @param array  $payload      // ['mission_key' => ..., 'url' => ...] など
+     *
+     * @return int 今回新たに獲得したマイル数の合計
      */
-    public function handleTrigger(User $user, string $triggerType, array $payload = []): void
+    public function handleTrigger(User $user, string $triggerType, array $payload = []): int
     {
-        // そのトリガーに紐づくミッションを全取得
-        $missions = Mission::where('trigger_type', $triggerType)->get();
+        $query = Mission::where('trigger_type', $triggerType);
+
+        // mission_key が指定されていたら、特定のミッションだけ対象にする
+        if (!empty($payload['mission_key'])) {
+            $query->where('key', $payload['mission_key']);
+        }
+
+        $missions = $query->get();
+
+        $earnedTotal = 0;
 
         foreach ($missions as $mission) {
-            $this->progressMission($user, $mission, $payload);
+            $earnedTotal += $this->progressMission($user, $mission, $payload);
         }
+
+        return $earnedTotal;
     }
 
     /**
      * ミッションを1ステップ進めて、条件を満たしたらクリア＋マイル付与
+     *
+     * @return int このミッションで今回新たに獲得したマイル数
      */
-    protected function progressMission(User $user, Mission $mission, array $payload = []): void
+    protected function progressMission(User $user, Mission $mission, array $payload = []): int
     {
         // ユーザーのミッション状態レコードを取得 or 作成
         $userMission = UserMission::firstOrCreate(
@@ -39,46 +53,63 @@ class MissionService
             ['progress_count' => 0]
         );
 
+        // ★ URL が来ていたら proof_url に保存（最新のものに更新）
+        if (!empty($payload['url'])) {
+            $userMission->proof_url = $payload['url'];
+        }
+
         // すでにクリア済みで、repeatable じゃない場合は何もしない
         if ($userMission->isCompleted() && !$mission->repeatable) {
-            return;
+            // ただし proof_url だけは更新される可能性があるので save しておく
+            $userMission->save();
+            return 0;
         }
 
-        // 進捗を1進める（必要に応じて payload で制御してもOK）
+        // 進捗を1進める
         $userMission->progress_count += 1;
 
-        // 達成判定
-        if ($userMission->progress_count >= $mission->required_count && !$userMission->isCompleted()) {
-            $userMission->completed_at = Carbon::now();
-
-            DB::transaction(function () use ($user, $mission, $userMission) {
-                $userMission->save();
-
-                // マイル履歴作成
-                MileHistory::create([
-                    'user_id'    => $user->id,
-                    'mission_id' => $mission->id,
-                    'miles'      => $mission->reward_miles,
-                    'description'     => 'mission_completed',
-                ]);
-
-                // ユーザーの合計マイルを更新（users テーブルにカラムがある想定）
-                $user->increment('total_miles', $mission->reward_miles);
-            });
-        } else {
-            // まだ達成してない場合は進捗だけ保存
+        // まだ達成していない or すでに completed_at が入っている場合 → 進捗だけ保存
+        if ($userMission->progress_count < $mission->required_count || $userMission->isCompleted()) {
             $userMission->save();
+            return 0;
         }
+
+        // ここに来たら「今ちょうど達成した」
+        $earned = (int) $mission->reward_miles;
+
+        DB::transaction(function () use ($user, $mission, $userMission, $earned, $payload) {
+            // 念のためトランザクション内でも URL を反映
+            if (!empty($payload['url'])) {
+                $userMission->proof_url = $payload['url'];
+            }
+
+            $userMission->completed_at = Carbon::now();
+            $userMission->save();
+
+            // マイル履歴作成
+            MileHistory::create([
+                'user_id'     => $user->id,
+                'mission_id'  => $mission->id,
+                'miles'       => $earned,
+                'type'        => 'earn',
+                'description' => 'mission_completed',
+            ]);
+
+            // ユーザーの合計マイルを更新
+            $user->increment('total_miles', $earned);
+        });
+
+        return $earned;
     }
 
-    public function completeManually(User $user, Mission $mission): void
-{
-    // trigger_type が manual系かどうかを一応チェックしても良い
-    if (!str_starts_with($mission->trigger_type, 'manual')) {
-        // ここで例外投げる or 何もしないでもOK
-        // throw new \RuntimeException('このミッションは手動達成ではありません。');
-    }
+    public function completeManually(User $user, Mission $mission): int
+    {
+        // trigger_type が manual系かどうかを一応チェックしても良い
+        if (!str_starts_with($mission->trigger_type, 'manual')) {
+            // 必要ならここで例外など
+            // throw new \RuntimeException('このミッションは手動達成ではありません。');
+        }
 
-    $this->progressMission($user, $mission);
-}
+        return $this->progressMission($user, $mission);
+    }
 }

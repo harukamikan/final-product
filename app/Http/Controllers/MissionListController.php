@@ -2,8 +2,8 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Mission;
 use Illuminate\Http\Request;
+use App\Models\Mission;
 
 class MissionListController extends Controller
 {
@@ -11,28 +11,58 @@ class MissionListController extends Controller
     {
         $user = $request->user();
 
-        // それぞれのミッションに対して、ログインユーザーの進捗を eager load
-        $missions = Mission::with(['userMissions' => function ($q) use ($user) {
+        // まずこのユーザーに紐づく user_missions を一緒にロード
+        $allMissions = Mission::with(['userMissions' => function ($q) use ($user) {
             $q->where('user_id', $user->id);
-        }])->orderBy('id')->get();
+        }])
+        ->orderBy('id')
+        ->get();
 
-        $totalMiles      = $user->total_miles ?? 0;
-        $completedCount  = 0;
-        $activeCount     = 0;
+        // ★ 未完了だけに絞り込む（userMission がない or completed_at が null）
+        $missions = $allMissions->filter(function ($mission) {
+            $userMission = $mission->userMissions->first();
 
-        foreach ($missions as $mission) {
-            $um = $mission->userMissions->first();
-            if ($um && $um->completed_at) {
-                $completedCount++;
-            } else {
-                $activeCount++;
+            // まだ一度も触ってないミッション → 表示対象
+            if (!$userMission) {
+                return true;
             }
-        }
 
-        $filter = $request->get('filter', 'all'); // all / active / completed
+            // completed_at が null = 未完了 → 表示対象
+            return is_null($userMission->completed_at);
+        });
 
-        return view('missions.user_index', compact(
-            'missions', 'totalMiles', 'completedCount', 'activeCount', 'filter'
-        ));
+        // マイル系
+        $totalMiles = $user->total_miles
+            ?? $user->mileHistories()->sum('miles');
+
+        $earnedThisTime = (int) session('earned_miles', 0);
+
+        return view('missions.user_index', [
+            'missions'       => $missions,
+            'totalMiles'     => $totalMiles,
+            'earnedThisTime' => $earnedThisTime,
+        ]);
+    }
+
+    public function completed(Request $request)
+    {
+        $user = $request->user();
+
+        // 完了済みだけ
+        $missions = Mission::with(['userMissions' => function ($q) use ($user) {
+            $q->where('user_id', $user->id)
+              ->whereNotNull('completed_at');
+        }])
+        ->orderBy('id')
+        ->get()
+        ->filter(fn ($mission) => $mission->userMissions->isNotEmpty());
+
+        $totalMiles = $user->total_miles
+            ?? $user->mileHistories()->sum('miles');
+
+        return view('missions.completed', [
+            'missions'   => $missions,
+            'totalMiles' => $totalMiles,
+        ]);
     }
 }

@@ -9,51 +9,55 @@ class MissionSeeder extends Seeder
 {
     public function run()
     {
+         // 1. 技術ブログ（Qiita）
         Mission::updateOrCreate(
-            ['key' => 'write_qiita_article'],
+            ['key' => 'write_tech_blog'],
             [
-                'title'          => 'Qiitaに技術ブログを1本書く',
-                'description'    => 'Qiitaに記事を投稿し、URLを登録すると達成となります。',
+                'title'          => '技術ブログ（Qiita）を書く',
+                'description'    => 'Qiitaなどに技術記事を投稿し、URLを登録すると達成となります。',
                 'trigger_type'   => 'tech_blog_posted',
                 'required_count' => 1,
-                'reward_miles'   => 50,
-                'repeatable'     => true,  // 記事1本ごとにマイル欲しければ true
+                'reward_miles'   => 50,   // ★会社と相談して決める
+                'repeatable'     => false,
             ]
         );
 
+        // 2. イベントに登壇する
         Mission::updateOrCreate(
-            ['key' => 'speak_at_event'],
+            ['key' => 'event_speaker'],
             [
                 'title'          => 'イベントに登壇する',
-                'description'    => '社内外の勉強会・カンファレンスなどで登壇したら達成ボタンを押してください。',
-                'trigger_type'   => 'manual_event_speaker',
+                'description'    => '技術イベントなどで登壇し、報告用のGoogleフォームURLを登録すると達成となります。',
+                'trigger_type'   => 'google_form_submitted',
                 'required_count' => 1,
-                'reward_miles'   => 200,
-                'repeatable'     => true, // 登壇のたびに達成OK
+                'reward_miles'   => 150, // TODO: 適宜調整
+                'repeatable'     => false,
             ]
         );
 
+        // 3. イベントを企画・開催する
         Mission::updateOrCreate(
-            ['key' => 'organize_event'],
+            ['key' => 'event_organizer'],
             [
                 'title'          => 'イベントを企画・開催する',
-                'description'    => '勉強会やLT会などを企画・主催したら達成ボタンを押してください。',
-                'trigger_type'   => 'manual_event_owner',
+                'description'    => '社内外向けのイベントを企画・開催し、報告用のGoogleフォームURLを登録すると達成となります。',
+                'trigger_type'   => 'google_form_submitted',
                 'required_count' => 1,
-                'reward_miles'   => 300,
-                'repeatable'     => true,
+                'reward_miles'   => 200, // TODO: 適宜調整
+                'repeatable'     => false,
             ]
         );
 
+        // 4. 資格を取得する
         Mission::updateOrCreate(
-            ['key' => 'get_certification'],
+            ['key' => 'acquire_certificate'],
             [
                 'title'          => '資格を取得する',
-                'description'    => '業務に関連する資格を取得したら達成ボタンを押してください。',
-                'trigger_type'   => 'manual_certification',
+                'description'    => '業務やキャリアに関連する資格を取得し、報告用のGoogleフォームURLを登録すると達成となります。',
+                'trigger_type'   => 'google_form_submitted',
                 'required_count' => 1,
-                'reward_miles'   => 500,
-                'repeatable'     => true, // 資格ごとにマイル付与
+                'reward_miles'   => 100, // TODO: 資格の重さで調整してもOK
+                'repeatable'     => false,
             ]
         );
     }

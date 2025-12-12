@@ -10,6 +10,8 @@ use App\Http\Controllers\Admin\MissionCreater;
 use App\Http\Controllers\UserMissionController;
 use App\Http\Controllers\MissionListController;
 use App\Http\Controllers\RankingController;
+use Illuminate\Support\Facades\Auth;
+
 
 
 Route::get('/', function () {
@@ -43,6 +45,22 @@ Route::middleware('auth')->group(function () {
 
     Route::get('/ranking', [RankingController::class, 'index'])
         ->name('ranking.index');
+    Route::get('/missions/google-form', [MissionController::class, 'showGoogleForm'])
+    ->name('missions.google_form.form');
+    Route::post('/missions/google-form', [MissionController::class, 'storeGoogleForm'])
+        ->name('missions.google_form.store');
+    Route::middleware(['auth']) // 管理者限定にする場合は、ここに管理者ミドルウェアを追加
+    ->prefix('admin')
+    ->name('admin.')
+    ->group(function () {
+        Route::resource('missions', MissionCreater::class);
+    });
+    Route::post('/missions/{mission}/complete', [UserMissionController::class, 'complete'])
+        ->name('missions.complete');
+    Route::get('/missions', [MissionListController::class, 'index'])->name('missions.index');
+    Route::get('/missions/completed', [MissionListController::class, 'completed'])
+    ->name('missions.completed');
+
 });
 
 
@@ -53,4 +71,17 @@ Route::post('/goals', [GoalController::class, 'store'])->name('goals.store');
 Route::get('/goals/{id}/edit', [GoalController::class, 'edit'])->name('goals.edit');
 Route::put('/goals/{id}', [GoalController::class, 'update'])->name('goals.update');
 
-require __DIR__ . '/auth.php';
+Route::get('/logout', function () {
+    Auth::logout();
+    request()->session()->invalidate();
+    request()->session()->regenerateToken();
+    return redirect('/');
+})->middleware('auth');
+
+require __DIR__.'/auth.php';
+
+// ↓ ここに追加
+Route::get('/debug/users', function () {
+    $users = \App\Models\User::all(['id', 'name', 'email', 'slack_id']);
+    return response()->json($users);
+})->middleware('auth');
