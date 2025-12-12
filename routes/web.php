@@ -11,6 +11,7 @@ use App\Http\Controllers\UserMissionController;
 use App\Http\Controllers\MissionListController;
 use App\Http\Controllers\RankingController;
 use Illuminate\Support\Facades\Auth;
+use App\Http\Controllers\StatsController;
 
 
 
@@ -61,6 +62,8 @@ Route::middleware('auth')->group(function () {
     Route::get('/missions', [MissionListController::class, 'index'])->name('missions.index');
     Route::get('/missions/completed', [MissionListController::class, 'completed'])
     ->name('missions.completed');
+
+    Route::get('/stats', [StatsController::class, 'index'])->name('stats.index');
 
 });
 
