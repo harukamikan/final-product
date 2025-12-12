@@ -3,18 +3,42 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
-use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class RankingController extends Controller
 {
     public function index()
     {
-        // total_miles の降順でランキング取得
-        $rankers = User::orderBy('total_miles', 'desc')->get();
+        // マイルランキング
+        $mileRankers = User::orderBy('total_miles', 'desc')->get();
 
-        // 自分の順位を計算
-        $myRank = User::where('total_miles', '>', auth()->user()->total_miles)->count() + 1;
+        // ミッション数ランキング
+        $missionRankers = User::orderBy('completed_missions', 'desc')->get();
 
-        return view('ranking.index', compact('rankers', 'myRank'));
+        // 自分の順位
+        $myMileRank = User::where(
+            'total_miles',
+            '>',
+            Auth::user()->total_miles
+        )->count() + 1;
+
+        $myMissionRank = User::where(
+            'completed_missions',
+            '>',
+            Auth::user()->completed_missions
+        )->count() + 1;
+
+        //ランキング対象人数
+        $mileUserCount = $mileRankers->count();
+        $missionUserCount = $missionRankers->count();
+
+        return view('ranking.index', compact(
+            'mileRankers',
+            'missionRankers',
+            'myMileRank',
+            'myMissionRank',
+            'mileUserCount',
+            'missionUserCount'
+        ));
     }
 }

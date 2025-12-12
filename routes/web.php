@@ -44,6 +44,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/missions', [MissionListController::class, 'index'])->name('missions.index');
 
     Route::get('/ranking', [RankingController::class, 'index'])
+        ->middleware('auth')
         ->name('ranking.index');
     Route::get('/missions/google-form', [MissionController::class, 'showGoogleForm'])
     ->name('missions.google_form.form');
