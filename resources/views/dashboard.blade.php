@@ -29,8 +29,8 @@
                     } 
                 </style>
                 <div class="bg-white overflow-hidden shadow-2xl card-shadow sm:rounded-lg">
-                    <div class="p-6 text-center">
-                        <h3 class="text-gray-600 text-sm font-semibold uppercase mb-2">総マイル</h3>
+                    <div class="p-6 text-center flex flex-col justify-center h-full">
+                        <h3 class="text-gray-600 text-sm font-semibold uppercase mb-2 text-center">総マイル</h3>
                         <div class="text-5xl font-bold text-indigo-600 mb-2">{{ $totalMiles }}</div>
                         <p class="text-gray-500 text-sm whitespace-nowrap">累計獲得マイル</p>
                     </div>
@@ -39,15 +39,19 @@
                 <div class="bg-white overflow-hidden shadow-2xl card-shadow sm:rounded-lg">
                     <div class="p-6 text-center">
                         <h3 class="text-gray-600 text-sm font-semibold uppercase mb-2">現在のランク</h3>
-                        <div class="rank-text font-bold text-yellow-500 mb-2 whitespace-nowrap flex items-center justify-center gap-1">
-                        <span class="rank-icon">
-                            @if($rank == 'ゴールド') 🥇
-                            @elseif($rank == 'シルバー') 🥈
-                            @else 🥉
-                            @endif
+                        <div class="rank-text font-bold mb-2 whitespace-nowrap flex items-center justify-center gap-1
+                            @if($rank == 'ゴールド') text-yellow-400
+                            @elseif($rank == 'シルバー') text-gray-400
+                            @else text-orange-600
+                            @endif">
+                            <span class="rank-icon">
+                                @if($rank == 'ゴールド') 🥇
+                                @elseif($rank == 'シルバー') 🥈
+                                @else 🥉
+                                @endif
                             </span>
                             <span>{{ $rank }}</span>
-                         </div>
+                        </div>
                         
                         @php
                             $nextRank = $rank == 'ブロンズ' ? 'シルバー' : ($rank == 'シルバー' ? 'ゴールド' : '最高ランク');
@@ -62,6 +66,16 @@
                                     <div class="bg-indigo-600 h-3 rounded-full transition-all duration-300" style="width: {{ $progress }}%"></div>
                                 </div>
                                 <p class="text-gray-600 text-sm">{{ $nextRank }}まで あと{{ $remaining }}マイル ({{ $totalMiles }}/{{ $nextMiles }})</p>
+                                @if($recommendedMission)
+                                <div class="mt-3 p-3 bg-yellow-50 border-l-4 border-yellow-500 rounded-r text-center">
+                                    <p class="text-yellow-700 text-sm font-semibold">
+                                        💡 {{ $recommendedMission->title }}
+                                    </p>
+                                    <p class="text-yellow-600 text-xs mt-1">
+                                         +{{ $recommendedMission->reward_miles }}マイル獲得
+                                    </p>
+                                </div>
+                                @endif
                             </div>
                         @else
                             <p class="text-gray-500 text-sm mt-2">最高ランク達成！🎉</p>
@@ -70,8 +84,8 @@
                 </div>
 
                 <div class="bg-white overflow-hidden shadow-2xl card-shadow sm:rounded-lg">
-                    <div class="p-6 text-center">
-                        <h3 class="text-gray-600 text-sm font-semibold uppercase mb-2">今月の活動</h3>
+                    <div class="p-6 text-center flex flex-col justify-center h-full">
+                        <h3 class="text-gray-600 text-sm font-semibold uppercase mb-2 text-center">今月の活動</h3>
                         <div class="text-5xl font-bold text-indigo-600 mb-2">{{ $thisMonthGoals }}</div>
                         <p class="text-gray-500 text-sm">件</p>
                     </div>

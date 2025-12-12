@@ -6,6 +6,8 @@ use Illuminate\Http\Request;
 use App\Models\Goal;
 use App\Models\MileHistory;
 use App\Models\UserMission;
+use App\Models\Mission;
+
 
 class DashboardController extends Controller
 {
@@ -47,6 +49,13 @@ class DashboardController extends Controller
         // ランク判定
         $rank = $this->calculateRank($totalMiles);
 
+        // 未達成の中で一番報酬が高いミッションを取得
+        $recommendedMission = Mission::whereNotIn('id', 
+            UserMission::where('user_id', $userId)->pluck('mission_id')
+        )
+        ->orderBy('reward_miles', 'desc')
+        ->first();
+
 
         return view('dashboard', compact(
             'recentGoals', 
@@ -55,7 +64,8 @@ class DashboardController extends Controller
             'totalMiles',
             'thisMonthMiles',
             'recentMissions',
-            'rank'
+            'rank',
+            'recommendedMission'
         ));
 
     }
