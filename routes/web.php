@@ -6,6 +6,9 @@ use App\Http\Controllers\GoalController;
 use App\Http\Controllers\MissionController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\SlackAuthController;
+use App\Http\Controllers\Admin\MissionCreater;
+use App\Http\Controllers\UserMissionController;
+use App\Http\Controllers\MissionListController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -26,7 +29,24 @@ Route::middleware('auth')->group(function () {
         ->name('missions.blog-url.form');
     Route::post('/missions/blog-url', [MissionController::class, 'submitBlogUrl'])
         ->name('missions.blog-url.submit');
+    Route::get('/missions/google-form', [MissionController::class, 'showGoogleForm'])
+    ->name('missions.google_form.form');
+    Route::post('/missions/google-form', [MissionController::class, 'storeGoogleForm'])
+        ->name('missions.google_form.store');
+    Route::middleware(['auth']) // 管理者限定にする場合は、ここに管理者ミドルウェアを追加
+    ->prefix('admin')
+    ->name('admin.')
+    ->group(function () {
+        Route::resource('missions', MissionCreater::class);
+    });
+    Route::post('/missions/{mission}/complete', [UserMissionController::class, 'complete'])
+        ->name('missions.complete');
+    Route::get('/missions', [MissionListController::class, 'index'])->name('missions.index');
+    Route::get('/missions/completed', [MissionListController::class, 'completed'])
+    ->name('missions.completed');
+
 });
+
 
 // Goal routes
 Route::get('/goals', [GoalController::class, 'index'])->name('goals.index');
@@ -35,4 +55,18 @@ Route::post('/goals', [GoalController::class, 'store'])->name('goals.store');
 Route::get('/goals/{id}/edit', [GoalController::class, 'edit'])->name('goals.edit');
 Route::put('/goals/{id}', [GoalController::class, 'update'])->name('goals.update');
 
+Route::get('/logout', function () {
+    Auth::logout();
+    request()->session()->invalidate();
+    request()->session()->regenerateToken();
+    return redirect('/');
+})->middleware('auth');
+
 require __DIR__.'/auth.php';
+
+// ↓ ここに追加
+Route::get('/debug/users', function () {
+    $users = \App\Models\User::all(['id', 'name', 'email', 'slack_id']);
+    return response()->json($users);
+})->middleware('auth');
+
