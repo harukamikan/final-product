@@ -97,6 +97,9 @@ class MissionService
 
             // ユーザーの合計マイルを更新
             $user->increment('total_miles', $earned);
+
+            //達成ミッション数を加算
+            $user->increment('completed_missions');
         });
 
         return $earned;
