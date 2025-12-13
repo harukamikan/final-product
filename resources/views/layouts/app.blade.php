@@ -8,12 +8,6 @@
 
     {{-- Vite（Tailwind + Alpine + JS） --}}
     @vite(['resources/css/app.css', 'resources/js/app.js'])
-<<<<<<< HEAD
-</head>
-
-
-<body class="bg-gray-100">
-=======
     
 </head>
 
@@ -62,7 +56,6 @@
             </div>
         </div>
     </nav>
->>>>>>> feature/dashboard2/ryouta
 
     <div class="min-h-screen">
         @yield('content')
