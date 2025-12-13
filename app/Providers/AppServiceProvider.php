@@ -4,6 +4,8 @@ namespace App\Providers;
 
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\URL;
+use Illuminate\Support\Facades\View;
+use Illuminate\Support\Facades\Auth;
 use SocialiteProviders\Manager\SocialiteWasCalled;
 
 class AppServiceProvider extends ServiceProvider
@@ -24,5 +26,12 @@ class AppServiceProvider extends ServiceProvider
             SocialiteWasCalled::class,
             'SocialiteProviders\\Slack\\SlackExtendSocialite@handle'
         );
+
+        View::composer('*', function ($view) {
+            $view->with(
+                'bgColor',
+                Auth::check() ? Auth::user()->background_color : null
+            );
+        });
     }
 }

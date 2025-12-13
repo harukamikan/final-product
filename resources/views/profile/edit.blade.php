@@ -1,102 +1,64 @@
-<x-app-layout>
-    <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-            プロフィール
-        </h2>
-    </x-slot>
+@extends('layouts.app')
 
-    <div class="py-8">
-        <div class="max-w-3xl mx-auto space-y-8">
+@section('content')
+<div class="py-8">
+    <div class="max-w-3xl mx-auto space-y-8">
 
-            {{-- 基本情報 --}}
-            <div class="bg-white p-6 rounded-lg shadow">
-                <h3 class="text-lg font-semibold mb-4">基本情報</h3>
+        {{-- 基本情報 --}}
+        <div class="bg-white p-6 rounded-lg shadow">
+            <h3 class="text-lg font-semibold mb-4">基本情報</h3>
 
-                <div class="space-y-4 text-sm">
-                    <div>
-                        <span class="text-gray-500">ユーザー名</span>
-                        <p class="font-medium">{{ $user->name }}</p>
-                    </div>
+            <p class="text-sm text-gray-600">ユーザー名</p>
+            <p class="font-medium mb-4">{{ $user->name }}</p>
 
-                    <div>
-                        <span class="text-gray-500">メールアドレス</span>
-                        <p class="font-medium">{{ $user->email }}</p>
-                    </div>
-                </div>
-            </div>
-
-            {{-- Slack連携 --}}
-            <div class="bg-white p-6 rounded-lg shadow">
-                <h3 class="text-lg font-semibold mb-4">外部連携</h3>
-
-                @if ($user->slack_id)
-                <p class="text-green-600 font-medium">
-                    ✅ Slack連携済み
-                </p>
-                @else
-                <p class="text-gray-500">
-                    未連携
-                </p>
-
-                <a href="{{ route('slack.login') }}"
-                    class="inline-block mt-3 text-indigo-600 hover:underline">
-                    Slackと連携する
-                </a>
-                @endif
-            </div>
-
-            {{-- テーマ設定 --}}
-            <div class="bg-white p-6 rounded-lg shadow">
-                <h3 class="text-lg font-semibold mb-4">表示設定</h3>
-
-                <form method="POST" action="{{ route('profile.update') }}" class="space-y-4">
-                    @csrf
-                    @method('PATCH')
-
-                    <div>
-                        <label class="block text-sm text-gray-600 mb-1">
-                            背景テーマ
-                        </label>
-
-                        <select name="theme"
-                            class="w-full border-gray-300 rounded-md">
-                            <option value="light" {{ $user->theme === 'light' ? 'selected' : '' }}>
-                                ライト
-                            </option>
-                            <option value="dark" {{ $user->theme === 'dark' ? 'selected' : '' }}>
-                                ダーク
-                            </option>
-                        </select>
-                    </div>
-
-                    {{-- 表示設定 --}}
-                    <div class="bg-white p-6 rounded-lg shadow">
-                        <h3 class="text-lg font-semibold mb-4">表示設定</h3>
-
-                        <form method="POST" action="{{ route('profile.update') }}" class="space-y-4">
-                            @csrf
-                            @method('PATCH')
-
-                            {{-- 背景色 --}}
-                            <div>
-                                <label class="block text-sm text-gray-600 mb-1">
-                                    背景色
-                                </label>
-
-                                <input
-                                    type="color"
-                                    name="background_color"
-                                    value="{{ $user->background_color ?? '#667eea' }}">
-
-                            </div>
-
-                            <button
-                                class="px-4 py-2 bg-indigo-600 text-white rounded-md">
-                                保存
-                            </button>
-                        </form>
-                    </div>
-
-            </div>
+            <p class="text-sm text-gray-600">メールアドレス</p>
+            <p class="font-medium">{{ $user->email }}</p>
         </div>
-</x-app-layout>
+
+        {{-- 表示設定 --}}
+        <div class="bg-white p-6 rounded-lg shadow">
+            <h3 class="text-lg font-semibold mb-4">表示設定</h3>
+
+            <form method="POST" action="{{ route('profile.update') }}" class="space-y-4">
+                @csrf
+                @method('PATCH')
+
+                {{-- テーマ --}}
+                <div>
+                    <label for="theme" class="block text-sm text-gray-600 mb-1">
+                        テーマ
+                    </label>
+                    <select id="theme" name="theme" class="w-full border-gray-300 rounded-md">
+                        <option value="light" {{ $user->theme === 'light' ? 'selected' : '' }}>
+                            ライト
+                        </option>
+                        <option value="dark" {{ $user->theme === 'dark' ? 'selected' : '' }}>
+                            ダーク
+                        </option>
+                    </select>
+                </div>
+
+                {{-- 背景色 --}}
+                <div>
+                    <label for="background_color" class="block text-sm text-gray-600 mb-1">
+                        背景色
+                    </label>
+                    <input
+                        id="background_color"
+                        type="color"
+                        name="background_color"
+                        value="{{ $user->background_color ?? '#667eea' }}"
+                        x-data
+                        @input="document.body.style.backgroundColor = $event.target.value" />
+
+                </div>
+
+                <button class="px-4 py-2 bg-indigo-600 text-white rounded-md">
+                    保存
+                </button>
+            </form>
+        </div>
+
+    </div>
+</div>
+@endsection

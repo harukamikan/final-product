@@ -12,17 +12,12 @@
 
 </head>
 
-@php
-$user = auth()->user()?->fresh();
-$bgColor = $user?->background_color;
-@endphp
-
 <body
-    class="min-h-screen {{ $bgColor ? '' : 'bg-gradient-to-br from-indigo-500 to-purple-600' }}"
+    class="min-h-screen
+        {{ $bgColor ? '' : 'bg-gradient-to-br from-indigo-500 to-purple-600' }}"
     @if ($bgColor)
-    style="background-color: {{ $bgColor }};"
+    style="background: {{ $bgColor }};"
     @endif>
-
 
 
     <nav class="bg-white border-b border-gray-200 shadow-sm">
@@ -74,9 +69,10 @@ $bgColor = $user?->background_color;
         </div>
     </nav>
 
-    <main class="min-h-screen">
-        {{ $slot }}
+    <main class="min-h-screen bg-transparent">
+        @yield('content')
     </main>
+
 
 </body>
 
