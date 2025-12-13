@@ -27,11 +27,11 @@ class ProfileUpdateRequest extends FormRequest
             ],
 
             'theme' => [
-                'required',
+                'nullable',
                 'string',
                 Rule::in(['light', 'dark']),
             ],
-            
+
             'background_color' => [
                 'nullable',
                 'regex:/^#[0-9A-Fa-f]{6}$/',

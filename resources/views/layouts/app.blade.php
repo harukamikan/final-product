@@ -13,14 +13,16 @@
 </head>
 
 @php
-$bgColor = auth()->user()->background_color ?? null;
+$user = auth()->user()?->fresh();
+$bgColor = $user?->background_color;
 @endphp
 
 <body
     class="min-h-screen {{ $bgColor ? '' : 'bg-gradient-to-br from-indigo-500 to-purple-600' }}"
     @if ($bgColor)
-    data-bg="{{ $bgColor }}"
+    style="background-color: {{ $bgColor }};"
     @endif>
+
 
 
     <nav class="bg-white border-b border-gray-200 shadow-sm">

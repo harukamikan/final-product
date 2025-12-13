@@ -86,8 +86,8 @@
                                 <input
                                     type="color"
                                     name="background_color"
-                                    value="{{ $user->background_color ?? '#667eea' }}"
-                                    class="w-20 h-10 p-0 border rounded cursor-pointer" />
+                                    value="{{ $user->background_color ?? '#667eea' }}">
+
                             </div>
 
                             <button
