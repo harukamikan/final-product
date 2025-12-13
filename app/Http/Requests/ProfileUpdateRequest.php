@@ -25,6 +25,17 @@ class ProfileUpdateRequest extends FormRequest
                 'max:255',
                 Rule::unique(User::class)->ignore($this->user()->id),
             ],
+
+            'theme' => [
+                'required',
+                'string',
+                Rule::in(['light', 'dark']),
+            ],
+            
+            'background_color' => [
+                'nullable',
+                'regex:/^#[0-9A-Fa-f]{6}$/',
+            ],
         ];
     }
 }

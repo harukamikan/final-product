@@ -12,7 +12,16 @@
 
 </head>
 
-<body style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh;">
+@php
+$bgColor = auth()->user()->background_color ?? null;
+@endphp
+
+<body
+    class="min-h-screen {{ $bgColor ? '' : 'bg-gradient-to-br from-indigo-500 to-purple-600' }}"
+    @if ($bgColor)
+    style="background-color: {{ $bgColor }};"
+    @endif>
+
 
     <nav class="bg-white border-b border-gray-200 shadow-sm">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -63,9 +72,9 @@
         </div>
     </nav>
 
-    <div class="min-h-screen">
-        @yield('content')
-    </div>
+    <main class="min-h-screen">
+        {{ $slot }}
+    </main>
 
 </body>
 
