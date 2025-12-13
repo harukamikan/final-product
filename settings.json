@@ -4,9 +4,5 @@
     "less.validate": false,
 
     "html.validate.styles": false,
-    "html.validate.scripts": false,
-
-    "files.associations": {
-        "*.blade.php": "blade"
-    }
+    "html.validate.scripts": false
 }

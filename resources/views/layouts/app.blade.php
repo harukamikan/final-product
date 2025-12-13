@@ -19,7 +19,7 @@ $bgColor = auth()->user()->background_color ?? null;
 <body
     class="min-h-screen {{ $bgColor ? '' : 'bg-gradient-to-br from-indigo-500 to-purple-600' }}"
     @if ($bgColor)
-    style="background-color: {{ $bgColor }};"
+    data-bg="{{ $bgColor }}"
     @endif>
 
 
