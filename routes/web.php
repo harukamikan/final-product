@@ -9,6 +9,7 @@ use App\Http\Controllers\SlackAuthController;
 use App\Http\Controllers\Admin\MissionCreater;
 use App\Http\Controllers\UserMissionController;
 use App\Http\Controllers\MissionListController;
+use App\Http\Controllers\QiitaArticleController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -44,6 +45,8 @@ Route::middleware('auth')->group(function () {
     Route::get('/missions', [MissionListController::class, 'index'])->name('missions.index');
     Route::get('/missions/completed', [MissionListController::class, 'completed'])
     ->name('missions.completed');
+    Route::get('/qiita', [QiitaArticleController::class, 'index'])
+        ->name('qiita.index');
 
 });
 
