@@ -10,9 +10,13 @@ use App\Http\Controllers\Admin\MissionCreater;
 use App\Http\Controllers\UserMissionController;
 use App\Http\Controllers\MissionListController;
 use App\Http\Controllers\QiitaArticleController;
+use App\Http\Controllers\RankingController;
+use Illuminate\Support\Facades\Auth;
+
+
 
 Route::get('/', function () {
-    return view('welcome');
+    return redirect()->route('login');
 });
 
 Route::get('/auth/slack/redirect', [SlackAuthController::class, 'redirect'])->name('slack.login');
@@ -30,6 +34,19 @@ Route::middleware('auth')->group(function () {
         ->name('missions.blog-url.form');
     Route::post('/missions/blog-url', [MissionController::class, 'submitBlogUrl'])
         ->name('missions.blog-url.submit');
+    Route::middleware(['auth']) // 権限まわりはプロジェクトに合わせて
+        ->prefix('admin')
+        ->name('admin.')
+        ->group(function () {
+            Route::resource('missions', MissionCreater::class);
+        });
+    Route::post('/missions/{mission}/complete', [UserMissionController::class, 'complete'])
+        ->name('missions.complete');
+    Route::get('/missions', [MissionListController::class, 'index'])->name('missions.index');
+
+    Route::get('/ranking', [RankingController::class, 'index'])
+        ->middleware('auth')
+        ->name('ranking.index');
     Route::get('/missions/google-form', [MissionController::class, 'showGoogleForm'])
     ->name('missions.google_form.form');
     Route::post('/missions/google-form', [MissionController::class, 'storeGoogleForm'])
@@ -72,4 +89,3 @@ Route::get('/debug/users', function () {
     $users = \App\Models\User::all(['id', 'name', 'email', 'slack_id']);
     return response()->json($users);
 })->middleware('auth');
-
