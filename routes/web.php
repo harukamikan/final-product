@@ -12,7 +12,7 @@ use App\Http\Controllers\MissionListController;
 use App\Http\Controllers\QiitaArticleController;
 use App\Http\Controllers\RankingController;
 use Illuminate\Support\Facades\Auth;
-
+use App\Http\Controllers\Admin\GoalUploadController;
 
 
 Route::get('/', function () {
@@ -89,3 +89,9 @@ Route::get('/debug/users', function () {
     $users = \App\Models\User::all(['id', 'name', 'email', 'slack_id']);
     return response()->json($users);
 })->middleware('auth');
+
+// 管理者用ルート
+Route::middleware(['auth'])->prefix('admin')->group(function () {
+    Route::get('/goals/upload', [GoalUploadController::class, 'index'])->name('admin.goals.upload.index');
+    Route::post('/goals/upload', [GoalUploadController::class, 'upload'])->name('admin.goals.upload');
+});
