@@ -124,7 +124,7 @@ return [
     ],
 
     // config/app.php
-    'default_background_color' => '#5985ff',
+    'default_background_color' => '#667eea',
 
 
 ];
