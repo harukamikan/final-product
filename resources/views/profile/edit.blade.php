@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="py-8">
+<div class="py-8 px-6">
     <div class="max-w-3xl mx-auto space-y-8">
 
         {{-- 基本情報 --}}
@@ -29,14 +29,7 @@
                     <label for="background_color" class="block text-sm text-gray-600 mb-1">
                         背景色
                     </label>
-                    <input
-                        id="background_color"
-                        type="color"
-                        name="background_color"
-                        value="{{ $user->background_color ?? '#667eea' }}"
-                        x-data
-                        @input="document.body.style.backgroundColor = $event.target.value" />
-
+                    <input type="color" name="background_color" value="{{ auth()->user()->background_color }}">
                 </div>
 
                 <button class="px-4 py-2 bg-indigo-600 text-white rounded-md">
