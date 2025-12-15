@@ -7,6 +7,7 @@ use App\Services\MissionService;
 use App\Models\Mission;
 use App\Services\QiitaService;
 use App\Models\QiitaArticle;
+use App\Services\GeminiService; 
 use Illuminate\Support\Facades\Log;
 use Carbon\Carbon;
 
@@ -28,7 +29,8 @@ class MissionController extends Controller
     public function submitBlogUrl(
     Request $request,
     MissionService $missionService,
-    QiitaService $qiitaService
+    QiitaService $qiitaService,
+    GeminiService $geminiService
 ) {
     $request->validate([
         'url' => ['required', 'url'],
@@ -62,6 +64,18 @@ class MissionController extends Controller
             ]);
     }
 
+    // 2. Geminiで要約を生成（失敗してもミッション処理は続ける）
+    $summary = null;
+    try {
+        $summary = $geminiService->summarize($qiita['title'] ?? '', $qiita['body'] ?? '');
+    } catch (\Throwable $e) {
+        Log::warning('Gemini summarize failed', [
+            'url' => $qiita['url'] ?? $url,
+            'error' => $e->getMessage(),
+        ]);
+    }
+
+
     // 2. ミッション進捗 & マイル付与
     $earned = $missionService->handleTrigger(
         $user,
@@ -82,6 +96,7 @@ class MissionController extends Controller
             'mission_id'  => $mission->id,
             'title'       => $qiita['title'] ?? '',
             'body'        => $qiita['body'] ?? '',
+            'summary'     => $summary,  
             'tags'        => $qiita['tags'] ?? [],
             'likes_count' => $qiita['likes_count'] ?? 0,
             'posted_at'   => !empty($qiita['created_at'])

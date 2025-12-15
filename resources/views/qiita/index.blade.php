@@ -1,6 +1,10 @@
 @extends('layouts.app')
 
 @section('content')
+@php
+    use Illuminate\Support\Str;
+@endphp
+
 <div class="max-w-5xl mx-auto px-4 py-8 space-y-6">
 
     {{-- ヘッダー --}}
@@ -17,8 +21,13 @@
     {{-- タイムライン --}}
     <div class="space-y-4">
         @forelse ($articles as $article)
-            <div class="flex gap-3">
+            @php
+                $hasSummary = !empty($article->summary);
+                // 本文をそのまま出すとMarkdownが見づらいので、まずはプレーンに（要望が「全文表示」なので）
+                $fullBody = trim(strip_tags($article->body ?? ''));
+            @endphp
 
+            <div class="flex gap-3">
                 {{-- 左：ユーザーアイコン風 --}}
                 <div class="flex flex-col items-center">
                     <div class="w-9 h-9 rounded-full bg-gray-100 flex items-center justify-center text-xs font-semibold text-gray-600">
@@ -53,11 +62,22 @@
                     </div>
 
                     {{-- 記事タイトル --}}
-                    <div>
+                    <div class="flex items-start justify-between gap-3">
                         <a href="{{ $article->url }}" target="_blank"
                            class="text-base font-semibold text-indigo-700 hover:underline break-words">
                             {{ $article->title }}
                         </a>
+
+                        {{-- 状態バッジ（ここで一目で分かる） --}}
+                        @if ($hasSummary)
+                            <span class="shrink-0 inline-flex items-center px-2 py-1 rounded-full bg-indigo-50 text-indigo-700 text-[11px] font-semibold border border-indigo-100">
+                                ✨ 要約あり
+                            </span>
+                        @else
+                            <span class="shrink-0 inline-flex items-center px-2 py-1 rounded-full bg-amber-50 text-amber-700 text-[11px] font-semibold border border-amber-100">
+                                ⚠ 要約未生成
+                            </span>
+                        @endif
                     </div>
 
                     {{-- タグ --}}
@@ -71,12 +91,31 @@
                         </div>
                     @endif
 
-                    {{-- 本文の抜粋 --}}
-                    <div class="text-xs text-gray-600 mt-1">
-                        @php
-                            $plain = Str::limit(strip_tags($article->body), 160);
-                        @endphp
-                        <p class="whitespace-pre-wrap">{{ $plain }}</p>
+                    {{-- 本文表示領域 --}}
+                    <div class="text-xs text-gray-700 mt-2 space-y-2">
+
+                        {{-- 要約がある場合 --}}
+                        @if ($hasSummary)
+                            <div class="rounded-xl bg-indigo-50 border border-indigo-100 p-3">
+                                <p class="text-[11px] font-semibold text-indigo-700 mb-1">AI要約</p>
+                                <p class="whitespace-pre-wrap">{{ $article->summary }}</p>
+                            </div>
+
+                            {{-- 参考として本文は折りたたみ（クリックで読める） --}}
+                            <details class="rounded-xl border bg-white px-3 py-2">
+                                <summary class="cursor-pointer text-[11px] text-gray-500 select-none">
+                                    本文を全文表示（クリックで開く）
+                                </summary>
+                                <pre class="mt-2 text-[11px] whitespace-pre-wrap text-gray-700">{{ $fullBody ?: '本文がありません' }}</pre>
+                            </details>
+
+                        {{-- 要約がない場合（要望どおり「全文」を見せる） --}}
+                        @else
+                            <div class="rounded-xl bg-amber-50 border border-amber-100 p-3">
+                                <p class="text-[11px] font-semibold text-amber-700 mb-1">要約未生成のため本文を全文表示</p>
+                                <pre class="text-[11px] whitespace-pre-wrap text-gray-800">{{ $fullBody ?: '本文がありません' }}</pre>
+                            </div>
+                        @endif
                     </div>
 
                     {{-- 下段：LGTM数 --}}

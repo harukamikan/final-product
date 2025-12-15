@@ -44,4 +44,8 @@ return [
         'token' => env('QIITA_TOKEN'),
     ],
 
+    'gemini' => [
+        'api_key' => env('GEMINI_API_KEY'),
+            ],
+
 ];
