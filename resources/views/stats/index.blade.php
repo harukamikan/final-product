@@ -25,19 +25,20 @@
             </div>
 
             <!-- グラフエリア -->
-            <div class="bg-white overflow-hidden shadow-2xl card-shadow sm:rounded-lg mb-6">
+            <div class="overflow-hidden shadow-2xl card-shadow sm:rounded-lg mb-6" style="background: rgba(255, 255, 255, 0.15); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.2);">
                 <div class="p-6">
-                    <h3 class="font-semibold text-lg text-gray-800 mb-4">📈 月別マイル獲得</h3>
-                    
-                    <div style="height: 400px;">
-                        <canvas id="monthlyChart"></canvas>
-                    </div>
-                </div>
-            </div>
+                    <h3 class="font-semibold text-lg text-white mb-4">📈 月別マイル獲得</h3>
+                    <div style="height: 400px; overflow-x: auto;">
+                        <div style="min-width: 800px; height: 100%;">
+                    <canvas id="monthlyChart"></canvas>
+               </div>
+           </div>
+       </div>
+   </div>
 
-            <div class="bg-white overflow-hidden shadow-2xl card-shadow sm:rounded-lg">
+            <div class="overflow-hidden shadow-2xl card-shadow sm:rounded-lg" style="background: rgba(255, 255, 255, 0.15); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.2);">
                 <div class="p-6">
-                    <h3 class="font-semibold text-lg text-gray-800 mb-4">🎯 カテゴリ別マイル獲得</h3>
+                    <h3 class="font-semibold text-lg text-white mb-4">🎯 カテゴリ別マイル獲得</h3>
                     <div style="height: 400px;">
                         <canvas id="categoryChart"></canvas>
                     </div>
@@ -59,36 +60,23 @@
         new Chart(document.getElementById('monthlyChart'), {
             type: 'line',
             data: {
-                labels: monthlyData.map(d => d.month),
+                labels: monthlyData.map(d => {
+                    const [year, month] = d.month.split('-');
+                    return `${year}年${parseInt(month)}月`;
+                }),
                 datasets: [{
                     label: 'マイル獲得数',
                     data: monthlyData.map(d => parseInt(d.total)),
-                    borderColor: 'rgb(79, 70, 229)',
-                    backgroundColor: 'rgba(79, 70, 229, 0.1)',
-                    tension: 0.3
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false
-            }
-        });
-
-        // カテゴリ別マイルグラフ
-        const categoryData = @json($categoryMiles);
-        new Chart(document.getElementById('categoryChart'), {
-            type: 'bar',
-            data: {
-                labels: categoryData.map(d => d.type || '未分類'),
-                datasets: [{
-                    label: 'マイル獲得数',
-                    data: categoryData.map(d => parseInt(d.total)),
-                    backgroundColor: [
-                        'rgba(79, 70, 229, 0.8)',
-                        'rgba(245, 158, 11, 0.8)',
-                        'rgba(34, 197, 94, 0.8)',
-                        'rgba(239, 68, 68, 0.8)'
-                    ]
+                    borderColor: 'rgb(255, 255, 255)',
+                    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+                    borderWidth: 3,
+                    pointRadius: 5,
+                    pointBackgroundColor: 'rgb(255, 255, 255)',
+                    pointBorderColor: 'rgba(99, 102, 241, 0.8)',
+                    pointBorderWidth: 3,
+                    pointHoverRadius: 7,
+                    tension: 0.4,
+                    fill: true
                 }]
             },
             options: {
@@ -96,10 +84,66 @@
                 maintainAspectRatio: false,
                 plugins: {
                     legend: {
-                        display: true
+                        display: false
+                    }
+                },
+                scales: {
+                    x: {
+                       grid: {
+                           color: 'rgba(255, 255, 255, 0.1)',
+                        },
+                        ticks: {
+                            color: 'rgba(255, 255, 255, 0.9)',
+                        }
+                    },
+                    y: {
+                       grid: {
+                           color: 'rgba(255, 255, 255, 0.1)',
+                           drawBorder: false
+                        },
+                        ticks: {
+                            color: 'rgba(255, 255, 255, 0.9)',
+                        },
+                        beginAtZero: true
                     }
                 }
             }
         });
+
+        // カテゴリ別マイルグラフ
+        const categoryData = @json($categoryMiles);
+        new Chart(document.getElementById('categoryChart'), {
+            type: 'pie',
+            data: {
+                labels: categoryData.map(d => d.type || '未分類'),
+                datasets: [{
+                    label: 'マイル獲得数',
+                    data: categoryData.map(d => parseInt(d.total)),
+                    backgroundColor: [
+                         'rgba(79, 70, 229, 0.8)',
+                         'rgba(245, 158, 11, 0.8)',
+                         'rgba(34, 197, 94, 0.8)',
+                         'rgba(239, 68, 68, 0.8)',
+                         'rgba(236, 72, 153, 0.8)'
+                        ]
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'right',
+                         labels: {
+                              color: 'rgba(255, 255, 255, 0.9)',
+                              font: {
+                                  size: 12,
+                                  weight: '500'
+                            }
+                       }
+                    }
+                }
+            }
+        });   
     </script>
 @endsection

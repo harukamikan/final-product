@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\MileHistory;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Carbon;
 
 class StatsController extends Controller
 {
@@ -12,16 +13,41 @@ class StatsController extends Controller
     {
         $userId = auth()->id();
 
-        // 月別マイル獲得（過去6ヶ月）
-        $monthlyMiles = MileHistory::where('user_id', $userId)
+        // 最古のデータの月を取得
+        $oldestMonth = MileHistory::where('user_id', $userId)
+            ->orderBy('created_at')
+            ->value(DB::raw('DATE_FORMAT(created_at, "%Y-%m")'));
+
+        // データがない場合は現在月から
+        $startMonth = $oldestMonth ? $oldestMonth : now()->format('Y-m');
+
+        // 月ラベルを作成（最古の月〜来月まで）
+        $months = collect();
+        $current = Carbon::createFromFormat('Y-m', $startMonth);
+        $end = now()->addMonth();
+
+        while ($current <= $end) {
+            $months->push($current->format('Y-m'));
+            $current->addMonth();
+        }
+
+        // 月別マイル獲得
+        $monthlyMilesData = MileHistory::where('user_id', $userId)
             ->select(
                 DB::raw('DATE_FORMAT(created_at, "%Y-%m") as month'),
                 DB::raw('SUM(miles) as total')
             )
-            ->where('created_at', '>=', now()->subMonths(6))
             ->groupBy(DB::raw('DATE_FORMAT(created_at, "%Y-%m")'))
             ->orderBy('month')
-            ->get();
+            ->pluck('total', 'month');
+
+        // 全ての月にデータを埋める
+        $monthlyMiles = $months->map(function($month) use ($monthlyMilesData) {
+            return [
+                'month' => $month,
+                'total' => $monthlyMilesData->get($month, 0)
+            ];
+        });
 
         // カテゴリ別マイル獲得
         $categoryMiles = MileHistory::where('user_id', $userId)
