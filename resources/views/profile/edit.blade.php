@@ -138,19 +138,55 @@
             <hr>
 
             {{-- アカウント削除 --}}
-            <div>
+            <div x-data="{ open: false }">
                 <p class="font-medium text-red-600">アカウント削除</p>
                 <p class="text-sm text-gray-600 mb-3">
                     この操作は取り消せません。削除前にパスワード確認が必要です。
                 </p>
 
-                <a href="{{ route('password.confirm') }}"
-                    class="inline-block px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700">
+                <button
+                    @click="open = true"
+                    class="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700">
                     アカウントを削除する
-                </a>
-            </div>
-        </div>
+                </button>
 
+                {{-- 最終確認モーダル --}}
+                <div
+                    x-show="open"
+                    x-transition
+                    class="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+                    <div class="bg-white rounded-lg shadow p-6 w-full max-w-md">
+                        <h3 class="text-lg font-semibold text-red-600 mb-2">
+                            本当に削除しますか？
+                        </h3>
+
+                        <p class="text-sm text-gray-600 mb-4">
+                            アカウントを削除すると、すべてのデータが完全に削除されます。
+                            この操作は取り消せません。
+                        </p>
+
+                        <div class="flex justify-end gap-3">
+                            <button
+                                @click="open = false"
+                                class="px-4 py-2 border rounded-md text-gray-600 hover:bg-gray-100">
+                                キャンセル
+                            </button>
+
+                            <a href="{{ route('profile.delete.confirm') }}"
+                                class="inline-block px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700">
+                                アカウントを削除する
+                            </a>
+
+
+                            @csrf
+                            @method('DELETE')
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+
+        </div>
     </div>
-</div>
-@endsection
+    @endsection
