@@ -23,20 +23,6 @@
                 @csrf
                 @method('PATCH')
 
-                {{-- テーマ --}}
-                <div>
-                    <label for="theme" class="block text-sm text-gray-600 mb-1">
-                        テーマ
-                    </label>
-                    <select id="theme" name="theme" class="w-full border-gray-300 rounded-md">
-                        <option value="light" {{ $user->theme === 'light' ? 'selected' : '' }}>
-                            ライト
-                        </option>
-                        <option value="dark" {{ $user->theme === 'dark' ? 'selected' : '' }}>
-                            ダーク
-                        </option>
-                    </select>
-                </div>
 
                 {{-- 背景色 --}}
                 <div>

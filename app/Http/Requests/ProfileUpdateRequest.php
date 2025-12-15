@@ -26,12 +26,6 @@ class ProfileUpdateRequest extends FormRequest
                 Rule::unique(User::class)->ignore($this->user()->id),
             ],
 
-            'theme' => [
-                'nullable',
-                'string',
-                Rule::in(['light', 'dark']),
-            ],
-
             'background_color' => [
                 'nullable',
                 'regex:/^#[0-9A-Fa-f]{6}$/',
