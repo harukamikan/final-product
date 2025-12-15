@@ -19,23 +19,43 @@
         <div class="bg-white p-6 rounded-lg shadow">
             <h3 class="text-lg font-semibold mb-4">表示設定</h3>
 
-            <form method="POST" action="{{ route('profile.update') }}" class="space-y-4">
+            <form
+                method="POST"
+                action="{{ route('profile.update') }}"
+                x-data="{
+        defaultColor: '{{ config('app.default_background_color', '#f3f4f6') }}',
+        color: '{{ auth()->user()->background_color ?? config('app.default_background_color', '#f3f4f6') }}'
+    }">
                 @csrf
                 @method('PATCH')
 
-
-                {{-- 背景色 --}}
                 <div>
-                    <label for="background_color" class="block text-sm text-gray-600 mb-1">
+                    <label class="block text-sm text-gray-600 mb-1">
                         背景色
                     </label>
-                    <input type="color" name="background_color" value="{{ auth()->user()->background_color }}">
+
+                    <div class="flex items-center gap-3">
+                        <input
+                            type="color"
+                            x-model="color"
+                            class="h-10 w-16 cursor-pointer">
+
+                        <button
+                            type="button"
+                            @click="color = defaultColor"
+                            class="px-3 py-2 text-sm border rounded-md text-gray-600 hover:bg-gray-100">
+                            初期色に戻す
+                        </button>
+                    </div>
                 </div>
 
-                <button class="px-4 py-2 bg-indigo-600 text-white rounded-md">
+                <input type="hidden" name="background_color" :value="color">
+
+                <button class="mt-4 px-4 py-2 bg-indigo-600 text-white rounded-md">
                     保存
                 </button>
             </form>
+
         </div>
 
     </div>

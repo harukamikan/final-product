@@ -27,10 +27,13 @@ class AppServiceProvider extends ServiceProvider
         );
 
         View::composer('*', function ($view) {
-            $view->with(
-                'bgColor',
-                Auth::check() ? Auth::user()->background_color : null
-            );
+            $bgColor = config('app.default_background_color');
+
+            if (Auth::check() && Auth::user()->background_color) {
+                $bgColor = Auth::user()->background_color;
+            }
+
+            $view->with('bgColor', $bgColor);
         });
     }
 }
