@@ -63,35 +63,35 @@
 
             {{-- 成功フラッシュ（3秒で消える） --}}
             @if (session('status') === 'password-updated')
-                <div
-                    x-data="{ show: true }"
-                    x-init="setTimeout(() => show = false, 3000)"
-                    x-show="show"
-                    x-transition
-                    class="rounded-md bg-green-50 p-4 text-green-700">
-                    パスワードを更新しました。
-                </div>
+            <div
+                x-data="{ show: true }"
+                x-init="setTimeout(() => show = false, 3000)"
+                x-show="show"
+                x-transition
+                class="rounded-md bg-green-50 p-4 text-green-700">
+                パスワードを更新しました。
+            </div>
             @endif
 
-            {{-- 失敗フラッシュ（3秒で消える） --}}
-            @if ($errors->has('current_password') || $errors->has('password'))
-                <div
-                    x-data="{ show: true }"
-                    x-init="setTimeout(() => show = false, 3000)"
-                    x-show="show"
-                    x-transition
-                    class="rounded-md bg-red-50 p-4 text-red-700">
-                    <p class="font-medium mb-1">パスワードを更新できませんでした</p>
-                    <ul class="list-disc pl-5 text-sm space-y-1">
-                        @if ($errors->has('current_password'))
-                            <li>現在のパスワードが正しくありません。</li>
-                        @endif
-                        @if ($errors->has('password'))
-                            <li>新しいパスワードを正しく入力してください。</li>
-                        @endif
-                    </ul>
-                </div>
+            @if ($errors->updatePassword->any())
+            <div
+                x-data="{ show: true }"
+                x-init="setTimeout(() => show = false, 3000)"
+                x-show="show"
+                x-transition
+                class="rounded-md bg-red-50 p-4 text-red-700">
+                <p class="font-medium mb-1">パスワードを更新できませんでした</p>
+                <ul class="list-disc pl-5 text-sm space-y-1">
+                    @if ($errors->updatePassword->has('current_password'))
+                    <li>現在のパスワードが正しくありません。</li>
+                    @endif
+                    @if ($errors->updatePassword->has('password'))
+                    <li>新しいパスワードを正しく入力してください。</li>
+                    @endif
+                </ul>
+            </div>
             @endif
+
 
             {{-- パスワード変更 --}}
             <form method="POST" action="{{ route('password.update') }}">
@@ -107,7 +107,7 @@
                             name="current_password"
                             placeholder="現在のパスワード"
                             class="w-full rounded px-3 py-2 border
-                                @error('current_password') border-red-500 @else border-gray-300 @enderror"
+        @error('current_password', 'updatePassword') border-red-500 @else border-gray-300 @enderror"
                             required>
 
                         <input
@@ -115,7 +115,7 @@
                             name="password"
                             placeholder="新しいパスワード"
                             class="w-full rounded px-3 py-2 border
-                                @error('password') border-red-500 @else border-gray-300 @enderror"
+        @error('password', 'updatePassword') border-red-500 @else border-gray-300 @enderror"
                             required>
 
                         <input
@@ -123,8 +123,9 @@
                             name="password_confirmation"
                             placeholder="新しいパスワード（確認）"
                             class="w-full rounded px-3 py-2 border
-                                @error('password') border-red-500 @else border-gray-300 @enderror"
+        @error('password', 'updatePassword') border-red-500 @else border-gray-300 @enderror"
                             required>
+
                     </div>
 
                     <button
@@ -144,7 +145,7 @@
                 </p>
 
                 <a href="{{ route('password.confirm') }}"
-                   class="inline-block px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700">
+                    class="inline-block px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700">
                     アカウントを削除する
                 </a>
             </div>
