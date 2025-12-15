@@ -29,7 +29,14 @@ Route::get('/dashboard', [DashboardController::class, 'index'])
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
-    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+
+    Route::get('/profile/delete/confirm', [ProfileController::class, 'confirmDelete'])
+        ->name('profile.delete.confirm');
+
+    Route::delete('/profile/delete', [ProfileController::class, 'destroy'])
+        ->name('profile.delete');
+
+
     Route::get('/missions/blog-url', [MissionController::class, 'showBlogUrlForm'])
         ->name('missions.blog-url.form');
     Route::post('/missions/blog-url', [MissionController::class, 'submitBlogUrl'])
@@ -48,23 +55,22 @@ Route::middleware('auth')->group(function () {
         ->middleware('auth')
         ->name('ranking.index');
     Route::get('/missions/google-form', [MissionController::class, 'showGoogleForm'])
-    ->name('missions.google_form.form');
+        ->name('missions.google_form.form');
     Route::post('/missions/google-form', [MissionController::class, 'storeGoogleForm'])
         ->name('missions.google_form.store');
     Route::middleware(['auth']) // 管理者限定にする場合は、ここに管理者ミドルウェアを追加
-    ->prefix('admin')
-    ->name('admin.')
-    ->group(function () {
-        Route::resource('missions', MissionCreater::class);
-    });
+        ->prefix('admin')
+        ->name('admin.')
+        ->group(function () {
+            Route::resource('missions', MissionCreater::class);
+        });
     Route::post('/missions/{mission}/complete', [UserMissionController::class, 'complete'])
         ->name('missions.complete');
     Route::get('/missions', [MissionListController::class, 'index'])->name('missions.index');
     Route::get('/missions/completed', [MissionListController::class, 'completed'])
-    ->name('missions.completed');
+        ->name('missions.completed');
     Route::get('/qiita', [QiitaArticleController::class, 'index'])
         ->name('qiita.index');
-
 });
 
 
@@ -82,9 +88,8 @@ Route::get('/logout', function () {
     return redirect('/');
 })->middleware('auth');
 
-require __DIR__.'/auth.php';
+require __DIR__ . '/auth.php';
 
-// ↓ ここに追加
 Route::get('/debug/users', function () {
     $users = \App\Models\User::all(['id', 'name', 'email', 'slack_id']);
     return response()->json($users);

@@ -93,10 +93,22 @@
 
     {{-- フラッシュメッセージ --}}
     @if (session('status') === 'account-deleted')
-    <div class="mx-auto max-w-3xl mt-4 rounded-md bg-green-50 p-4 text-green-700">
-        アカウントを削除しました。ご利用ありがとうございました。
+    <div
+        x-data="{ show: true }"
+        x-init="
+            setTimeout(() => show = false, 2500);
+            setTimeout(() => window.location.href = '/', 3000);
+        "
+        x-show="show"
+        x-transition
+        class="mx-auto max-w-3xl mt-4 rounded-md bg-green-50 p-4 text-green-700 text-center">
+        <p class="font-medium">アカウントを削除しました。</p>
+        <p class="text-sm mt-1">トップページへ移動します…</p>
     </div>
     @endif
+
+
+
 
     {{-- メインコンテンツ --}}
     <main class="min-h-screen px-6 py-6">
