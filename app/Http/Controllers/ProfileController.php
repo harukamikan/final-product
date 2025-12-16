@@ -29,6 +29,12 @@ class ProfileController extends Controller
         $user = $request->user();
 
         $user->fill($request->validated());
+
+        if ($request->filled('background_type') && $request->filled('background_value')) {
+            $user->background_type  = $request->background_type;
+            $user->background_value = $request->background_value;
+        }
+
         $user->save();
 
         return redirect()

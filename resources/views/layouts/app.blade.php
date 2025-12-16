@@ -1,6 +1,5 @@
 <!DOCTYPE html>
-<html lang="ja"
-    style="background-color: {{ $bgColor }};">
+<html lang="ja">
 
 <head>
     <meta charset="UTF-8">
@@ -13,7 +12,16 @@
 
 <body
     class="min-h-screen"
-    style="background-color: {{ $bgColor }};">
+    @auth
+    @if(auth()->user()->background_type === 'gradient')
+    style="background: {{ auth()->user()->background_value }};"
+    @else
+    style="background-color: {{ auth()->user()->background_value ?? '#f3f4f6' }};"
+    @endif
+    @else
+    style="background-color: #f3f4f6;"
+    @endauth
+    >
     {{-- ナビゲーション --}}
     <nav class="bg-white/80 backdrop-blur border-b border-gray-200 shadow-sm">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
