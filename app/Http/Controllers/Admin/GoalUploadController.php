@@ -6,7 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Models\User;
-use App\Models\Goal;
+use App\Models\SemesterGoal;
 use PhpOffice\PhpSpreadsheet\Shared\Date;
 
 class GoalUploadController extends Controller
@@ -25,12 +25,11 @@ class GoalUploadController extends Controller
         ]);
 
         $file = $request->file('file');
-        $data = Excel::toArray([], $file)[0]; // 最初のシートを取得
+        $data = Excel::toArray([], $file)[0];
 
         $successCount = 0;
         $errorUsers = [];
 
-        // ヘッダー行をスキップ（1行目）
         foreach (array_slice($data, 1) as $row) {
             $name = $row[0] ?? null;
             $category = $row[1] ?? null;
@@ -39,11 +38,9 @@ class GoalUploadController extends Controller
 
             if (!$name || !$title) continue;
 
-            // 日付の変換処理を追加
             $deadline = null;
             if ($deadlineValue) {
                 try {
-                    // Excelのシリアル値を日付に変換
                     if (is_numeric($deadlineValue)) {
                         $deadline = Date::excelToDateTimeObject($deadlineValue)->format('Y-m-d');
                     } else {
@@ -54,11 +51,10 @@ class GoalUploadController extends Controller
                 }
             }
 
-            // ユーザーを名前で検索
             $user = User::where('name', $name)->first();
 
             if ($user) {
-                Goal::create([
+                SemesterGoal::create([
                     'user_id' => $user->id,
                     'category' => $category,
                     'title' => $title,

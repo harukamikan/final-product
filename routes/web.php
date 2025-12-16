@@ -100,3 +100,11 @@ Route::middleware(['auth'])->prefix('admin')->group(function () {
     Route::get('/goals/upload', [GoalUploadController::class, 'index'])->name('admin.goals.upload.index');
     Route::post('/goals/upload', [GoalUploadController::class, 'upload'])->name('admin.goals.upload');
 });
+
+// AI自動抽出
+Route::middleware(['auth'])->prefix('admin')->group(function () {
+    Route::get('/goals/ai-upload', [App\Http\Controllers\Admin\GoalAiUploadController::class, 'index'])->name('admin.goals.ai.index');
+    Route::post('/goals/ai-upload', [App\Http\Controllers\Admin\GoalAiUploadController::class, 'upload'])->name('admin.goals.ai.upload');
+    Route::get('/goals/ai-confirm', [App\Http\Controllers\Admin\GoalAiUploadController::class, 'confirm'])->name('admin.goals.ai.confirm');
+    Route::post('/goals/ai-store', [App\Http\Controllers\Admin\GoalAiUploadController::class, 'store'])->name('admin.goals.ai.store');
+});
