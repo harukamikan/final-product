@@ -43,5 +43,8 @@ return [
     'qiita' => [
         'token' => env('QIITA_TOKEN'),
     ],
+    'claude' => [
+    'api_key' => env('CLAUDE_API_KEY'),
+    ],
 
 ];

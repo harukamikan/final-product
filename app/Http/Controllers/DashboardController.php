@@ -7,6 +7,7 @@ use App\Models\Goal;
 use App\Models\MileHistory;
 use App\Models\UserMission;
 use App\Models\Mission;
+use App\Models\SemesterGoal;
 
 
 class DashboardController extends Controller
@@ -40,9 +41,9 @@ class DashboardController extends Controller
             ->sum('miles');
 
         //　半期目標を取得
-        $semesterGoal = Goal::where('user_id', $userId)
-           ->latest()
-           ->first();
+        $semesterGoal = SemesterGoal::where('user_id', $userId)
+            ->latest()
+            ->first();
 
         // 総マイル数を取得
         $totalMiles = MileHistory::where('user_id', $userId)

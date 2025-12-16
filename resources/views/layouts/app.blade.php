@@ -74,6 +74,18 @@
                                 class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
                                 プロフィール
                             </a>
+
+                            <!-- 半期目標AI取得 -->
+                            <div class="border-t border-gray-200"></div>
+                            <a href="{{ route('admin.goals.upload.index') }}"
+                                class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                                📊 Excel アップロード
+                            </a>
+                            <a href="{{ route('admin.goals.ai.index') }}"
+                                class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                                🤖 AI 抽出
+                            </a>
+                            <!-- ここまで -->
                             <a href="/logout"
                                 onclick="event.preventDefault(); document.getElementById('logout-form').submit();"
                                 class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
