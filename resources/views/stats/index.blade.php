@@ -36,6 +36,18 @@
        </div>
    </div>
 
+            <!-- 累積マイル推移グラフ -->
+            <div class="overflow-hidden shadow-2xl card-shadow sm:rounded-lg mb-6" style="background: rgba(255, 255, 255, 0.15); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.2);">
+                <div class="p-6">
+                    <h3 class="font-semibold text-lg text-white mb-4">📊 累積マイル推移</h3>
+                    <div style="height: 400px; overflow-x: auto;">
+                        <div style="min-width: 800px; height: 100%;">
+                            <canvas id="cumulativeChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <div class="overflow-hidden shadow-2xl card-shadow sm:rounded-lg" style="background: rgba(255, 255, 255, 0.15); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.2);">
                 <div class="p-6">
                     <h3 class="font-semibold text-lg text-white mb-4">🎯 カテゴリ別マイル獲得</h3>
@@ -100,6 +112,61 @@
                        grid: {
                            color: 'rgba(255, 255, 255, 0.1)',
                            drawBorder: false
+                        },
+                        ticks: {
+                            color: 'rgba(255, 255, 255, 0.9)',
+                        },
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+
+        // 累積マイルグラフ
+        const cumulativeData = @json($cumulativeMiles);
+        new Chart(document.getElementById('cumulativeChart'), {
+            type: 'line',
+            data: {
+                labels: cumulativeData.map(d => {
+                    const [year, month] = d.month.split('-');
+                    return `${year}年${parseInt(month)}月`;
+                }),
+                datasets: [{
+                    label: '累積マイル',
+                    data: cumulativeData.map(d => parseInt(d.total)),
+                    borderColor: 'rgb(34, 197, 94)',
+                    backgroundColor: 'rgba(34, 197, 94, 0.2)',
+                    borderWidth: 3,
+                    pointRadius: 5,
+                    pointBackgroundColor: 'rgb(34, 197, 94)',
+                    pointBorderColor: '#fff',
+                    pointBorderWidth: 2,
+                    pointHoverRadius: 7,
+                    tension: 0.4,
+                    fill: true
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                },
+                scales: {
+                    x: {
+                        grid: {
+                            color: 'rgba(255, 255, 255, 0.1)',
+                        },
+                        ticks: {
+                            color: 'rgba(255, 255, 255, 0.9)',
+                        }
+                    },
+                    y: {
+                        grid: {
+                            color: 'rgba(255, 255, 255, 0.1)',
+                            drawBorder: false
                         },
                         ticks: {
                             color: 'rgba(255, 255, 255, 0.9)',

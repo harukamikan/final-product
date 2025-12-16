@@ -49,6 +49,17 @@ class StatsController extends Controller
             ];
         });
 
+        // 累積マイル計算
+        $cumulativeMiles = [];
+        $total = 0;
+        foreach ($monthlyMiles as $data) {
+            $total += $data['total'];
+            $cumulativeMiles[] = [
+                'month' => $data['month'],
+                'total' => $total
+            ];
+        }
+
         // カテゴリ別マイル獲得
         $categoryMiles = MileHistory::where('user_id', $userId)
             ->select('type', DB::raw('SUM(miles) as total'))
@@ -63,7 +74,8 @@ class StatsController extends Controller
             'monthlyMiles',
             'categoryMiles',
             'totalMiles',
-            'totalActivities'
+            'totalActivities',
+            'cumulativeMiles'
         ));
     }
 }
