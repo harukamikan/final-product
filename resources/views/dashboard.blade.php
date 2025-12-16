@@ -12,13 +12,23 @@
             <h2 class="text-2xl font-bold mb-6 text-pink-200">ようこそ、{{ auth()->user()->name }}さん！</h2>
 
             <div class="bg-white overflow-hidden shadow-2xl card-shadow sm:rounded-lg mb-6">
-                <div class="p-6">
-                    <h3 class="font-semibold text-lg text-gray-800 mb-4">📋 今期の半期目標</h3>
+            <div class="p-6">
+                <h3 class="font-semibold text-lg text-gray-800 mb-4">📋 今期の半期目標</h3>
+                @if($semesterGoal)
                     <div class="border-l-4 border-indigo-500 bg-indigo-50 p-4 rounded-r">
-                        <div class="text-gray-800 text-lg">技術ブログの執筆を通じて社内外への情報発信を強化し、エンジニアブランディングを向上させる</div>
+                        <div class="font-semibold text-gray-800 mb-1">{{ $semesterGoal->category }}</div>
+                        <div class="text-gray-800 text-lg">{{ $semesterGoal->title }}</div>
+                        @if($semesterGoal->deadline)
+                            <div class="text-gray-600 text-sm mt-2">期限: {{ $semesterGoal->deadline }}</div>
+                        @endif
                     </div>
-                </div>
+                @else
+                    <div class="border-l-4 border-gray-300 bg-gray-50 p-4 rounded-r">
+                        <div class="text-gray-500">目標が設定されていません</div>
+                    </div>
+                @endif
             </div>
+        </div>
 
             <!-- マイル統計 -->
             <div class="grid grid-cols-3 gap-2 mb-6">

@@ -39,6 +39,14 @@ class DashboardController extends Controller
             ->whereMonth('created_at', now()->month)
             ->sum('miles');
 
+        //　半期目標を取得
+        $semesterGoal = Goal::where('user_id', $userId)
+           ->latest()
+           ->first();
+
+        // 総マイル数を取得
+        $totalMiles = MileHistory::where('user_id', $userId)
+            ->sum('miles');
         // 最近達成したミッション（3件）
         $recentMissions = UserMission::where('user_id', $userId)
             ->with('mission')
@@ -65,7 +73,8 @@ class DashboardController extends Controller
             'thisMonthMiles',
             'recentMissions',
             'rank',
-            'recommendedMission'
+            'recommendedMission',
+            'semesterGoal'
         ));
 
     }
