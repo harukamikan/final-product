@@ -3,7 +3,8 @@
     <div class="h-screen flex flex-col md:flex-row">
 
         {{-- 左側 --}}
-        <div class="md:w-1/2 w-full h-1/3 md:h-full bg-gradient-to-br from-blue-400 to-red-400 
+        <div class="md:w-1/2 w-full h-1/3 md:h-full
+                    bg-gradient-to-br from-blue-400 to-red-400
                     flex items-center justify-center px-6">
             <div class="text-center md:text-left">
                 <h1 class="text-white text-4xl md:text-6xl font-bold mb-4 drop-shadow-lg">
@@ -54,13 +55,12 @@
                         @endif
                     </div>
 
-                    {{-- LOG IN --}}
-                    <div class="flex justify-end">
-                        <x-primary-button class="w-1/3 justify-center py-2">
+                    {{-- LOG IN（メイン） --}}
+                    <div class="flex justify-center">
+                        <x-primary-button class="w-64 justify-center py-2 text-sm">
                             Log in
                         </x-primary-button>
                     </div>
-
                 </form>
 
                 {{-- Divider --}}
@@ -70,20 +70,32 @@
                     <div class="flex-grow border-t"></div>
                 </div>
 
-                {{-- Slack --}}
-                {{-- Slack --}}
-                <<div class="flex justify-end">
+                {{-- Slack（サブ） --}}
+                <div class="flex justify-center">
                     <a href="{{ route('slack.login') }}"
-                        class="w-1/3 flex items-center justify-center gap-2
+                        class="w-64 flex items-center justify-center
               bg-[#4A154B] text-white text-sm font-semibold
-              py-2 rounded-md hover:bg-[#3a0f3d] shadow">
+              py-2 rounded-md hover:bg-[#3a0f3d] shadow-sm">
                         Slackでログイン
                     </a>
+                </div>
+
+
+
+                {{-- 新規登録（補助） --}}
+                <div class="text-center text-sm text-gray-600">
+                    <p>
+                        まだアカウントをお持ちでない方は
+                        <a href="{{ route('register') }}"
+                            class="text-indigo-600 font-medium hover:underline">
+                            新規登録
+                        </a>
+                    </p>
+                </div>
+
+
             </div>
-
-
         </div>
-    </div>
     </div>
 
 </x-guest-layout>
