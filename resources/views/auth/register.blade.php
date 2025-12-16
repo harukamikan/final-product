@@ -78,12 +78,15 @@
                     </div>
 
                     {{-- Register Button --}}
-                    <button
-                        type="submit"
-                        class="w-full bg-indigo-600 text-white py-2 rounded-md
-                               hover:bg-indigo-700 transition font-semibold">
-                        REGISTER
-                    </button>
+                    <div class="flex justify-center mt-6">
+                        <button
+                            type="submit"
+                            class="w-64 bg-indigo-600 text-white py-2 rounded-md
+               hover:bg-indigo-700 transition font-semibold text-sm">
+                            REGISTER
+                        </button>
+                    </div>
+
                 </form>
 
                 {{-- OR --}}
@@ -94,12 +97,15 @@
                 </div>
 
                 {{-- Slack Register --}}
-                <a
-                    href="{{ route('slack.login') }}"
-                    class="block w-full text-center bg-purple-700 text-white py-2 rounded-md
-                           hover:bg-purple-800 transition font-semibold">
-                    Slackで登録
-                </a>
+                <div class="flex justify-center">
+                    <a
+                        href="{{ route('slack.login') }}"
+                        class="w-64 text-center bg-purple-700 text-white py-2 rounded-md
+               hover:bg-purple-800 transition font-semibold text-sm">
+                        Slackで登録
+                    </a>
+                </div>
+
 
                 <p class="text-xs text-gray-500 text-center mt-3">
                     Slackで登録すると自動的にアカウントが作成されます
