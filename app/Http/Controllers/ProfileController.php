@@ -29,6 +29,12 @@ class ProfileController extends Controller
         $user = $request->user();
 
         $user->fill($request->validated());
+
+        if ($request->filled('background_type') && $request->filled('background_value')) {
+            $user->background_type  = $request->background_type;
+            $user->background_value = $request->background_value;
+        }
+
         $user->save();
 
         return redirect()
@@ -41,22 +47,26 @@ class ProfileController extends Controller
     /**
      * Delete the user's account.
      */
+    public function confirmDelete()
+    {
+        return view('profile.confirm-delete');
+    }
+
     public function destroy(Request $request): RedirectResponse
     {
-        $request->validateWithBag('userDeletion', [
+        $request->validate([
             'password' => ['required', 'current_password'],
         ]);
 
         $user = $request->user();
 
         Auth::logout();
-
         $user->delete();
 
         $request->session()->invalidate();
         $request->session()->regenerateToken();
 
-        return Redirect::to('/')
+        return redirect('/')
             ->with('status', 'account-deleted');
     }
 }

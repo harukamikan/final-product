@@ -17,6 +17,7 @@ class ProfileUpdateRequest extends FormRequest
     {
         return [
             'name' => ['sometimes', 'string', 'max:255'],
+
             'email' => [
                 'sometimes',
                 'string',
@@ -25,9 +26,19 @@ class ProfileUpdateRequest extends FormRequest
                 'max:255',
                 Rule::unique(User::class)->ignore($this->user()->id),
             ],
-            'background_color' => [
+
+
+            'background_type' => [
+                'sometimes',
                 'nullable',
-                'regex:/^#[0-9A-Fa-f]{6}$/',
+                'in:color,gradient',
+            ],
+
+            'background_value' => [
+                'sometimes',
+                'nullable',
+                'string',
+                'max:255',
             ],
         ];
     }
