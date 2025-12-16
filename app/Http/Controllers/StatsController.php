@@ -24,7 +24,7 @@ class StatsController extends Controller
         // 月ラベルを作成（最古の月〜来月まで）
         $months = collect();
         $current = Carbon::createFromFormat('Y-m', $startMonth);
-        $end = now()->addMonth();
+        $end = now();
 
         while ($current <= $end) {
             $months->push($current->format('Y-m'));
