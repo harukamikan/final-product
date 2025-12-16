@@ -71,8 +71,7 @@
                 </div>
 
                 {{-- Slack --}}
-                {{-- Slack --}}
-                <<div class="flex justify-end">
+                <div class="flex justify-end">
                     <a href="{{ route('slack.login') }}"
                         class="w-1/3 flex items-center justify-center gap-2
               bg-[#4A154B] text-white text-sm font-semibold
