@@ -13,6 +13,8 @@ use App\Http\Controllers\QiitaArticleController;
 use App\Http\Controllers\RankingController;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\Admin\GoalUploadController;
+use App\Http\Controllers\StatsController;
+
 
 
 Route::get('/', function () {
@@ -71,6 +73,9 @@ Route::middleware('auth')->group(function () {
         ->name('missions.completed');
     Route::get('/qiita', [QiitaArticleController::class, 'index'])
         ->name('qiita.index');
+
+    Route::get('/stats', [StatsController::class, 'index'])->name('stats.index');
+
 });
 
 
