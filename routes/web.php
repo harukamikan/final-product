@@ -108,3 +108,6 @@ Route::middleware(['auth'])->prefix('admin')->group(function () {
     Route::get('/goals/ai-confirm', [App\Http\Controllers\Admin\GoalAiUploadController::class, 'confirm'])->name('admin.goals.ai.confirm');
     Route::post('/goals/ai-store', [App\Http\Controllers\Admin\GoalAiUploadController::class, 'store'])->name('admin.goals.ai.store');
 });
+Route::get('/demo/battle', function () {
+    return view('demo.battle');
+});
