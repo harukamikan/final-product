@@ -17,9 +17,9 @@ class ClaudeService
     /**
      * 自由形式のテキストから目標を抽出
      */
-    public function extractGoals($text)
+    public function extractGoals($text,$availableUsers = [])
     {
-        $prompt = $this->buildPrompt($text);
+        $prompt = $this->buildPrompt($text,$availableUsers);
 
         $response = Http::withHeaders([
             'x-api-key' => $this->apiKey,
@@ -47,18 +47,24 @@ class ClaudeService
         throw new \Exception('Claude API request failed: ' . $response->body());
     }
 
-    /**
-     * プロンプトを構築
-     */
-    protected function buildPrompt($text)
-    {
-        return <<<PROMPT
+/**
+ * プロンプトを構築
+ */
+protected function buildPrompt($text, $availableUsers = [])
+{
+    $userList = '';
+    if (!empty($availableUsers)) {
+        $userList = "\n# 利用可能なユーザー名:\n" . implode("\n", $availableUsers);
+    }
+    
+    return <<<PROMPT
 あなたはエンジニアの半期目標を抽出するアシスタントです。
 
 以下のテキストから、各メンバーの目標情報を抽出して、JSON形式で返してください。
+{$userList}
 
 # 抽出ルール
-- 名前（name）: メンバーの名前
+- 名前（name）: メンバーの名前（必ず上記の利用可能なユーザー名から選択してください）
 - 目標（goals）: 配列形式で複数可
   - category: ブログ、資格、登壇、開発、学習 など
   - title: 目標の内容（具体的に）
@@ -85,8 +91,7 @@ class ClaudeService
 
 JSONのみを返してください。説明文は不要です。
 PROMPT;
-    }
-
+}
     /**
      * レスポンスをパース
      */
