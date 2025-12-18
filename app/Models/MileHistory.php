@@ -19,7 +19,9 @@ class MileHistory extends Model
 
     protected $casts = [
         'miles' => 'integer',
+        'created_at' => 'datetime',
     ];
+
 
     /**
      * ユーザーとのリレーション
@@ -35,5 +37,10 @@ class MileHistory extends Model
     public function mission()
     {
         return $this->belongsTo(Mission::class);
+    }
+
+    public function scopeForUser($query, $userId)
+    {
+        return $query->where('user_id', $userId);
     }
 }

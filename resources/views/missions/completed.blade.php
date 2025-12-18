@@ -3,8 +3,7 @@
 @section('content')
 <div
     x-data="{ open: false }"
-    class="relative max-w-5xl mx-auto px-4 py-8 space-y-8"
->
+    class="relative max-w-5xl mx-auto px-4 py-8 space-y-8">
 
     {{-- ================= 右上：検索トグルボタン ================= --}}
     <button
@@ -13,8 +12,7 @@
                bg-white/70 backdrop-blur
                shadow-lg rounded-full p-3
                hover:bg-white transition"
-        title="検索"
-    >
+        title="検索">
         🔍
     </button>
 
@@ -25,8 +23,7 @@
         @click.outside="open = false"
         class="fixed top-36 right-6 z-20
                w-80 bg-white/90 backdrop-blur
-               rounded-2xl shadow-xl p-5 space-y-4"
-    >
+               rounded-2xl shadow-xl p-5 space-y-4">
         <h3 class="text-sm font-semibold text-gray-700">
             マイル履歴検索
         </h3>
@@ -43,8 +40,7 @@
                     placeholder="例：毎日ログイン"
                     class="w-full mt-1 px-3 py-2 text-sm
                            rounded-lg border border-gray-300
-                           focus:ring-indigo-500 focus:border-indigo-500"
-                >
+                           focus:ring-indigo-500 focus:border-indigo-500">
             </div>
 
             {{-- 獲得日検索 --}}
@@ -55,15 +51,13 @@
                     name="date"
                     value="{{ request('date') }}"
                     class="w-full mt-1 px-3 py-2 text-sm
-                           rounded-lg border border-gray-300"
-                >
+                           rounded-lg border border-gray-300">
             </div>
 
             <div class="flex justify-between pt-2">
                 <a
                     href="{{ route('missions.completed') }}"
-                    class="text-xs text-gray-500 hover:underline"
-                >
+                    class="text-xs text-gray-500 hover:underline">
                     リセット
                 </a>
 
@@ -71,8 +65,7 @@
                     type="submit"
                     class="px-4 py-2 rounded-lg
                            bg-indigo-600 text-white text-sm
-                           hover:bg-indigo-700"
-                >
+                           hover:bg-indigo-700">
                     検索
                 </button>
             </div>
@@ -94,66 +87,65 @@
     {{-- ================= タブ切り替え ================= --}}
     <div class="flex gap-4 text-sm font-medium">
         <a href="{{ route('missions.index') }}"
-           class="px-4 py-2 rounded-xl bg-gray-100 text-gray-600">
+            class="px-4 py-2 rounded-xl bg-gray-100 text-gray-600">
             進行中のミッション
         </a>
 
         <a href="{{ route('missions.completed') }}"
-           class="px-4 py-2 rounded-xl bg-indigo-600 text-white">
+            class="px-4 py-2 rounded-xl bg-indigo-600 text-white">
             完了したミッション
         </a>
     </div>
 
     {{-- ================= ミッションなし ================= --}}
     @if ($missions->isEmpty())
-        <div class="text-center p-10 bg-white rounded-3xl shadow-sm">
-            <div class="text-5xl mb-4">🎉</div>
-            <p class="text-xl font-semibold">まだ完了したミッションがありません</p>
-            <p class="text-gray-500 mt-2">進行中のミッションを達成していきましょう！</p>
-        </div>
+    <div class="text-center p-10 bg-white rounded-3xl shadow-sm">
+        <div class="text-5xl mb-4">🎉</div>
+        <p class="text-xl font-semibold">まだ完了したミッションがありません</p>
+        <p class="text-gray-500 mt-2">進行中のミッションを達成していきましょう！</p>
+    </div>
     @endif
 
     {{-- ================= 完了ミッション一覧 ================= --}}
     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-        @foreach ($missions as $mission)
-            <div class="rounded-3xl border bg-white px-5 py-6 shadow-sm space-y-4">
+        @foreach ($mileHistories as $history)
+        <div class="rounded-3xl border bg-white px-5 py-6 shadow-sm space-y-4">
 
-                <div class="flex justify-between items-start">
-                    <div>
-                        <h2 class="text-lg font-semibold text-gray-900">
-                            {{ $mission->title }}
-                        </h2>
+            <div class="flex justify-between items-start">
+                <div>
+                    <h2 class="text-lg font-semibold text-gray-900">
+                        {{ $history->mission->title }}
+                    </h2>
 
-                        <p class="text-xs text-gray-500 mt-1">
-                            {{ $mission->description }}
-                        </p>
+                    <p class="text-xs text-gray-500 mt-1">
+                        {{ $history->mission->description }}
+                    </p>
 
-                        {{-- 獲得日 --}}
-                        <p class="text-xs text-gray-400 mt-2">
-                            🗓 獲得日：
-                            {{ $mission->completed_at->format('Y年m月d日') }}
-                        </p>
-                    </div>
-
-                    {{-- 獲得マイル --}}
-                    <div class="text-right">
-                        <p class="text-xs text-gray-500">獲得マイル</p>
-                        <p class="text-lg font-bold text-emerald-600">
-                            +{{ $mission->reward_miles }} mile
-                        </p>
-                    </div>
+                    <p class="text-xs text-gray-400 mt-2">
+                        🗓 獲得日：
+                        {{ $history->created_at->format('Y年m月d日') }}
+                    </p>
                 </div>
 
-                <div class="pt-3 border-t">
-                    <span class="inline-flex items-center px-3 py-1 rounded-full
-                                 bg-emerald-50 text-emerald-700
-                                 text-sm font-medium">
-                        🎉 達成済み
-                    </span>
+                <div class="text-right">
+                    <p class="text-xs text-gray-500">獲得マイル</p>
+                    <p class="text-lg font-bold text-emerald-600">
+                        +{{ $history->miles }} mile
+                    </p>
                 </div>
-
             </div>
+
+            <div class="pt-3 border-t">
+                <span class="inline-flex items-center px-3 py-1 rounded-full
+                         bg-emerald-50 text-emerald-700
+                         text-sm font-medium">
+                    🎉 達成済み
+                </span>
+            </div>
+
+        </div>
         @endforeach
+
     </div>
 
 </div>
