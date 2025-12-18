@@ -14,6 +14,7 @@ use App\Http\Controllers\RankingController;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\Admin\GoalUploadController;
 use App\Http\Controllers\StatsController;
+use App\Http\Controllers\Admin\AdminDashboardController;
 
 
 
@@ -102,6 +103,7 @@ Route::get('/debug/users', function () {
 
 // 管理者用ルート
 Route::middleware(['auth'])->prefix('admin')->group(function () {
+    Route::get('/dashboard', [AdminDashboardController::class, 'index'])->name('admin.dashboard');
     Route::get('/goals/upload', [GoalUploadController::class, 'index'])->name('admin.goals.upload.index');
     Route::post('/goals/upload', [GoalUploadController::class, 'upload'])->name('admin.goals.upload');
 });

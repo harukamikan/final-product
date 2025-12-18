@@ -135,6 +135,48 @@
         @yield('content')
     </main>
 
+            <!-- コマンドパレット -->
+            <div x-data="{ 
+                open: false, 
+                search: '',
+                init() {
+                    document.addEventListener('keydown', (e) => {
+                        if (e.ctrlKey && e.key === 'k') {
+                            e.preventDefault();
+                            this.open = true;
+                        }
+                        if (e.key === 'Escape') {
+                            this.open = false;
+                            this.search = '';
+                        }
+                    });
+                }
+            }" 
+            x-show="open" 
+            x-cloak
+            class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50"
+            @click.self="open = false; search = ''">
+                <div class="bg-white rounded-lg shadow-xl w-full max-w-lg p-6">
+                    <input 
+                        type="text" 
+                        x-model="search"
+                        @input="
+                            if (search.toLowerCase() === 'admin') {
+                                window.location.href = '/admin/dashboard';
+                            }
+                        "
+                        placeholder="コマンドを入力..."
+                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                        x-ref="searchInput"
+                        @click.away="open = false; search = ''"
+                    >
+                </div>
+            </div>
+
+            <style>
+                [x-cloak] { display: none !important; }
+            </style>
+
 </body>
 
 </html>
