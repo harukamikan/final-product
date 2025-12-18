@@ -55,7 +55,7 @@ class User extends Authenticatable
 
     public function mileHistories()
     {
-        return $this->hasMany(MileHistory::class);
+        return $this->hasMany(\App\Models\MileHistory::class);
     }
 }
 

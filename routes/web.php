@@ -14,7 +14,7 @@ use App\Http\Controllers\RankingController;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\Admin\GoalUploadController;
 use App\Http\Controllers\StatsController;
-
+use App\Http\Controllers\MileHistoryController;
 
 
 Route::get('/', function () {
@@ -69,13 +69,13 @@ Route::middleware('auth')->group(function () {
     Route::post('/missions/{mission}/complete', [UserMissionController::class, 'complete'])
         ->name('missions.complete');
     Route::get('/missions', [MissionListController::class, 'index'])->name('missions.index');
-    Route::get('/missions/completed', [MissionListController::class, 'completed'])
+    Route::get('/missions/completed', [MileHistoryController::class, 'index'])
+        ->middleware('auth')
         ->name('missions.completed');
     Route::get('/qiita', [QiitaArticleController::class, 'index'])
         ->name('qiita.index');
 
     Route::get('/stats', [StatsController::class, 'index'])->name('stats.index');
-
 });
 
 
