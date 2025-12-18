@@ -98,7 +98,7 @@
     </div>
 
     {{-- ================= ミッションなし ================= --}}
-    @if ($missions->isEmpty())
+    @if ($mileHistories->isEmpty())
     <div class="text-center p-10 bg-white rounded-3xl shadow-sm">
         <div class="text-5xl mb-4">🎉</div>
         <p class="text-xl font-semibold">まだ完了したミッションがありません</p>
