@@ -20,9 +20,14 @@ class MileHistoryController extends Controller
             });
         }
 
-        if ($request->filled('date')) {
-            $query->whereDate('created_at', $request->date);
+        if ($request->filled('from_date')) {
+            $query->whereDate('created_at', '>=', $request->from_date);
         }
+
+        if ($request->filled('to_date')) {
+            $query->whereDate('created_at', '<=', $request->to_date);
+        }
+
 
         $mileHistories = $query
             ->latest('created_at')

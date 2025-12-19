@@ -22,10 +22,10 @@
         x-transition
         @click.outside="open = false"
         class="fixed top-36 right-6 z-20
-               w-80 bg-white/90 backdrop-blur
-               rounded-2xl shadow-xl p-5 space-y-4">
-        <h3 class="text-sm font-semibold text-gray-700">
-            マイル履歴検索
+           w-80 max-w-[calc(100vw-2rem)]
+           bg-white/90 backdrop-blur
+           rounded-2xl shadow-xl p-5 space-y-4">
+        マイル履歴検索
         </h3>
 
         <form method="GET" action="{{ route('missions.completed') }}" class="space-y-3">
@@ -37,22 +37,35 @@
                     type="text"
                     name="keyword"
                     value="{{ request('keyword') }}"
-                    placeholder="例：毎日ログイン"
+                    placeholder="例：イベントを企画・開催する"
                     class="w-full mt-1 px-3 py-2 text-sm
                            rounded-lg border border-gray-300
                            focus:ring-indigo-500 focus:border-indigo-500">
             </div>
 
-            {{-- 獲得日検索 --}}
+            {{-- 獲得日（期間）検索 --}}
             <div>
-                <label class="text-xs text-gray-500">獲得日</label>
-                <input
-                    type="date"
-                    name="date"
-                    value="{{ request('date') }}"
-                    class="w-full mt-1 px-3 py-2 text-sm
-                           rounded-lg border border-gray-300">
+                <label class="text-xs text-gray-500">獲得期間</label>
+
+                <div class="mt-1 grid grid-cols-1 gap-2 sm:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] sm:items-center">
+                    <input
+                        type="date"
+                        name="from_date"
+                        value="{{ request('from_date') }}"
+                        class="w-full min-w-0 px-3 py-2 text-sm rounded-lg border border-gray-300">
+
+                    <span class="hidden sm:flex items-center text-xs text-gray-400 justify-center">
+                        〜
+                    </span>
+
+                    <input
+                        type="date"
+                        name="to_date"
+                        value="{{ request('to_date') }}"
+                        class="w-full min-w-0 px-3 py-2 text-sm rounded-lg border border-gray-300">
+                </div>
             </div>
+
 
             <div class="flex justify-between pt-2">
                 <a
