@@ -60,12 +60,37 @@ class GoalAiUploadController extends Controller
     }
 
     // 確認後、実際に登録
-    public function store(Request $request)
-    {
-        $extractedData = session('extracted_goals');
+  public function store(Request $request)
+{
+    $extractedData = session('extracted_goals');
 
-        if (!$extractedData) {
-            return redirect()->route('admin.goals.ai.index')->with('error', 'データがありません');
+    if (!$extractedData) {
+        return redirect()->route('admin.goals.ai.index')->with('error', 'データがありません');
+    }
+
+    $successCount = 0;
+    $errorUsers = [];
+
+    foreach ($extractedData as $userData) {
+        $name = $userData['name'] ?? null;
+        $goals = $userData['goals'] ?? [];
+
+        if (!$name) continue;
+
+        // 🆕 ユーザーを名前で検索（3段階）
+        
+        // ①元の名前で完全一致
+        $user = User::where('name', $name)->first();
+
+        // ②全角→半角変換して完全一致
+        if (!$user) {
+            $normalized = mb_convert_kana($name, 'as', 'UTF-8');
+            $user = User::where('name', $normalized)->first();
+        }
+
+        // ③部分一致（セーフティネット）
+        if (!$user) {
+            $user = User::where('name', 'like', "%{$name}%")->first();
         }
 
         $successCount = 0;
