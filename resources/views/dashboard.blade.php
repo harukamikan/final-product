@@ -144,10 +144,17 @@
         <div>
             <a
                 href="{{ route('goals.create') }}"
-                class="inline-flex items-center px-4 py-2 rounded-lg
+                class="inline-flex items-center px-4 py-2 bg-white
                        border border-indigo-600 text-indigo-600
                        font-semibold text-sm
                        hover:bg-indigo-600 hover:text-white transition">
+                ➕ 新しい活動を記録
+            </a>
+        </div>
+
+        <!-- 新しい活動を記録ボタン -->
+        <div class="mb-6">
+            <a href="/goals/create" class="inline-flex items-center px-4 py-2 bg-white text-indigo-600 border-2 border-indigo-600 rounded-md font-semibold text-xs uppercase tracking-widest hover:bg-indigo-600 hover:text-white transition-all">
                 ➕ 新しい活動を記録
             </a>
         </div>
