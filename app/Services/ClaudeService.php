@@ -74,11 +74,7 @@ protected function buildPrompt($text, $availableUsers = [])
 - 入力: "haruka" → 出力: "5th21_はるか_W_福岡工業大学" ✅
 
 # 抽出ルール
-<<<<<<< HEAD
-- 名前（name）: メンバーの名前
-=======
 - 名前（name）: 上記のルールに従って正確に抽出
->>>>>>> 2400ed3 (Improve user matching with 3-step search and prompt enhancement)
 - 目標（goals）: 配列形式で複数可
   - category: ブログ、資格、登壇、開発、学習 など
   - title: 目標の内容（具体的に）

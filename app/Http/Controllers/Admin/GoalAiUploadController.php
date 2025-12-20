@@ -59,8 +59,8 @@ class GoalAiUploadController extends Controller
         return view('admin.goals.ai-confirm', compact('extractedData'));
     }
 
-    // 確認後、実際に登録
-  public function store(Request $request)
+ // 確認後、実際に登録
+public function store(Request $request)
 {
     $extractedData = session('extracted_goals');
 
@@ -93,43 +93,31 @@ class GoalAiUploadController extends Controller
             $user = User::where('name', 'like', "%{$name}%")->first();
         }
 
-        $successCount = 0;
-        $errorUsers = [];
-
-        foreach ($extractedData as $userData) {
-            $name = $userData['name'] ?? null;
-            $goals = $userData['goals'] ?? [];
-
-            if (!$name) continue;
-
-            // ユーザーを名前で検索
-            $user = User::where('name', $name)->first();
-
-            if ($user) {
-                foreach ($goals as $goal) {
-                    SemesterGoal::create([
-                        'user_id' => $user->id,
-                        'category' => $goal['category'] ?? '',
-                        'title' => $goal['title'] ?? '',
-                        'deadline' => $goal['deadline'] ?? null,
-                    ]);
-                    $successCount++;
-                }
-            } else {
-                $errorUsers[] = $name;
+        if ($user) {
+            foreach ($goals as $goal) {
+                SemesterGoal::create([
+                    'user_id' => $user->id,
+                    'category' => $goal['category'] ?? '',
+                    'title' => $goal['title'] ?? '',
+                    'deadline' => $goal['deadline'] ?? null,
+                ]);
+                $successCount++;
             }
+        } else {
+            $errorUsers[] = $name;
         }
-
-        // セッションをクリア
-        session()->forget('extracted_goals');
-
-        $errorUsers = array_unique($errorUsers);
-
-        return redirect()->route('admin.goals.ai.index')->with([
-            'success' => "{$successCount}件の目標を登録しました",
-            'errors' => $errorUsers
-        ]);
     }
+
+    // セッションをクリア
+    session()->forget('extracted_goals');
+
+    $errorUsers = array_unique($errorUsers);
+
+    return redirect()->route('admin.goals.ai.index')->with([
+        'success' => "{$successCount}件の目標を登録しました",
+        'errors' => $errorUsers
+    ]);
+}
 
     // ファイルから内容を抽出
     protected function extractContent($file)
