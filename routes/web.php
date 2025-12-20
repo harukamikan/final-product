@@ -15,7 +15,8 @@ use App\Http\Controllers\{
     RankingController,
     StatsController,
     MileHistoryController,
-    SemesterGoalController
+    SemesterGoalController,
+    ActivityController
 };
 
 use App\Http\Controllers\Admin\{
@@ -29,6 +30,7 @@ use App\Http\Controllers\Admin\{
 | Public Routes
 |--------------------------------------------------------------------------
 */
+
 Route::get('/', function () {
     return redirect()->route('login');
 });
@@ -102,6 +104,13 @@ Route::middleware(['auth'])->group(function () {
 
     Route::post('/missions/google-form', [MissionController::class, 'storeGoogleForm'])
         ->name('missions.google_form.store');
+
+    /*
+    | Activities
+    */
+    Route::get('/activities', [ActivityController::class, 'index'])
+        ->name('activities.index');
+
 
     /*
     | Ranking / Stats
