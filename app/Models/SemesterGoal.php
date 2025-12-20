@@ -10,9 +10,11 @@ class SemesterGoal extends Model
         'user_id',
         'category',
         'title',
+        'description',
         'deadline',
-        'semester',
+        'is_current',
     ];
+
 
     protected $casts = [
         'deadline' => 'date',
