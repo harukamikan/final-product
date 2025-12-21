@@ -105,6 +105,9 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/missions/google-form', [MissionController::class, 'storeGoogleForm'])
         ->name('missions.google_form.store');
 
+    Route::get('/missions/{mission}', [MissionController::class, 'show'])
+        ->name('missions.show');
+
     /*
     | Activities
     */

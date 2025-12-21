@@ -10,7 +10,7 @@
             <h1 class="text-2xl font-bold text-slate-800">
                 ミッション作成
             </h1>
-            <p class="text-sm text-slate-500 mt-1">
+            <p class="text-sm text-slate-700 mt-1">
                 新しいミッションの条件や報酬を設定します。
             </p>
         </div>
