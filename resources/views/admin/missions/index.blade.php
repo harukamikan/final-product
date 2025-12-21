@@ -10,7 +10,7 @@
                 <h1 class="text-2xl font-bold text-slate-800">
                     ミッション管理
                 </h1>
-                <p class="text-sm text-slate-500 mt-1">
+                <p class="text-sm text-slate-700 mt-1">
                     ミッションの作成・編集・管理を行います
                 </p>
             </div>
