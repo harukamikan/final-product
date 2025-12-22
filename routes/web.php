@@ -133,9 +133,7 @@ Route::middleware(['auth', 'company'])->group(function () {
     Route::post('/missions/{mission}/form', [MissionFormController::class, 'store'])
         ->name('missions.form.store');
 
-    Route::get('/missions/{mission}', [MissionController::class, 'show'])
-        ->name('missions.show');
-
+  
     /*
     | Activities
     */
@@ -162,6 +160,10 @@ Route::middleware(['auth', 'company'])->group(function () {
     
     Route::get('/missions/personal', [MissionListController::class, 'personal'])
         ->name('missions.personal');
+
+    Route::get('/missions/{mission}', [MissionController::class, 'show'])
+        ->name('missions.show');
+
 
     Route::post('/missions/{mission}/complete', [UserMissionController::class, 'complete'])
         ->name('missions.complete');
