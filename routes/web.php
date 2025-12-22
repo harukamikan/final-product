@@ -145,37 +145,30 @@ Route::middleware(['auth', 'company'])->group(function () {
     /*
     | Ranking / Stats
     */
-    Route::get('/ranking', [RankingController::class, 'index'])
+   Route::get('/ranking', [RankingController::class, 'index'])
         ->name('ranking.index');
-<<<<<<< HEAD
-    Route::get('/missions/google-form', [MissionController::class, 'showGoogleForm'])
-        ->name('missions.google_form.form');
-    Route::post('/missions/google-form', [MissionController::class, 'storeGoogleForm'])
-        ->name('missions.google_form.store');
-    Route::middleware(['auth']) // 管理者限定にする場合は、ここに管理者ミドルウェアを追加
-        ->prefix('admin')
-        ->name('admin.')
-        ->group(function () {
-            Route::resource('missions', MissionCreater::class);
-        });
-    Route::post('/missions/{mission}/complete', [UserMissionController::class, 'complete'])
-        ->name('missions.complete');
-    Route::get('/missions', [MissionListController::class, 'index'])->name('missions.index');
-    Route::get('/missions/completed', [MissionListController::class, 'completed'])
-        ->name('missions.completed');
-    Route::get('/missions/completed', [MissionListController::class, 'completed'])
-        ->name('missions.completed');
-    Route::get('/missions/personal', [MissionListController::class, 'personal'])
-        ->name('missions.personal');
-=======
 
     Route::get('/stats', [StatsController::class, 'index'])
         ->name('stats.index');
 
     /*
+    | Missions
+    */
+    Route::get('/missions', [MissionListController::class, 'index'])
+        ->name('missions.index');
+    
+    Route::get('/missions/completed', [MissionListController::class, 'completed'])
+        ->name('missions.completed');
+    
+    Route::get('/missions/personal', [MissionListController::class, 'personal'])
+        ->name('missions.personal');
+
+    Route::post('/missions/{mission}/complete', [UserMissionController::class, 'complete'])
+        ->name('missions.complete');
+
+    /*
     | Qiita
     */
->>>>>>> develop
     Route::get('/qiita', [QiitaArticleController::class, 'index'])
         ->name('qiita.index');
 
@@ -239,4 +232,4 @@ Route::middleware(['auth', 'company'])->get('/debug/users', function () {
     return response()->json(
         \App\Models\User::all(['id', 'name', 'email', 'slack_id', 'company_id'])
     );
-});
+});  
