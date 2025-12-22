@@ -71,7 +71,6 @@ Route::middleware(['auth'])->group(function () {
 
     Route::get('/profile/delete/confirm', [ProfileController::class, 'confirmDelete'])
         ->name('profile.delete.confirm');
-
     Route::delete('/profile/delete', [ProfileController::class, 'destroy'])
         ->name('profile.delete');
 
