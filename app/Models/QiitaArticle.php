@@ -3,9 +3,12 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use App\Models\Concerns\BelongsToCompany;
 
 class QiitaArticle extends Model
 {
+    use BelongsToCompany;
+
     protected $fillable = [
         'user_id',
         'mission_id',

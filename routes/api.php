@@ -14,10 +14,7 @@ Route::post('/slack/test', function (Request $request) {
 });
 
 Route::post('/slack/activity', function (Request $request) {
-    // Slackから送られてきたユーザーIDを取得
     $slackUserId = $request->input('user_id');
-    
-    // SlackユーザーIDでLaravelユーザーを検索
     $user = User::where('slack_id', $slackUserId)->first();
     
     if (!$user) {
@@ -26,22 +23,20 @@ Route::post('/slack/activity', function (Request $request) {
         ]);
     }
     
-    // Slackから送られてきたデータを取得
-    $text = $request->input('text'); // 例: "ブログ https://example.com"
-    
-    // スペースで分割
+    $text = $request->input('text');
     $parts = explode(' ', $text, 2);
-    $type = $parts[0] ?? '';  // 種別（ブログ、資格など）
-    $url = $parts[1] ?? '';   // URL
+    $type = $parts[0] ?? '';
+    $url = $parts[1] ?? '';
     
-    // データベースに保存
+    // 修正: title と date も保存
     $activity = Activity::create([
         'user_id' => $user->id,
         'type' => $type,
+        'title' => null,
+        'date' => null,
         'url' => $url,
     ]);
     
-    // ログに記録
     \Log::info('Activity received:', [
         'type' => $type,
         'url' => $url,
@@ -53,7 +48,6 @@ Route::post('/slack/activity', function (Request $request) {
         'text' => "✅ 活動を登録しました！\n種別: {$type}\nURL: {$url}"
     ]);
 });
-
 Route::post('/slack/list', function (Request $request) {
     // Slackから送られてきたユーザーIDを取得
     $slackUserId = $request->input('user_id');

@@ -48,21 +48,19 @@ class MissionController extends Controller
             return back()
                 ->withInput()
                 ->withErrors([
-                    'url' => 'Qiitaの記事URLの形式ではないようです。',
+                    'url' => 'Qiita APIから記事情報を取得できませんでした。時間をおいて再度お試しください。',
                 ]);
         }
-    } catch (\Throwable $e) {
-        Log::error('Qiita API error', [
-            'url'   => $url,
-            'error' => $e->getMessage(),
-        ]);
 
-        return back()
-            ->withInput()
-            ->withErrors([
-                'url' => 'Qiita APIから記事情報を取得できませんでした。時間をおいて再度お試しください。',
-            ]);
-    }
+        // 2. ミッション進捗 & マイル付与
+        $earned = $missionService->handleTrigger(
+            $user,
+            'tech_blog_posted',
+            [
+                'mission_key' => $mission->key,
+                'url'         => $qiita['url'] ?? $url,  // Qiita側の正式URLを優先
+            ]
+        );
 
     // 2. Geminiで要約を生成（失敗してもミッション処理は続ける）
     $summary = null;
@@ -158,5 +156,29 @@ class MissionController extends Controller
                 'success'      => "ミッション「{$mission->title}」の報告を送信しました。",
                 'earned_miles' => $earned,
             ]);
+    }
+
+    /**
+     * ミッション詳細 or 適切な入力画面へリダイレクト
+     */
+    public function show(Mission $mission)
+    {
+        return match ($mission->key) {
+
+            // 技術ブログ（Qiita）
+            'write_tech_blog' => redirect()
+                ->route('missions.blog-url.form'),
+
+            // Googleフォーム系ミッション
+            'event_speaker',
+            'event_organizer',
+            'acquire_certificate' => redirect()
+                ->route('missions.google_form.form', [
+                    'mission_key' => $mission->key,
+                ]),
+
+            // 将来用（想定外のkey）
+            default => abort(404, 'このミッションはまだ対応していません'),
+        };
     }
 }

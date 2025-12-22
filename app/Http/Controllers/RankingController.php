@@ -9,26 +9,32 @@ class RankingController extends Controller
 {
     public function index()
     {
-        // マイルランキング
-        $mileRankers = User::orderBy('total_miles', 'desc')->get();
+        $me = Auth::user();
+        $companyId = $me->company_id;
 
-        // ミッション数ランキング
-        $missionRankers = User::orderBy('completed_missions', 'desc')->get();
+        // middleware で弾いてる想定だけど保険
+        abort_if(!$companyId, 403, '会社に所属していません');
 
-        // 自分の順位
-        $myMileRank = User::where(
-            'total_miles',
-            '>',
-            Auth::user()->total_miles
-        )->count() + 1;
+        // マイルランキング（社内のみ）
+        $mileRankers = User::where('company_id', $companyId)
+            ->orderByDesc('total_miles')
+            ->get();
 
-        $myMissionRank = User::where(
-            'completed_missions',
-            '>',
-            Auth::user()->completed_missions
-        )->count() + 1;
+        // ミッション数ランキング（社内のみ）
+        $missionRankers = User::where('company_id', $companyId)
+            ->orderByDesc('completed_missions')
+            ->get();
 
-        //ランキング対象人数
+        // 自分の順位（社内のみ）
+        $myMileRank = User::where('company_id', $companyId)
+            ->where('total_miles', '>', $me->total_miles)
+            ->count() + 1;
+
+        $myMissionRank = User::where('company_id', $companyId)
+            ->where('completed_missions', '>', $me->completed_missions)
+            ->count() + 1;
+
+        // ランキング対象人数（社内のみ）
         $mileUserCount = $mileRankers->count();
         $missionUserCount = $missionRankers->count();
 

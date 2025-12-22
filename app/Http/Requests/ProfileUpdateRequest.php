@@ -16,14 +16,29 @@ class ProfileUpdateRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'name' => ['required', 'string', 'max:255'],
+            'name' => ['sometimes', 'string', 'max:255'],
+
             'email' => [
-                'required',
+                'sometimes',
                 'string',
                 'lowercase',
                 'email',
                 'max:255',
                 Rule::unique(User::class)->ignore($this->user()->id),
+            ],
+
+
+            'background_type' => [
+                'sometimes',
+                'nullable',
+                'in:color,gradient',
+            ],
+
+            'background_value' => [
+                'sometimes',
+                'nullable',
+                'string',
+                'max:255',
             ],
         ];
     }

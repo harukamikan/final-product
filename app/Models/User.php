@@ -6,6 +6,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Database\Eloquent\Builder;
 
 class User extends Authenticatable
 {
@@ -21,6 +22,8 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'background_type',
+        'background_value',
     ];
 
     /**
@@ -53,8 +56,14 @@ class User extends Authenticatable
 
     public function mileHistories()
     {
-        return $this->hasMany(MileHistory::class);
+        return $this->hasMany(\App\Models\MileHistory::class);
     }
+
+    public function scopeForCompany(Builder $query, int $companyId): Builder
+    {
+        return $query->where('company_id', $companyId);
+    }
+
 }
 
 
