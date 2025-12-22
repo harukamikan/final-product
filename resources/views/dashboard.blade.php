@@ -39,7 +39,7 @@
                 </div>
                 @if($semesterGoal->deadline)
                 <div class="text-sm text-slate-500 mt-2">
-                    期限：{{ $semesterGoal->deadline }}
+                    期限：{{ $semesterGoal->deadline->format('Y-m-d') }}
                 </div>
                 @endif
             </div>
@@ -172,7 +172,7 @@
                             </p>
                             @if($goal->deadline)
                             <p class="text-sm text-slate-500 mt-1">
-                                期限：{{ $goal->deadline }}
+                                期限：{{ $goal->deadline->format('Y-m-d') }}
                             </p>
                             @endif
                         </div>
