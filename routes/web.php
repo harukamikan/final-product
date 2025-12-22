@@ -17,7 +17,8 @@ use App\Http\Controllers\{
     MileHistoryController,
     SemesterGoalController,
     ActivityController,
-    CompanyController
+    CompanyController,
+    MissionFormController
 };
 
 use App\Http\Controllers\Admin\{
@@ -125,11 +126,12 @@ Route::middleware(['auth', 'company'])->group(function () {
     Route::post('/missions/blog-url', [MissionController::class, 'submitBlogUrl'])
         ->name('missions.blog-url.submit');
 
-    Route::get('/missions/google-form', [MissionController::class, 'showGoogleForm'])
-        ->name('missions.google_form.form');
+    // アプリ内フォーム提出
+    Route::get('/missions/{mission}/form', [MissionFormController::class, 'create'])
+        ->name('missions.form.create');
 
-    Route::post('/missions/google-form', [MissionController::class, 'storeGoogleForm'])
-        ->name('missions.google_form.store');
+    Route::post('/missions/{mission}/form', [MissionFormController::class, 'store'])
+        ->name('missions.form.store');
 
     Route::get('/missions/{mission}', [MissionController::class, 'show'])
         ->name('missions.show');
