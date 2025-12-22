@@ -56,7 +56,7 @@ class User extends Authenticatable
 
     public function mileHistories()
     {
-        return $this->hasMany(MileHistory::class);
+        return $this->hasMany(\App\Models\MileHistory::class);
     }
 
     public function scopeForCompany(Builder $query, int $companyId): Builder

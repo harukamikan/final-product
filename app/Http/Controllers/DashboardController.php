@@ -2,42 +2,42 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
 use App\Models\Goal;
 use App\Models\MileHistory;
 use App\Models\UserMission;
 use App\Models\Mission;
-
+use App\Models\SemesterGoal;
 
 class DashboardController extends Controller
 {
     public function index()
     {
-
         $userId = auth()->id();
-        
-        // ログインユーザーの目標を最新3件取得
+
+        // 最近の目標（3件）
         $recentGoals = Goal::where('user_id', $userId)
             ->latest()
             ->take(3)
             ->get();
 
-        // 総目標数をカウント
-        $totalGoals = Goal::where('user_id', $userId)->count();
-
-        // 今月作成された目標数
+        // 今月の活動数
         $thisMonthGoals = Goal::where('user_id', $userId)
             ->whereMonth('created_at', now()->month)
             ->count();
 
-            // 総マイル数を取得
+        // 総マイル数
         $totalMiles = MileHistory::where('user_id', $userId)
             ->sum('miles');
 
-        // 今月獲得したマイル数
+        // 今月のマイル数
         $thisMonthMiles = MileHistory::where('user_id', $userId)
             ->whereMonth('created_at', now()->month)
             ->sum('miles');
+
+        // 今期の半期目標
+        $semesterGoal = SemesterGoal::where('user_id', $userId)
+            ->where('is_current', true)
+            ->first();
 
         // 最近達成したミッション（3件）
         $recentMissions = UserMission::where('user_id', $userId)
@@ -49,33 +49,30 @@ class DashboardController extends Controller
         // ランク判定
         $rank = $this->calculateRank($totalMiles);
 
-        // 未達成の中で一番報酬が高いミッションを取得
-        $recommendedMission = Mission::whereNotIn('id', 
+        // おすすめミッション
+        $recommendedMission = Mission::whereNotIn(
+            'id',
             UserMission::where('user_id', $userId)->pluck('mission_id')
         )
         ->orderBy('reward_miles', 'desc')
         ->first();
 
-
         return view('dashboard', compact(
-            'recentGoals', 
-            'totalGoals', 
+            'recentGoals',
             'thisMonthGoals',
             'totalMiles',
             'thisMonthMiles',
             'recentMissions',
             'rank',
-            'recommendedMission'
+            'recommendedMission',
+            'semesterGoal'
         ));
-
     }
 
-        // ランク計算メソッド
-        private function calculateRank($miles)
-        {
-            if ($miles >= 500) return 'ゴールド';
-            if ($miles >= 200) return 'シルバー';
-            return 'ブロンズ';
-        }
-
+    private function calculateRank($miles)
+    {
+        if ($miles >= 500) return 'ゴールド';
+        if ($miles >= 200) return 'シルバー';
+        return 'ブロンズ';
     }
+}
