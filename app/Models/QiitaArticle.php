@@ -15,6 +15,7 @@ class QiitaArticle extends Model
         'item_id',
         'title',
         'body',
+        'summary', 
         'tags',
         'likes_count',
         'posted_at',

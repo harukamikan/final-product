@@ -7,6 +7,7 @@ use App\Services\MissionService;
 use App\Models\Mission;
 use App\Services\QiitaService;
 use App\Models\QiitaArticle;
+use App\Services\GeminiService; 
 use Illuminate\Support\Facades\Log;
 use Carbon\Carbon;
 
@@ -26,35 +27,24 @@ class MissionController extends Controller
      * 技術ブログ（Qiita）URL送信処理
      */
     public function submitBlogUrl(
-        Request $request,
-        MissionService $missionService,
-        QiitaService $qiitaService
-    ) {
-        $request->validate([
-            'url' => ['required', 'url'],
-        ]);
+    Request $request,
+    MissionService $missionService,
+    QiitaService $qiitaService,
+    GeminiService $geminiService
+) {
+    $request->validate([
+        'url' => ['required', 'url'],
+    ]);
 
-        $user    = $request->user();
-        $url     = $request->input('url');
-        $mission = Mission::where('key', 'write_tech_blog')->firstOrFail();
+    $user    = $request->user();
+    $url     = $request->input('url');
+    $mission = Mission::where('key', 'write_tech_blog')->firstOrFail();
 
-        // 1. Qiita API から記事情報を取得
-        try {
-            $qiita = $qiitaService->fetchItemFromUrl($url);
+    // 1. Qiita API から記事情報を取得
+    try {
+        $qiita = $qiitaService->fetchItemFromUrl($url);
 
-            if (!$qiita) {
-                return back()
-                    ->withInput()
-                    ->withErrors([
-                        'url' => 'Qiitaの記事URLの形式ではないようです。',
-                    ]);
-            }
-        } catch (\Throwable $e) {
-            Log::error('Qiita API error', [
-                'url'   => $url,
-                'error' => $e->getMessage(),
-            ]);
-
+        if (!$qiita) {
             return back()
                 ->withInput()
                 ->withErrors([
@@ -72,32 +62,55 @@ class MissionController extends Controller
             ]
         );
 
-        // 3. タイムライン用に Qiita 記事情報を保存
-        QiitaArticle::updateOrCreate(
-            [
-                'user_id' => $user->id,
-                'item_id' => $qiita['item_id'],   // QiitaService で返している item_id
-            ],
-            [
-                'mission_id'  => $mission->id,
-                'title'       => $qiita['title'] ?? '',
-                'body'        => $qiita['body'] ?? '',
-                'tags'        => $qiita['tags'] ?? [],
-                'likes_count' => $qiita['likes_count'] ?? 0,
-                'posted_at'   => !empty($qiita['created_at'])
-                    ? Carbon::parse($qiita['created_at'])
-                    : null,
-                'url'         => $qiita['url'] ?? $url,
-            ]
-        );
-
-        // 4. 記事情報を表示（タイトル / 本文 / タグ / LGTM / 投稿日時）
-        return view('missions.blog-preview', [
-            'mission' => $mission,
-            'qiita'   => $qiita,
-            'earned'  => $earned,
+    // 2. Geminiで要約を生成（失敗してもミッション処理は続ける）
+    $summary = null;
+    try {
+        $summary = $geminiService->summarize($qiita['title'] ?? '', $qiita['body'] ?? '');
+    } catch (\Throwable $e) {
+        Log::warning('Gemini summarize failed', [
+            'url' => $qiita['url'] ?? $url,
+            'error' => $e->getMessage(),
         ]);
     }
+
+
+    // 2. ミッション進捗 & マイル付与
+    $earned = $missionService->handleTrigger(
+        $user,
+        'tech_blog_posted',
+        [
+            'mission_key' => $mission->key,
+            'url'         => $qiita['url'] ?? $url,  // Qiita側の正式URLを優先
+        ]
+    );
+
+    // 3. タイムライン用に Qiita 記事情報を保存
+    QiitaArticle::updateOrCreate(
+        [
+            'user_id' => $user->id,
+            'item_id' => $qiita['item_id'],   // QiitaService で返している item_id
+        ],
+        [
+            'mission_id'  => $mission->id,
+            'title'       => $qiita['title'] ?? '',
+            'body'        => $qiita['body'] ?? '',
+            'summary'     => $summary,  
+            'tags'        => $qiita['tags'] ?? [],
+            'likes_count' => $qiita['likes_count'] ?? 0,
+            'posted_at'   => !empty($qiita['created_at'])
+                ? Carbon::parse($qiita['created_at'])
+                : null,
+            'url'         => $qiita['url'] ?? $url,
+        ]
+    );
+
+    // 4. 記事情報を表示（タイトル / 本文 / タグ / LGTM / 投稿日時）
+    return view('missions.blog-preview', [
+        'mission' => $mission,
+        'qiita'   => $qiita,
+        'earned'  => $earned,
+    ]);
+}
 
     /**
      * GoogleフォームURL入力画面（ここが不足していた）
