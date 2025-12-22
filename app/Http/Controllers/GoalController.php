@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Goal;
+use Illuminate\Support\Facades\Auth;
 
 class GoalController extends Controller
 {
@@ -25,7 +26,7 @@ class GoalController extends Controller
         ]);
 
         Goal::create([
-            'user_id' => auth()->id(),
+            'user_id' => Auth::id(),
             'title' => $request->title,
             'deadline' => $request->deadline,
             'category' => $request->category,
@@ -40,7 +41,7 @@ class GoalController extends Controller
 
     public function index()
     {
-        return view('goals.index');
+        return view('activities.index');
     }
 
     public function edit($id)
@@ -65,7 +66,22 @@ class GoalController extends Controller
 
          Goal::find($id)->update($validated);
         
-        return redirect()->route('goals.index')
+        return redirect()->route('activities.index')
             ->with('success', '目標を更新しました！');
+    }
+
+    public function destroy($id)
+    {
+        $goal = Goal::findOrFail($id);
+
+        if ($goal->user_id !== Auth::id()) {
+            abort(403, 'この操作は許可されていません');
+        }
+
+        $goal->delete();
+
+        return redirect()
+            ->route('dashboard')
+            ->with('success', '活動を削除しました');
     }
 }

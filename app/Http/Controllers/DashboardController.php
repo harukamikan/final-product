@@ -7,12 +7,13 @@ use App\Models\MileHistory;
 use App\Models\UserMission;
 use App\Models\Mission;
 use App\Models\SemesterGoal;
+use Illuminate\Support\Facades\Auth;
 
 class DashboardController extends Controller
 {
     public function index()
     {
-        $userId = auth()->id();
+        $userId = Auth::id();
 
         // 最近の目標（3件）
         $recentGoals = Goal::where('user_id', $userId)
