@@ -72,7 +72,7 @@
                                         💡 {{ $recommendedMission->title }}
                                     </p>
                                     <p class="text-yellow-600 text-xs mt-1">
-                                         +{{ $recommendedMission->reward_miles }}マイル獲得
+                                        +{{ $recommendedMission->reward_miles }}マイル獲得
                                     </p>
                                 </div>
                                 @endif
@@ -95,7 +95,7 @@
             <!-- 新しい活動を記録ボタン -->
             <div class="mb-6">
                 <a href="/goals/create" class="inline-flex items-center px-4 py-2 bg-white text-indigo-600 border-2 border-indigo-600 rounded-md font-semibold text-xs uppercase tracking-widest hover:bg-indigo-600 hover:text-white transition-all">
-                  ➕ 新しい活動を記録
+                ➕ 新しい活動を記録
                 </a>
             </div>
 
@@ -106,37 +106,37 @@
         
                 @if($recentGoals->count() > 0)
                     <div class="space-y-4">
-                         @foreach($recentGoals as $goal)
-                             <!-- 目標カード -->
-                             <div class="border-l-4 border-indigo-500 bg-white border-2 border-gray-100 p-5 rounded-lg shadow-lg hover:shadow-xl transition-all duration-200">
-                                 <div class="flex justify-between items-start">
-                                     <div>
-                                         <div class="font-semibold text-gray-800">{{ $goal->category }}</div>
-                                         <div class="text-gray-600 mt-1">{{ $goal->title }}</div>
-                                         <div class="text-gray-500 text-sm mt-1">{{ $goal->deadline }}</div>
-                                     </div>
-                                     <div>
-                                         <a href="/goals/{{ $goal->id }}/edit" class="text-indigo-600 hover:text-indigo-800 text-sm font-semibold">
-                                             編集
-                                         </a>
-                                     </div>
-                                 </div>
-                             </div>
-                         @endforeach
-                     </div>
+                        @foreach($recentGoals as $goal)
+                            <!-- 目標カード -->
+                            <div class="border-l-4 border-indigo-500 bg-white border-2 border-gray-100 p-5 rounded-lg shadow-lg hover:shadow-xl transition-all duration-200">
+                                <div class="flex justify-between items-start">
+                                    <div>
+                                        <div class="font-semibold text-gray-800">{{ $goal->category }}</div>
+                                        <div class="text-gray-600 mt-1">{{ $goal->title }}</div>
+                                        <div class="text-gray-500 text-sm mt-1">{{ $goal->deadline }}</div>
+                                    </div>
+                                    <div>
+                                        <a href="/goals/{{ $goal->id }}/edit" class="text-indigo-600 hover:text-indigo-800 text-sm font-semibold">
+                                            編集
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        @endforeach
+                    </div>
 
-                     <div class="mt-6 text-center">
-                     </div>
-                 @else
-                     <div class="text-center py-8 text-gray-500">
-                         <p class="mb-4">まだ目標が登録されていません</p>
-                         <a href="/goals/create" class="text-indigo-600 hover:text-indigo-800 font-semibold">
-                             最初の目標を作成
-                         </a>
-                     </div>
-                 @endif
-             </div>
-         </div>
+                    <div class="mt-6 text-center">
+                    </div>
+                @else
+                    <div class="text-center py-8 text-gray-500">
+                        <p class="mb-4">まだ目標が登録されていません</p>
+                        <a href="/goals/create" class="text-indigo-600 hover:text-indigo-800 font-semibold">
+                            最初の目標を作成
+                        </a>
+                    </div>
+                @endif
+            </div>
+        </div>
 
                     <div class="mt-6 text-center">
                         <a href="/activities" class="inline-block px-4 py-2 bg-white text-indigo-600 border-2 border-indigo-600 rounded-md font-semibold text-sm hover:bg-indigo-600 hover:text-white transition-all">
