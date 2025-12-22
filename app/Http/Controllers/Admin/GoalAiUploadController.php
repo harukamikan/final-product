@@ -25,14 +25,14 @@ class GoalAiUploadController extends Controller
 
     // テキストファイルを処理
     public function upload(Request $request)
-    {
-        $request->validate([
-            'file' => 'required|mimes:txt,xlsx,xls,docx'
-        ]);
+{
+    $request->validate([
+        'file' => 'required|mimes:txt,xlsx,xls,docx'
+    ]);
 
-        // ファイルの内容を取得
-        $file = $request->file('file');
-        $content = $this->extractContent($file);
+    // ファイルの内容を取得
+    $file = $request->file('file');
+    $content = $this->extractContent($file);
 
         try {
             // 利用可能なユーザー名リストを取得
@@ -43,12 +43,14 @@ class GoalAiUploadController extends Controller
             // セッションに保存して確認画面へ
             session(['extracted_goals' => $extractedData]);
 
-            return redirect()->route('admin.goals.ai.confirm');
-        } catch (\Exception $e) {
-            return redirect()->back()->with('error', 'AI抽出に失敗しました: ' . $e->getMessage());
-        }
-    }
+        // セッションに保存して確認画面へ
+        session(['extracted_goals' => $extractedData]);
 
+        return redirect()->route('admin.goals.ai.confirm');
+    } catch (\Exception $e) {
+        return redirect()->back()->with('error', 'AI抽出に失敗しました: ' . $e->getMessage());
+    }
+}
     // 確認画面を表示
     public function confirm()
     {
@@ -66,7 +68,7 @@ public function store(Request $request)
 {
     $extractedData = session('extracted_goals');
 
-    if (!$extractedData) {
+if (!$extractedData) {
         return redirect()->route('admin.goals.ai.index')->with('error', 'データがありません');
     }
 
@@ -92,12 +94,8 @@ public function store(Request $request)
         }
 
         if ($user) {
-            // 🆕 AI で目標を分類
+            // AI で目標を分類
             $classified = $this->claudeService->classifyGoals($goals);
-
-            // 🆕 デバッグログ
-            \Log::info('Classified Goals:', $classified);
-            \Log::info('User ID:', ['user_id' => $user->id]);
 
             // 定量的な目標 → missions テーブル
             if (isset($classified['missions'])) {
@@ -133,6 +131,7 @@ public function store(Request $request)
         }
     }
 
+    // セッションをクリア
     session()->forget('extracted_goals');
 
     $errorUsers = array_unique($errorUsers);

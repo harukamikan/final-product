@@ -19,7 +19,11 @@ class ClaudeService
      */
     public function extractGoals($text,$availableUsers = [])
     {
+<<<<<<< HEAD
         $prompt = $this->buildPrompt($text, $availableUsers);
+=======
+        $prompt = $this->buildPrompt($text,$availableUsers);
+>>>>>>> develop
 
         $response = Http::withHeaders([
             'x-api-key' => $this->apiKey,
@@ -52,6 +56,7 @@ class ClaudeService
  */
 protected function buildPrompt($text, $availableUsers = [])
 {
+<<<<<<< HEAD
     // デバッグ用
     \Log::info('Available Users:', $availableUsers);
     $userList = '';
@@ -60,11 +65,18 @@ protected function buildPrompt($text, $availableUsers = [])
     }
      // デバッグ用
     \Log::info('User List:', ['userList' => $userList]);
+=======
+    $userList = '';
+    if (!empty($availableUsers)) {
+        $userList = "\n# 利用可能なユーザー名:\n" . implode("\n", $availableUsers);
+    }
+>>>>>>> develop
     
     return <<<PROMPT
 あなたはエンジニアの半期目標を抽出するアシスタントです。
 
 以下のテキストから、各メンバーの目標情報を抽出して、JSON形式で返してください。
+{$userList}
 
 # 【重要】名前の抽出ルール
 1. 入力テキストに記載されている名前を確認する
@@ -76,7 +88,11 @@ protected function buildPrompt($text, $availableUsers = [])
 - 利用可能なユーザー名: ["test", "haruka", "haruka", "haruka"]
 - 出力: "haruka" ✅（リストから完全一致を選択）
 # 抽出ルール
+<<<<<<< HEAD
 - 名前（name）: 上記のルールに従って正確に抽出
+=======
+- 名前（name）: メンバーの名前（必ず上記の利用可能なユーザー名から選択してください）
+>>>>>>> develop
 - 目標（goals）: 配列形式で複数可
   - category: ブログ、資格、登壇、開発、学習 など
   - title: 目標の内容（具体的に）

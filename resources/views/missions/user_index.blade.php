@@ -95,7 +95,7 @@
                             技術ブログのURLを送信
                         </a>
                     @elseif ($mission->trigger_type === 'google_form_submitted')
-                        <a href="{{ route('missions.google_form.form', ['mission_key' => $mission->key]) }}"
+                        <a href="{{ route('missions.form.create', ['mission' => $mission->id]) }}"
                            class="px-4 py-2 rounded-xl bg-indigo-600 text-white text-sm font-medium hover:bg-indigo-700 transition">
                             GoogleフォームのURLを送信
                         </a>

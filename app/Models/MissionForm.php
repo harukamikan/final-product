@@ -3,28 +3,18 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use App\Models\Concerns\BelongsToCompany;
 
-class QiitaArticle extends Model
+class MissionForm extends Model
 {
-    use BelongsToCompany;
-
     protected $fillable = [
         'user_id',
         'mission_id',
-        'item_id',
+        'category',
         'title',
-        'body',
-        'summary', 
-        'tags',
-        'likes_count',
-        'posted_at',
-        'url',
-    ];
-
-    protected $casts = [
-        'tags'      => 'array',
-        'posted_at' => 'datetime',
+        'occurred_on',
+        'details',
+        'evidence_url',
+        'status',
     ];
 
     public function user()
