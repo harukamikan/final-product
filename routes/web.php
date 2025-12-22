@@ -69,6 +69,10 @@ Route::middleware('auth')->group(function () {
     Route::get('/missions', [MissionListController::class, 'index'])->name('missions.index');
     Route::get('/missions/completed', [MissionListController::class, 'completed'])
         ->name('missions.completed');
+    Route::get('/missions/completed', [MissionListController::class, 'completed'])
+        ->name('missions.completed');
+    Route::get('/missions/personal', [MissionListController::class, 'personal'])
+        ->name('missions.personal');
     Route::get('/qiita', [QiitaArticleController::class, 'index'])
         ->name('qiita.index');
 });

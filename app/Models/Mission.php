@@ -10,7 +10,7 @@ class Mission extends Model
     use HasFactory;
 
     protected $fillable = [
-        'key', 'title', 'description',
+        'user_id','key', 'title', 'description',
         'trigger_type', 'required_count',
         'reward_miles', 'repeatable',
     ];

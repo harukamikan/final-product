@@ -35,9 +35,11 @@ class GoalAiUploadController extends Controller
         $content = $this->extractContent($file);
 
         try {
-            // AI で目標を抽出
-            $extractedData = $this->claudeService->extractGoals($content);
+            // 利用可能なユーザー名リストを取得
+        $availableUsers = \App\Models\User::all()->pluck('name')->toArray();
 
+        // AI抽出時にユーザーリストを渡す
+        $extractedData = $this->claudeService->extractGoals($content, $availableUsers);
             // セッションに保存して確認画面へ
             session(['extracted_goals' => $extractedData]);
 
@@ -77,38 +79,60 @@ public function store(Request $request)
 
         if (!$name) continue;
 
-        // 🆕 ユーザーを名前で検索（3段階）
-        
-        // ①元の名前で完全一致
+        // ユーザーを名前で検索（3段階）
         $user = User::where('name', $name)->first();
 
-        // ②全角→半角変換して完全一致
         if (!$user) {
             $normalized = mb_convert_kana($name, 'as', 'UTF-8');
             $user = User::where('name', $normalized)->first();
         }
 
-        // ③部分一致（セーフティネット）
         if (!$user) {
             $user = User::where('name', 'like', "%{$name}%")->first();
         }
 
         if ($user) {
-            foreach ($goals as $goal) {
-                SemesterGoal::create([
-                    'user_id' => $user->id,
-                    'category' => $goal['category'] ?? '',
-                    'title' => $goal['title'] ?? '',
-                    'deadline' => $goal['deadline'] ?? null,
-                ]);
-                $successCount++;
+            // 🆕 AI で目標を分類
+            $classified = $this->claudeService->classifyGoals($goals);
+
+            // 🆕 デバッグログ
+            \Log::info('Classified Goals:', $classified);
+            \Log::info('User ID:', ['user_id' => $user->id]);
+
+            // 定量的な目標 → missions テーブル
+            if (isset($classified['missions'])) {
+                foreach ($classified['missions'] as $mission) {
+                    \App\Models\Mission::create([
+                        'user_id' => $user->id,
+                        'key' => $mission['key'] ?? uniqid('mission_'),
+                        'title' => $mission['title'],
+                        'description' => $mission['description'] ?? null,
+                        'trigger_type' => $mission['trigger_type'],
+                        'required_count' => $mission['required_count'],
+                        'reward_miles' => $mission['reward_miles'] ?? 0,
+                        'repeatable' => $mission['repeatable'] ?? false,
+                    ]);
+                    $successCount++;
+                }
+            }
+
+            // 定性的な目標 → semester_goals テーブル
+            if (isset($classified['semester_goals'])) {
+                foreach ($classified['semester_goals'] as $goal) {
+                    SemesterGoal::create([
+                        'user_id' => $user->id,
+                        'category' => $goal['category'] ?? '定性目標',
+                        'title' => $goal['goal'],
+                        'deadline' => $goal['deadline'] ?? null,
+                    ]);
+                    $successCount++;
+                }
             }
         } else {
             $errorUsers[] = $name;
         }
     }
 
-    // セッションをクリア
     session()->forget('extracted_goals');
 
     $errorUsers = array_unique($errorUsers);
@@ -118,7 +142,6 @@ public function store(Request $request)
         'errors' => $errorUsers
     ]);
 }
-
     // ファイルから内容を抽出
     protected function extractContent($file)
     {

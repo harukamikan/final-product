@@ -16,18 +16,22 @@
     </div>
 
     {{-- ----- タブ切り替え ----- --}}
-    <div class="flex gap-4 text-sm font-medium">
-        <a href="{{ route('missions.index') }}"
-           class="px-4 py-2 rounded-xl bg-gray-100 text-gray-600">
-            進行中のミッション
-        </a>
+   <div class="flex gap-4 text-sm font-medium">
+    <a href="{{ route('missions.index') }}"
+       class="px-4 py-2 rounded-xl {{ request()->routeIs('missions.index') ? 'bg-indigo-600 text-white' : 'bg-gray-100 text-gray-600' }}">
+        進行中のミッション
+    </a>
 
-        <a href="{{ route('missions.completed') }}"
-            class="px-4 py-2 rounded-xl bg-indigo-600 text-white">
-            完了したミッション
-        </a>
+    <a href="{{ route('missions.completed') }}"
+        class="px-4 py-2 rounded-xl {{ request()->routeIs('missions.completed') ? 'bg-indigo-600 text-white' : 'bg-gray-100 text-gray-600' }}">
+        完了したミッション
+    </a>
+
+    <a href="{{ route('missions.personal') }}"
+        class="px-4 py-2 rounded-xl {{ request()->routeIs('missions.personal') ? 'bg-indigo-600 text-white' : 'bg-gray-100 text-gray-600' }}">
+        個人ミッション
+    </a>
     </div>
-
     {{-- ----- ミッションがないとき ----- --}}
     @if ($missions->isEmpty())
         <div class="text-center p-10 bg-white rounded-3xl shadow-sm">
