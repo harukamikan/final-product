@@ -16,7 +16,9 @@ use App\Http\Controllers\{
     StatsController,
     MileHistoryController,
     SemesterGoalController,
-    ActivityController
+    ActivityController,
+    CompanyController,
+    MissionFormController
 };
 
 use App\Http\Controllers\Admin\{
@@ -43,10 +45,33 @@ Route::get('/auth/slack/callback', [SlackAuthController::class, 'callback'])
 
 /*
 |--------------------------------------------------------------------------
-| Authenticated Routes
+| Authenticated but NOT yet in a company
+| （company middleware の外に置くのが重要）
 |--------------------------------------------------------------------------
 */
 Route::middleware(['auth'])->group(function () {
+    // 会社作成（未所属ユーザーが最初に行ける場所）
+    Route::get('/company/create', [CompanyController::class, 'showCreateForm'])
+        ->name('company.create');
+
+    Route::post('/company/create', [CompanyController::class, 'store'])
+        ->name('company.store');
+
+    // 招待コード参加（招待された人用）
+    Route::get('/company/join', [CompanyController::class, 'showJoinForm'])
+        ->name('company.join');
+
+    Route::post('/company/join', [CompanyController::class, 'join'])
+        ->name('company.join.submit');
+});
+
+/*
+|--------------------------------------------------------------------------
+| Authenticated Routes (Company Scoped)
+| （ここから下は “社内クローズド”）
+|--------------------------------------------------------------------------
+*/
+Route::middleware(['auth', 'company'])->group(function () {
 
     /*
     | Dashboard
@@ -90,6 +115,8 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/missions/{mission}/complete', [UserMissionController::class, 'complete'])
         ->name('missions.complete');
 
+    // NOTE: 「完了したミッション」なら controller 名が MileHistoryController なのは意図通り？
+    // もし MissionListController@completed なら戻した方がいい
     Route::get('/missions/completed', [MileHistoryController::class, 'index'])
         ->name('missions.completed');
 
@@ -99,11 +126,12 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/missions/blog-url', [MissionController::class, 'submitBlogUrl'])
         ->name('missions.blog-url.submit');
 
-    Route::get('/missions/google-form', [MissionController::class, 'showGoogleForm'])
-        ->name('missions.google_form.form');
+    // アプリ内フォーム提出
+    Route::get('/missions/{mission}/form', [MissionFormController::class, 'create'])
+        ->name('missions.form.create');
 
-    Route::post('/missions/google-form', [MissionController::class, 'storeGoogleForm'])
-        ->name('missions.google_form.store');
+    Route::post('/missions/{mission}/form', [MissionFormController::class, 'store'])
+        ->name('missions.form.store');
 
     Route::get('/missions/{mission}', [MissionController::class, 'show'])
         ->name('missions.show');
@@ -113,7 +141,6 @@ Route::middleware(['auth'])->group(function () {
     */
     Route::get('/activities', [ActivityController::class, 'index'])
         ->name('activities.index');
-
 
     /*
     | Ranking / Stats
@@ -132,7 +159,7 @@ Route::middleware(['auth'])->group(function () {
 
     /*
     |--------------------------------------------------------------------------
-    | Admin Routes
+    | Admin Routes（まずは company 内。あとで admin middleware を追加）
     |--------------------------------------------------------------------------
     */
     Route::prefix('admin')->name('admin.')->group(function () {
@@ -186,8 +213,8 @@ require __DIR__ . '/auth.php';
 | Debug (開発用)
 |--------------------------------------------------------------------------
 */
-Route::middleware('auth')->get('/debug/users', function () {
+Route::middleware(['auth', 'company'])->get('/debug/users', function () {
     return response()->json(
-        \App\Models\User::all(['id', 'name', 'email', 'slack_id'])
+        \App\Models\User::all(['id', 'name', 'email', 'slack_id', 'company_id'])
     );
 });

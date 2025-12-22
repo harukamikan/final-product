@@ -7,6 +7,7 @@ use App\Services\MissionService;
 use App\Models\Mission;
 use App\Services\QiitaService;
 use App\Models\QiitaArticle;
+use App\Services\GeminiService;
 use Illuminate\Support\Facades\Log;
 use Carbon\Carbon;
 
@@ -18,7 +19,6 @@ class MissionController extends Controller
     public function showBlogUrlForm()
     {
         $mission = Mission::where('key', 'write_tech_blog')->firstOrFail();
-
         return view('missions.blog_url', compact('mission'));
     }
 
@@ -28,7 +28,8 @@ class MissionController extends Controller
     public function submitBlogUrl(
         Request $request,
         MissionService $missionService,
-        QiitaService $qiitaService
+        QiitaService $qiitaService,
+        GeminiService $geminiService
     ) {
         $request->validate([
             'url' => ['required', 'url'],
@@ -38,7 +39,7 @@ class MissionController extends Controller
         $url     = $request->input('url');
         $mission = Mission::where('key', 'write_tech_blog')->firstOrFail();
 
-        // 1. Qiita API から記事情報を取得
+        // 1) Qiita API から記事情報を取得
         try {
             $qiita = $qiitaService->fetchItemFromUrl($url);
 
@@ -46,42 +47,54 @@ class MissionController extends Controller
                 return back()
                     ->withInput()
                     ->withErrors([
-                        'url' => 'Qiitaの記事URLの形式ではないようです。',
+                        'url' => 'Qiita APIから記事情報を取得できませんでした。時間をおいて再度お試しください。',
                     ]);
             }
         } catch (\Throwable $e) {
-            Log::error('Qiita API error', [
-                'url'   => $url,
+            Log::warning('Qiita fetch failed', [
+                'url' => $url,
                 'error' => $e->getMessage(),
             ]);
 
             return back()
                 ->withInput()
                 ->withErrors([
-                    'url' => 'Qiita APIから記事情報を取得できませんでした。時間をおいて再度お試しください。',
+                    'url' => 'Qiita記事の取得に失敗しました。URLを確認して再度お試しください。',
                 ]);
         }
 
-        // 2. ミッション進捗 & マイル付与
+        // 2) Geminiで要約を生成（失敗してもミッション処理は続行）
+        $summary = null;
+        try {
+            $summary = $geminiService->summarize($qiita['title'] ?? '', $qiita['body'] ?? '');
+        } catch (\Throwable $e) {
+            Log::warning('Gemini summarize failed', [
+                'url' => $qiita['url'] ?? $url,
+                'error' => $e->getMessage(),
+            ]);
+        }
+
+        // 3) ミッション進捗 & マイル付与（※二重実行になっていたので1回に統一）
         $earned = $missionService->handleTrigger(
             $user,
             'tech_blog_posted',
             [
                 'mission_key' => $mission->key,
-                'url'         => $qiita['url'] ?? $url,  // Qiita側の正式URLを優先
+                'url'         => $qiita['url'] ?? $url,
             ]
         );
 
-        // 3. タイムライン用に Qiita 記事情報を保存
+        // 4) タイムライン用に Qiita 記事情報を保存
         QiitaArticle::updateOrCreate(
             [
                 'user_id' => $user->id,
-                'item_id' => $qiita['item_id'],   // QiitaService で返している item_id
+                'item_id' => $qiita['item_id'],   // QiitaServiceで返している item_id
             ],
             [
                 'mission_id'  => $mission->id,
                 'title'       => $qiita['title'] ?? '',
                 'body'        => $qiita['body'] ?? '',
+                'summary'     => $summary,
                 'tags'        => $qiita['tags'] ?? [],
                 'likes_count' => $qiita['likes_count'] ?? 0,
                 'posted_at'   => !empty($qiita['created_at'])
@@ -91,7 +104,7 @@ class MissionController extends Controller
             ]
         );
 
-        // 4. 記事情報を表示（タイトル / 本文 / タグ / LGTM / 投稿日時）
+        // 5) プレビュー表示
         return view('missions.blog-preview', [
             'mission' => $mission,
             'qiita'   => $qiita,
@@ -100,11 +113,11 @@ class MissionController extends Controller
     }
 
     /**
-     * GoogleフォームURL入力画面（ここが不足していた）
+     * （旧）GoogleフォームURL入力画面
+     * ※ 今はアプリ内フォームに移行したので、ルートから外していれば未使用になります
      */
     public function showGoogleForm(Request $request)
     {
-        // URL: /missions/google-form?mission_key=event_speaker など
         $missionKey = $request->query('mission_key');
 
         if (!$missionKey) {
@@ -117,7 +130,8 @@ class MissionController extends Controller
     }
 
     /**
-     * GoogleフォームURL送信処理
+     * （旧）GoogleフォームURL送信処理
+     * ※ 今はアプリ内フォームに移行したので、ルートから外していれば未使用になります
      */
     public function storeGoogleForm(Request $request, MissionService $missionService)
     {
@@ -153,19 +167,14 @@ class MissionController extends Controller
         return match ($mission->key) {
 
             // 技術ブログ（Qiita）
-            'write_tech_blog' => redirect()
-                ->route('missions.blog-url.form'),
+            'write_tech_blog' => redirect()->route('missions.blog-url.form'),
 
-            // Googleフォーム系ミッション
+            // ✅ アプリ内フォームへ（Googleフォームではなく）
             'event_speaker',
             'event_organizer',
-            'acquire_certificate' => redirect()
-                ->route('missions.google_form.form', [
-                    'mission_key' => $mission->key,
-                ]),
+            'acquire_certificate' => redirect()->route('missions.app-form', ['mission' => $mission]),
 
-            // 将来用（想定外のkey）
-            default => abort(404, 'このミッションはまだ対応していません'),
+            default => view('missions.show', compact('mission')),
         };
     }
 }
