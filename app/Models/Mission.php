@@ -12,7 +12,7 @@ class Mission extends Model
     use BelongsToCompany;
 
     protected $fillable = [
-        'key', 'title', 'description',
+        'user_id','key', 'title', 'description',
         'trigger_type', 'required_count',
         'reward_miles', 'repeatable',
     ];

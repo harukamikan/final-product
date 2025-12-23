@@ -22,7 +22,7 @@
                         {{ __('統計') }}
                     </x-nav-link>
                     <x-nav-link :href="route('activities.index')" :active="request()->routeIs('activities.*')">
-                        {{ __('活動記録') }}
+                        {{ __('活動履歴') }}
                     </x-nav-link>
                 </div>
             </div>
@@ -86,7 +86,7 @@
                 {{ __('統計') }}
             </x-responsive-nav-link>
             <x-responsive-nav-link :href="route('activities.index')" :active="request()->routeIs('activities.*')">
-                {{ __('活動記録') }}
+                {{ __('活動履歴') }}
             </x-responsive-nav-link>
         </div>
 

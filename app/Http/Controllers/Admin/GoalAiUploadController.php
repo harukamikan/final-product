@@ -34,12 +34,14 @@ class GoalAiUploadController extends Controller
     $file = $request->file('file');
     $content = $this->extractContent($file);
 
-    // 🆕 ユーザー一覧を取得
-    $availableUsers = \App\Models\User::pluck('name')->toArray();
+        try {
+            // 利用可能なユーザー名リストを取得
+        $availableUsers = \App\Models\User::all()->pluck('name')->toArray();
 
-    try {
-        // AI で目標を抽出（ユーザー一覧を渡す）
+        // AI抽出時にユーザーリストを渡す
         $extractedData = $this->claudeService->extractGoals($content, $availableUsers);
+            // セッションに保存して確認画面へ
+            session(['extracted_goals' => $extractedData]);
 
         // セッションに保存して確認画面へ
         session(['extracted_goals' => $extractedData]);
@@ -61,12 +63,12 @@ class GoalAiUploadController extends Controller
         return view('admin.goals.ai-confirm', compact('extractedData'));
     }
 
-    // 確認後、実際に登録
-    public function store(Request $request)
+ // 確認後、実際に登録
+public function store(Request $request)
 {
     $extractedData = session('extracted_goals');
 
-    if (!$extractedData) {
+if (!$extractedData) {
         return redirect()->route('admin.goals.ai.index')->with('error', 'データがありません');
     }
 
@@ -79,23 +81,50 @@ class GoalAiUploadController extends Controller
 
         if (!$name) continue;
 
-        // 🆕 ユーザーを名前で検索（完全一致）
+        // ユーザーを名前で検索（3段階）
         $user = User::where('name', $name)->first();
 
-        // 🆕 見つからなければ部分一致で探す
+        if (!$user) {
+            $normalized = mb_convert_kana($name, 'as', 'UTF-8');
+            $user = User::where('name', $normalized)->first();
+        }
+
         if (!$user) {
             $user = User::where('name', 'like', "%{$name}%")->first();
         }
 
         if ($user) {
-            foreach ($goals as $goal) {
-                SemesterGoal::create([
-                    'user_id' => $user->id,
-                    'category' => $goal['category'] ?? '',
-                    'title' => $goal['title'] ?? '',
-                    'deadline' => $goal['deadline'] ?? null,
-                ]);
-                $successCount++;
+            // AI で目標を分類
+            $classified = $this->claudeService->classifyGoals($goals);
+
+            // 定量的な目標 → missions テーブル
+            if (isset($classified['missions'])) {
+                foreach ($classified['missions'] as $mission) {
+                    \App\Models\Mission::create([
+                        'user_id' => $user->id,
+                        'key' => $mission['key'] ?? uniqid('mission_'),
+                        'title' => $mission['title'],
+                        'description' => $mission['description'] ?? null,
+                        'trigger_type' => $mission['trigger_type'],
+                        'required_count' => $mission['required_count'],
+                        'reward_miles' => $mission['reward_miles'] ?? 0,
+                        'repeatable' => $mission['repeatable'] ?? false,
+                    ]);
+                    $successCount++;
+                }
+            }
+
+            // 定性的な目標 → semester_goals テーブル
+            if (isset($classified['semester_goals'])) {
+                foreach ($classified['semester_goals'] as $goal) {
+                    SemesterGoal::create([
+                        'user_id' => $user->id,
+                        'category' => $goal['category'] ?? '定性目標',
+                        'title' => $goal['goal'],
+                        'deadline' => $goal['deadline'] ?? null,
+                    ]);
+                    $successCount++;
+                }
             }
         } else {
             $errorUsers[] = $name;
