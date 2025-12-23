@@ -25,7 +25,8 @@
            w-80 max-w-[calc(100vw-2rem)]
            bg-white/90 backdrop-blur
            rounded-2xl shadow-xl p-5 space-y-4">
-        マイル履歴検索
+        <h3 class="font-bold text-gray-800">
+            マイル履歴検索
         </h3>
 
         <form method="GET" action="{{ route('missions.completed') }}" class="space-y-3">
@@ -68,7 +69,7 @@
 
 
             <div class="flex justify-between pt-2">
-                <a
+                
                     href="{{ route('missions.completed') }}"
                     class="text-xs text-gray-500 hover:underline">
                     リセット
@@ -97,92 +98,76 @@
         <div class="text-5xl">🏆</div>
     </div>
 
-<<<<<<< HEAD
-    {{-- ----- タブ切り替え ----- --}}
-   <div class="flex gap-4 text-sm font-medium">
-    <a href="{{ route('missions.index') }}"
-       class="px-4 py-2 rounded-xl {{ request()->routeIs('missions.index') ? 'bg-indigo-600 text-white' : 'bg-gray-100 text-gray-600' }}">
-        進行中のミッション
-    </a>
-=======
-    {{-- ================= タブ切り替え ================= --}}
+    {{-- タブ切り替え --}}
     <div class="flex gap-4 text-sm font-medium">
         <a href="{{ route('missions.index') }}"
-            class="px-4 py-2 rounded-xl bg-gray-100 text-gray-600">
+           class="px-4 py-2 rounded-xl {{ request()->routeIs('missions.index') ? 'bg-indigo-600 text-white' : 'bg-gray-100 text-gray-600' }}">
             進行中のミッション
         </a>
->>>>>>> develop
 
-    <a href="{{ route('missions.completed') }}"
-        class="px-4 py-2 rounded-xl {{ request()->routeIs('missions.completed') ? 'bg-indigo-600 text-white' : 'bg-gray-100 text-gray-600' }}">
-        完了したミッション
-    </a>
+        <a href="{{ route('missions.completed') }}"
+            class="px-4 py-2 rounded-xl {{ request()->routeIs('missions.completed') ? 'bg-indigo-600 text-white' : 'bg-gray-100 text-gray-600' }}">
+            完了したミッション
+        </a>
 
-    <a href="{{ route('missions.personal') }}"
-        class="px-4 py-2 rounded-xl {{ request()->routeIs('missions.personal') ? 'bg-indigo-600 text-white' : 'bg-gray-100 text-gray-600' }}">
-        個人ミッション
-    </a>
+        <a href="{{ route('missions.personal') }}"
+            class="px-4 py-2 rounded-xl {{ request()->routeIs('missions.personal') ? 'bg-indigo-600 text-white' : 'bg-gray-100 text-gray-600' }}">
+            個人ミッション
+        </a>
     </div>
-<<<<<<< HEAD
-    {{-- ----- ミッションがないとき ----- --}}
+
+    {{-- ミッションなし --}}
     @if ($missions->isEmpty())
         <div class="text-center p-10 bg-white rounded-3xl shadow-sm">
             <div class="text-5xl mb-4">🎉</div>
             <p class="text-xl font-semibold">まだ完了したミッションがありません</p>
             <p class="text-gray-500 mt-2">進行中のミッションを達成していきましょう！</p>
         </div>
-=======
-
-    {{-- ================= ミッションなし ================= --}}
-    @if ($mileHistories->isEmpty())
-    <div class="text-center p-10 bg-white rounded-3xl shadow-sm">
-        <div class="text-5xl mb-4">🎉</div>
-        <p class="text-xl font-semibold">まだ完了したミッションがありません</p>
-        <p class="text-gray-500 mt-2">進行中のミッションを達成していきましょう！</p>
-    </div>
->>>>>>> develop
     @endif
 
-    {{-- ================= 完了ミッション一覧 ================= --}}
+    {{-- 完了ミッション一覧 --}}
     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-        @foreach ($mileHistories as $history)
-        <div class="rounded-3xl border bg-white px-5 py-6 shadow-sm space-y-4">
+        @foreach ($missions as $mission)
+            @php
+                $userMission = $mission->userMissions->first();
+            @endphp
+            
+            <div class="rounded-3xl border bg-white px-5 py-6 shadow-sm space-y-4">
+                <div class="flex justify-between items-start">
+                    <div>
+                        <h2 class="text-lg font-semibold text-gray-900">
+                            {{ $mission->title }}
+                        </h2>
 
-            <div class="flex justify-between items-start">
-                <div>
-                    <h2 class="text-lg font-semibold text-gray-900">
-                        {{ $history->mission->title }}
-                    </h2>
+                        <p class="text-xs text-gray-500 mt-1">
+                            {{ $mission->description }}
+                        </p>
 
-                    <p class="text-xs text-gray-500 mt-1">
-                        {{ $history->mission->description }}
-                    </p>
+                        @if($userMission && $userMission->completed_at)
+                            <p class="text-xs text-gray-400 mt-2">
+                                🗓 獲得日：
+                                {{ $userMission->completed_at->format('Y年m月d日') }}
+                            </p>
+                        @endif
+                    </div>
 
-                    <p class="text-xs text-gray-400 mt-2">
-                        🗓 獲得日：
-                        {{ $history->created_at->format('Y年m月d日') }}
-                    </p>
+                    <div class="text-right">
+                        <p class="text-xs text-gray-500">獲得マイル</p>
+                        <p class="text-lg font-bold text-emerald-600">
+                            +{{ $mission->reward_miles }} mile
+                        </p>
+                    </div>
                 </div>
 
-                <div class="text-right">
-                    <p class="text-xs text-gray-500">獲得マイル</p>
-                    <p class="text-lg font-bold text-emerald-600">
-                        +{{ $history->miles }} mile
-                    </p>
+                <div class="pt-3 border-t">
+                    <span class="inline-flex items-center px-3 py-1 rounded-full
+                             bg-emerald-50 text-emerald-700
+                             text-sm font-medium">
+                        🎉 達成済み
+                    </span>
                 </div>
             </div>
-
-            <div class="pt-3 border-t">
-                <span class="inline-flex items-center px-3 py-1 rounded-full
-                         bg-emerald-50 text-emerald-700
-                         text-sm font-medium">
-                    🎉 達成済み
-                </span>
-            </div>
-
-        </div>
         @endforeach
-
     </div>
 
 </div>
