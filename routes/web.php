@@ -2,12 +2,6 @@
 
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
-<<<<<<< HEAD
-use App\Http\Controllers\Admin\GoalUploadController;
-use App\Http\Controllers\StatsController;
-use App\Http\Controllers\Admin\AdminDashboardController;
-=======
->>>>>>> develop
 
 use App\Http\Controllers\{
     ProfileController,
@@ -30,7 +24,8 @@ use App\Http\Controllers\{
 use App\Http\Controllers\Admin\{
     MissionCreater,
     GoalUploadController,
-    GoalAiUploadController
+    GoalAiUploadController,
+    AdminDashboardController
 };
 
 /*
@@ -170,6 +165,9 @@ Route::middleware(['auth', 'company'])->group(function () {
     */
     Route::prefix('admin')->name('admin.')->group(function () {
 
+        Route::get('/dashboard', [AdminDashboardController::class, 'index'])
+            ->name('dashboard');
+
         // Mission management
         Route::resource('missions', MissionCreater::class);
 
@@ -214,18 +212,6 @@ Route::post('/logout', function () {
 */
 require __DIR__ . '/auth.php';
 
-<<<<<<< HEAD
-Route::get('/debug/users', function () {
-    $users = \App\Models\User::all(['id', 'name', 'email', 'slack_id']);
-    return response()->json($users);
-})->middleware('auth');
-
-// 管理者用ルート
-Route::middleware(['auth'])->prefix('admin')->group(function () {
-    Route::get('/dashboard', [AdminDashboardController::class, 'index'])->name('admin.dashboard');
-    Route::get('/goals/upload', [GoalUploadController::class, 'index'])->name('admin.goals.upload.index');
-    Route::post('/goals/upload', [GoalUploadController::class, 'upload'])->name('admin.goals.upload');
-=======
 /*
 |--------------------------------------------------------------------------
 | Debug (開発用)
@@ -235,5 +221,4 @@ Route::middleware(['auth', 'company'])->get('/debug/users', function () {
     return response()->json(
         \App\Models\User::all(['id', 'name', 'email', 'slack_id', 'company_id'])
     );
->>>>>>> develop
 });
