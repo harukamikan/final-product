@@ -24,7 +24,8 @@ use App\Http\Controllers\{
 use App\Http\Controllers\Admin\{
     MissionCreater,
     GoalUploadController,
-    GoalAiUploadController
+    GoalAiUploadController,
+    AdminDashboardController
 };
 
 /*
@@ -180,6 +181,9 @@ Route::middleware(['auth', 'company'])->group(function () {
     |--------------------------------------------------------------------------
     */
     Route::prefix('admin')->name('admin.')->group(function () {
+
+        Route::get('/dashboard', [AdminDashboardController::class, 'index'])
+            ->name('dashboard');
 
         // Mission management
         Route::resource('missions', MissionCreater::class);
