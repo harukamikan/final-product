@@ -25,24 +25,24 @@
     {{-- ナビゲーション --}}
 
     @php
-        $bgValue = auth()->user()->background_value ?? '#f3f4f6';
-        
-        // グラデーションの場合は最初の色を取得
-        if (auth()->check() && auth()->user()->background_type === 'gradient') {
-            preg_match('/#[0-9A-Fa-f]{6}/', $bgValue, $matches);
-            $bgValue = $matches[0] ?? '#f3f4f6';
-        }
-        
-        // 明るさを計算（RGB → 0-255）
-        $r = hexdec(substr($bgValue, 1, 2));
-        $g = hexdec(substr($bgValue, 3, 2));
-        $b = hexdec(substr($bgValue, 5, 2));
-        $brightness = ($r * 299 + $g * 587 + $b * 114) / 1000;
-        
-        // 明るい背景なら暗い文字、暗い背景なら明るい文字
-        $navText = $brightness > 155 ? 'text-white' : 'text-gray-900';
-        $navBorder = $brightness > 155 ? 'border-gray-700' : 'border-gray-200';
-        $hoverText = $brightness > 155 ? 'hover:text-gray-300' : 'hover:text-gray-700';
+    $bgValue = auth()->user()->background_value ?? '#f3f4f6';
+
+    // グラデーションの場合は最初の色を取得
+    if (auth()->check() && auth()->user()->background_type === 'gradient') {
+    preg_match('/#[0-9A-Fa-f]{6}/', $bgValue, $matches);
+    $bgValue = $matches[0] ?? '#f3f4f6';
+    }
+
+    // 明るさを計算（RGB → 0-255）
+    $r = hexdec(substr($bgValue, 1, 2));
+    $g = hexdec(substr($bgValue, 3, 2));
+    $b = hexdec(substr($bgValue, 5, 2));
+    $brightness = ($r * 299 + $g * 587 + $b * 114) / 1000;
+
+    // 明るい背景なら暗い文字、暗い背景なら明るい文字
+    $navText = $brightness > 155 ? 'text-white' : 'text-gray-900';
+    $navBorder = $brightness > 155 ? 'border-gray-700' : 'border-gray-200';
+    $hoverText = $brightness > 155 ? 'hover:text-gray-300' : 'hover:text-gray-700';
     @endphp
 
     <nav class="backdrop-blur border-b {{ $navBorder }} shadow-sm">
@@ -61,6 +61,12 @@
                         class="inline-flex items-center px-1 pt-1 text-sm font-medium {{ $navText }}
                        {{ request()->is('admin/missions*') ? 'border-b-2 border-indigo-500' : $hoverText }}">
                         🎯 ミッション管理
+                    </a>
+
+                    <a href="{{ route('admin.rewards.index') }}"
+                        class="inline-flex items-center px-1 pt-1 text-sm font-medium {{ $navText }}
+                        {{ request()->is('admin/rewards*') ? 'border-b-2 border-indigo-500' : $hoverText }}">
+                        🎁 報酬決定
                     </a>
 
                     <a href="{{ route('admin.goals.upload.index') }}"
@@ -145,8 +151,8 @@
         @yield('content')
     </main>
 
-            <!-- コマンドパレット -->
-            <div x-data="{ 
+    <!-- コマンドパレット -->
+    <div x-data="{ 
                 open: false, 
                 search: '',
                 init() {
@@ -161,31 +167,32 @@
                         }
                     });
                 }
-            }" 
-            x-show="open" 
-            x-cloak
-            class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50"
-            @click.self="open = false; search = ''">
-                <div class="bg-white rounded-lg shadow-xl w-full max-w-lg p-6">
-                    <input 
-                        type="text" 
-                        x-model="search"
-                        @input="
+            }"
+        x-show="open"
+        x-cloak
+        class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50"
+        @click.self="open = false; search = ''">
+        <div class="bg-white rounded-lg shadow-xl w-full max-w-lg p-6">
+            <input
+                type="text"
+                x-model="search"
+                @input="
                             if (search.toLowerCase() === 'admin') {
                                 window.location.href = '/admin/dashboard';
                             }
                         "
-                        placeholder="コマンドを入力..."
-                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                        x-ref="searchInput"
-                        @click.away="open = false; search = ''"
-                    >
-                </div>
-            </div>
+                placeholder="コマンドを入力..."
+                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                x-ref="searchInput"
+                @click.away="open = false; search = ''">
+        </div>
+    </div>
 
-            <style>
-                [x-cloak] { display: none !important; }
-            </style>
+    <style>
+        [x-cloak] {
+            display: none !important;
+        }
+    </style>
 
 </body>
 
