@@ -7,13 +7,29 @@ use App\Models\MileHistory;
 use App\Models\UserMission;
 use App\Models\Mission;
 use App\Models\SemesterGoal;
+use App\Models\RewardSurvey;
 use Illuminate\Support\Facades\Auth;
 
 class DashboardController extends Controller
 {
     public function index()
     {
-        $userId = Auth::id();
+        $user = Auth::user();
+        $userId = $user->id;
+        $company = $user->company;
+
+        // 初期値（会社未所属でも落ちない）
+        $showRewardSurveyNotice = false;
+
+        // 会社に所属している場合のみ判定
+        if ($company) {
+            $hasAnsweredSurvey = RewardSurvey::where('user_id', $userId)
+                ->where('company_id', $company->id)
+                ->exists();
+
+            $showRewardSurveyNotice =
+                $company->reward_survey_active && ! $hasAnsweredSurvey;
+        }
 
         // 最近の目標（3件）
         $recentGoals = Goal::where('user_id', $userId)
@@ -55,8 +71,8 @@ class DashboardController extends Controller
             'id',
             UserMission::where('user_id', $userId)->pluck('mission_id')
         )
-        ->orderBy('reward_miles', 'desc')
-        ->first();
+            ->orderBy('reward_miles', 'desc')
+            ->first();
 
         return view('dashboard', compact(
             'recentGoals',
@@ -66,7 +82,8 @@ class DashboardController extends Controller
             'recentMissions',
             'rank',
             'recommendedMission',
-            'semesterGoal'
+            'semesterGoal',
+            'showRewardSurveyNotice'
         ));
     }
 

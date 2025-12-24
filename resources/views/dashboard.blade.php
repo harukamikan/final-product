@@ -9,6 +9,34 @@
             ようこそ、{{ auth()->user()->name }}さん
         </h2>
 
+        {{-- ===== 報酬アンケート通知 ===== --}}
+        @if($showRewardSurveyNotice)
+        <div class="bg-indigo-50 border border-indigo-200 rounded-2xl p-5 shadow-sm">
+            <div class="flex items-start justify-between gap-4">
+                <div>
+                    <p class="text-base font-semibold text-indigo-700">
+                        🎁 報酬アンケート回答依頼が来ています
+                    </p>
+                    <p class="text-sm text-indigo-600 mt-1">
+                        希望する報酬を第1〜第3希望まで入力してください。
+                    </p>
+                </div>
+
+                <a
+                    href="{{ route('reward-survey.create') }}"
+                    class="shrink-0 inline-flex items-center
+                       px-4 py-2 rounded-lg
+                       bg-indigo-600 text-white
+                       text-sm font-semibold
+                       hover:bg-indigo-700 transition">
+                    回答する
+                </a>
+            </div>
+        </div>
+        @endif
+
+
+
         {{-- ===== 半期目標 ===== --}}
         <div class="bg-white rounded-2xl shadow-md p-6">
             <div class="flex justify-between items-center mb-4">
