@@ -178,6 +178,17 @@ Route::middleware(['auth', 'company'])->group(function () {
 
     /*
     |--------------------------------------------------------------------------
+    | Reward Survey（社員用）
+    |--------------------------------------------------------------------------
+    */
+    Route::get('/reward-survey', [\App\Http\Controllers\RewardSurveyController::class, 'create'])
+        ->name('reward-survey.create');
+
+    Route::post('/reward-survey', [\App\Http\Controllers\RewardSurveyController::class, 'store'])
+        ->name('reward-survey.store');
+
+    /*
+    |--------------------------------------------------------------------------
     | Admin Routes（まずは company 内。あとで admin middleware を追加）
     |--------------------------------------------------------------------------
     */

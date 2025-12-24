@@ -3,8 +3,8 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use App\Models\RewardSurvey;
 use Illuminate\Support\Facades\Auth;
+use App\Models\RewardSurvey;
 
 class RewardSurveyController extends Controller
 {
@@ -27,11 +27,10 @@ class RewardSurveyController extends Controller
             'first_choice' => $request->first_choice,
             'second_choice'=> $request->second_choice,
             'third_choice' => $request->third_choice,
+            'status'       => 'pending',
         ]);
 
-        return redirect()
-            ->route('dashboard')
-            ->with('success', 'アンケートを送信しました');
+        return redirect()->route('dashboard')
+            ->with('status', 'reward-survey-submitted');
     }
 }
-
