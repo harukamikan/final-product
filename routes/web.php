@@ -25,7 +25,8 @@ use App\Http\Controllers\Admin\{
     MissionCreater,
     GoalUploadController,
     GoalAiUploadController,
-    AdminDashboardController
+    AdminDashboardController,
+    AdminRewardController
 };
 
 /*
@@ -134,7 +135,7 @@ Route::middleware(['auth', 'company'])->group(function () {
     Route::post('/missions/{mission}/form', [MissionFormController::class, 'store'])
         ->name('missions.form.store');
 
-  
+
     /*
     | Activities
     */
@@ -144,7 +145,7 @@ Route::middleware(['auth', 'company'])->group(function () {
     /*
     | Ranking / Stats
     */
-   Route::get('/ranking', [RankingController::class, 'index'])
+    Route::get('/ranking', [RankingController::class, 'index'])
         ->name('ranking.index');
 
     Route::get('/stats', [StatsController::class, 'index'])
@@ -155,10 +156,10 @@ Route::middleware(['auth', 'company'])->group(function () {
     */
     Route::get('/missions', [MissionListController::class, 'index'])
         ->name('missions.index');
-    
+
     Route::get('/missions/completed', [MissionListController::class, 'completed'])
         ->name('missions.completed');
-    
+
     Route::get('/missions/personal', [MissionListController::class, 'personal'])
         ->name('missions.personal');
 
@@ -187,6 +188,9 @@ Route::middleware(['auth', 'company'])->group(function () {
 
         // Mission management
         Route::resource('missions', MissionCreater::class);
+
+        Route::get('/rewards', [AdminRewardController::class, 'index'])
+            ->name('rewards.index');
 
         // CSV Upload
         Route::get('/goals/upload', [GoalUploadController::class, 'index'])
@@ -238,4 +242,4 @@ Route::middleware(['auth', 'company'])->get('/debug/users', function () {
     return response()->json(
         \App\Models\User::all(['id', 'name', 'email', 'slack_id', 'company_id'])
     );
-});  
+});

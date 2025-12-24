@@ -14,4 +14,9 @@ class RewardSurvey extends Model
         'third_choice',
         'status',
     ];
+
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
 }
