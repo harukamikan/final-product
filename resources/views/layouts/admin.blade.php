@@ -23,38 +23,60 @@
     @endauth
     >
     {{-- ナビゲーション --}}
-    <nav class="bg-white/80 backdrop-blur border-b border-gray-200 shadow-sm">
+
+    @php
+        $bgValue = auth()->user()->background_value ?? '#f3f4f6';
+        
+        // グラデーションの場合は最初の色を取得
+        if (auth()->check() && auth()->user()->background_type === 'gradient') {
+            preg_match('/#[0-9A-Fa-f]{6}/', $bgValue, $matches);
+            $bgValue = $matches[0] ?? '#f3f4f6';
+        }
+        
+        // 明るさを計算（RGB → 0-255）
+        $r = hexdec(substr($bgValue, 1, 2));
+        $g = hexdec(substr($bgValue, 3, 2));
+        $b = hexdec(substr($bgValue, 5, 2));
+        $brightness = ($r * 299 + $g * 587 + $b * 114) / 1000;
+        
+        // 明るい背景なら暗い文字、暗い背景なら明るい文字
+        $navText = $brightness > 155 ? 'text-white' : 'text-gray-900';
+        $navBorder = $brightness > 155 ? 'border-gray-700' : 'border-gray-200';
+        $hoverText = $brightness > 155 ? 'hover:text-gray-300' : 'hover:text-gray-700';
+    @endphp
+
+    <nav class="backdrop-blur border-b {{ $navBorder }} shadow-sm">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between h-16">
 
                 {{-- 管理者メニュー --}}
                 <div class="flex space-x-8">
                     <a href="{{ route('admin.dashboard') }}"
-                        class="inline-flex items-center px-1 pt-1 text-sm font-medium
-                       {{ request()->is('admin/dashboard') ? 'text-gray-900 border-b-2 border-indigo-500' : 'text-gray-500 hover:text-gray-700 hover:border-gray-300' }}">
+                        class="inline-flex items-center px-1 pt-1 text-sm font-medium {{ $navText }}
+                       {{ request()->is('admin/dashboard') ? 'border-b-2 border-indigo-500' : $hoverText }}">
                         📊 ダッシュボード
                     </a>
 
                     <a href="{{ route('admin.missions.index') }}"
-                        class="inline-flex items-center px-1 pt-1 text-sm font-medium
-                       {{ request()->is('admin/missions*') ? 'text-gray-900 border-b-2 border-indigo-500' : 'text-gray-500 hover:text-gray-700 hover:border-gray-300' }}">
+                        class="inline-flex items-center px-1 pt-1 text-sm font-medium {{ $navText }}
+                       {{ request()->is('admin/missions*') ? 'border-b-2 border-indigo-500' : $hoverText }}">
                         🎯 ミッション管理
                     </a>
 
                     <a href="{{ route('admin.goals.upload.index') }}"
-                        class="inline-flex items-center px-1 pt-1 text-sm font-medium
-                       {{ request()->is('admin/goals/upload') ? 'text-gray-900 border-b-2 border-indigo-500' : 'text-gray-500 hover:text-gray-700 hover:border-gray-300' }}">
+                        class="inline-flex items-center px-1 pt-1 text-sm font-medium {{ $navText }}
+                       {{ request()->is('admin/goals/upload') ? 'border-b-2 border-indigo-500' : $hoverText }}">
                         📊 Excel アップロード
                     </a>
 
                     <a href="{{ route('admin.goals.ai.index') }}"
-                        class="inline-flex items-center px-1 pt-1 text-sm font-medium
-                       {{ request()->is('admin/goals/ai-upload') ? 'text-gray-900 border-b-2 border-indigo-500' : 'text-gray-500 hover:text-gray-700 hover:border-gray-300' }}">
+                        class="inline-flex items-center px-1 pt-1 text-sm font-medium {{ $navText }}
+                       {{ request()->is('admin/goals/ai-upload') ? 'border-b-2 border-indigo-500' : $hoverText }}">
                         🤖 AI 自動抽出
                     </a>
 
                     <a href="/dashboard"
-                        class="inline-flex items-center px-1 pt-1 text-sm font-medium text-gray-500 hover:text-gray-700">
+                        class="inline-flex items-center px-1 pt-1 text-sm font-medium {{ $navText }} {{ $hoverText }}">
                         ← 通常画面に戻る
                     </a>
                 </div>
@@ -64,7 +86,7 @@
                     @auth
                     <div class="relative" x-data="{ open: false }">
                         <button @click="open = !open"
-                            class="flex items-center text-sm font-medium text-gray-700 hover:text-gray-900 focus:outline-none">
+                            class="flex items-center text-sm font-medium {{ $navText }} {{ $hoverText }} focus:outline-none">
                             <span>{{ auth()->user()->name }}</span>
                             <svg class="ml-2 h-4 w-4" xmlns="http://www.w3.org/2000/svg"
                                 viewBox="0 0 20 20" fill="currentColor">
