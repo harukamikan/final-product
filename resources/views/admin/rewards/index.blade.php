@@ -21,12 +21,49 @@
             </button>
         </form>
 
+        @if($company)
+        <form method="POST" action="{{ route('admin.rewards.deadline') }}" class="mb-6">
+            @csrf
+
+            <div class="flex items-end gap-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">
+                        回答期限
+                    </label>
+                    <input
+                        type="date"
+                        name="reward_survey_deadline"
+                        value="{{ $company->reward_survey_deadline }}"
+                        class="mt-1 rounded-md border-gray-300"
+                        required>
+                </div>
+
+                <button
+                    class="px-4 py-2 rounded-lg bg-gray-800 text-white text-sm font-semibold hover:bg-gray-900">
+                    期限を設定
+                </button>
+            </div>
+        </form>
+        @endif
+
+
         <div class="bg-white overflow-hidden shadow-2xl card-shadow sm:rounded-lg">
             <div class="p-6">
 
                 <h3 class="font-semibold text-lg text-gray-800 mb-4">
                     📋 報酬アンケート結果
                 </h3>
+
+                <div class="flex gap-6 mb-6 text-sm">
+                    <div class="px-4 py-2 rounded-lg bg-green-50 text-green-700 font-semibold">
+                        回答済み：{{ $answeredCount }} 人
+                    </div>
+
+                    <div class="px-4 py-2 rounded-lg bg-red-50 text-red-700 font-semibold">
+                        未回答：{{ $unansweredCount }} 人
+                    </div>
+                </div>
+
 
                 @if($rewardSurveys->isEmpty())
                 <p class="text-sm text-gray-500">

@@ -200,6 +200,9 @@ Route::middleware(['auth', 'company'])->group(function () {
         Route::post('/rewards/toggle', [AdminRewardController::class, 'toggle'])
             ->name('rewards.toggle');
 
+        Route::post('/rewards/deadline', [AdminRewardController::class, 'setDeadline'])
+            ->name('rewards.deadline');
+
         // Mission management
         Route::resource('missions', MissionCreater::class);
 

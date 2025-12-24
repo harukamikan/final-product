@@ -19,7 +19,13 @@
                     </p>
                     <p class="text-sm text-indigo-600 mt-1">
                         希望する報酬を第1〜第3希望まで入力してください。
+                        @if(auth()->user()->company?->reward_survey_deadline)
+                        <span class="font-semibold text-indigo-700">
+                            （{{ auth()->user()->company->reward_survey_deadline->format('Y年m月d日') }} まで）
+                        </span>
+                        @endif
                     </p>
+
                 </div>
 
                 <a
