@@ -28,7 +28,12 @@ class DashboardController extends Controller
                 ->exists();
 
             $showRewardSurveyNotice =
-                $company->reward_survey_active && ! $hasAnsweredSurvey;
+                $company->reward_survey_active
+                && ! $hasAnsweredSurvey
+                && (
+                    !$company->reward_survey_deadline
+                    || now()->lte($company->reward_survey_deadline)
+                );
         }
 
         // 最近の目標（3件）
