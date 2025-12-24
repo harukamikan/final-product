@@ -197,6 +197,9 @@ Route::middleware(['auth', 'company'])->group(function () {
         Route::get('/dashboard', [AdminDashboardController::class, 'index'])
             ->name('dashboard');
 
+        Route::post('/rewards/toggle', [AdminRewardController::class, 'toggle'])
+            ->name('rewards.toggle');
+
         // Mission management
         Route::resource('missions', MissionCreater::class);
 

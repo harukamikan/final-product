@@ -10,7 +10,7 @@
         </h2>
 
         {{-- ===== 報酬アンケート通知 ===== --}}
-        @if(!$hasAnsweredSurvey)
+        @if($showRewardSurveyNotice)
         <div class="bg-indigo-50 border border-indigo-200 rounded-2xl p-5 shadow-sm">
             <div class="flex items-start justify-between gap-4">
                 <div>
@@ -34,6 +34,7 @@
             </div>
         </div>
         @endif
+
 
 
         {{-- ===== 半期目標 ===== --}}

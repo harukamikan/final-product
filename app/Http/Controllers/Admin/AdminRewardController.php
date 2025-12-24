@@ -17,7 +17,7 @@ class AdminRewardController extends Controller
             ->latest()
             ->get();
 
-        return view('rewards.index', compact('rewardSurveys'));
+        return view('admin.rewards.index', compact('rewardSurveys'));
     }
 
     public function adopt(Request $request)
@@ -42,5 +42,16 @@ class AdminRewardController extends Controller
 
         return back()->with('success', '報酬候補として登録しました');
     }
-}
 
+    public function toggle()
+    {
+        $company = Auth::user()->company;
+
+        $company->reward_survey_active = ! $company->reward_survey_active;
+        $company->save();
+
+        return redirect()
+            ->route('admin.rewards.index')
+            ->with('status', 'reward-survey-toggled');
+    }
+}
