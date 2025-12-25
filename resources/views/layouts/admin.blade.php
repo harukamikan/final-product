@@ -69,6 +69,12 @@
                         🎁 報酬決定
                     </a>
 
+                    <a href="{{ route('admin.reward-distributions.index') }}"
+                        class="inline-flex items-center px-1 pt-1 text-sm font-medium {{ $navText }}
+                        {{ request()->is('admin/reward_distributions*') ? 'border-b-2 border-indigo-500' : $hoverText }}">
+                        🎰 報酬配布管理
+                    </a>
+
                     <a href="{{ route('admin.goals.upload.index') }}"
                         class="inline-flex items-center px-1 pt-1 text-sm font-medium {{ $navText }}
                        {{ request()->is('admin/goals/upload') ? 'border-b-2 border-indigo-500' : $hoverText }}">
