@@ -18,7 +18,8 @@ use App\Http\Controllers\{
     SemesterGoalController,
     ActivityController,
     CompanyController,
-    MissionFormController
+    MissionFormController,
+    GachaController
 };
 
 use App\Http\Controllers\Admin\{
@@ -27,7 +28,7 @@ use App\Http\Controllers\Admin\{
     GoalAiUploadController,
     AdminDashboardController,
     AdminRewardController,
-    RewardDistributionController
+    RewardDistributionController,
 };
 
 /*
