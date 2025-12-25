@@ -46,6 +46,11 @@
         </form>
         @endif
 
+        <a href="{{ route('admin.reward-distributions.index') }}"
+            class="inline-block mt-6 px-4 py-2 bg-indigo-600 text-white rounded-lg">
+            🎰 ガチャ配布設定へ
+        </a>
+
 
         <div class="bg-white overflow-hidden shadow-2xl card-shadow sm:rounded-lg">
             <div class="p-6">

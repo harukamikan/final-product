@@ -26,7 +26,8 @@ use App\Http\Controllers\Admin\{
     GoalUploadController,
     GoalAiUploadController,
     AdminDashboardController,
-    AdminRewardController
+    AdminRewardController,
+    RewardDistributionController
 };
 
 /*
@@ -202,6 +203,22 @@ Route::middleware(['auth', 'company'])->group(function () {
 
         Route::post('/rewards/deadline', [AdminRewardController::class, 'setDeadline'])
             ->name('rewards.deadline');
+
+        //報酬配布管理
+        Route::get(
+            '/reward-distributions',
+            [RewardDistributionController::class, 'index']
+        )->name('reward-distributions.index');
+
+        Route::post(
+            '/reward-distributions',
+            [RewardDistributionController::class, 'store']
+        )->name('reward-distributions.store');
+
+        Route::patch(
+            '/reward-distributions/{distribution}/toggle',
+            [RewardDistributionController::class, 'toggle']
+        )->name('reward-distributions.toggle');
 
         // Mission management
         Route::resource('missions', MissionCreater::class);

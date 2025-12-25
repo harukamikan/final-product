@@ -1,0 +1,68 @@
+@extends('layouts.admin')
+
+@section('content')
+<div class="max-w-6xl mx-auto px-4 py-8 space-y-8">
+
+    <h1 class="text-2xl font-bold text-slate-800">
+        報酬配布管理
+    </h1>
+
+    {{-- 新規追加 --}}
+    <form method="POST" action="{{ route('admin.reward-distributions.store') }}"
+          class="bg-white p-6 rounded-xl shadow space-y-4">
+        @csrf
+
+        <div>
+            <label class="text-sm font-semibold">報酬</label>
+            <select name="reward_id" class="w-full border rounded-lg p-2">
+                @foreach($rewards as $reward)
+                    <option value="{{ $reward->id }}">
+                        {{ $reward->name }}
+                    </option>
+                @endforeach
+            </select>
+        </div>
+
+        <div>
+            <label class="text-sm font-semibold">数量（空欄＝無制限）</label>
+            <input type="number" name="quantity" class="w-full border rounded-lg p-2">
+        </div>
+
+        <div class="grid grid-cols-2 gap-4">
+            <input type="datetime-local" name="starts_at" class="border rounded-lg p-2">
+            <input type="datetime-local" name="ends_at" class="border rounded-lg p-2">
+        </div>
+
+        <button class="px-4 py-2 bg-indigo-600 text-white rounded-lg">
+            配布候補に追加
+        </button>
+    </form>
+
+    {{-- 一覧 --}}
+    <div class="bg-white rounded-xl shadow divide-y">
+        @foreach($distributions as $d)
+        <div class="p-4 flex justify-between items-center">
+            <div>
+                <p class="font-semibold">{{ $d->reward->name }}</p>
+                <p class="text-sm text-gray-500">
+                    数量：{{ $d->quantity ?? '無制限' }}
+                </p>
+            </div>
+
+            <form method="POST"
+                  action="{{ route('admin.reward-distributions.toggle', $d) }}">
+                @csrf
+                @method('PATCH')
+
+                <button
+                    class="px-4 py-1 rounded-lg text-white
+                    {{ $d->is_active ? 'bg-green-600' : 'bg-gray-400' }}">
+                    {{ $d->is_active ? '配布中' : '停止中' }}
+                </button>
+            </form>
+        </div>
+        @endforeach
+    </div>
+
+</div>
+@endsection
