@@ -19,7 +19,8 @@ use App\Http\Controllers\{
     ActivityController,
     CompanyController,
     MissionFormController,
-    GachaController
+    GachaController,
+    InviteController,
 };
 
 use App\Http\Controllers\Admin\{
@@ -46,6 +47,9 @@ Route::get('/auth/slack/redirect', [SlackAuthController::class, 'redirect'])
 
 Route::get('/auth/slack/callback', [SlackAuthController::class, 'callback'])
     ->name('slack.callback');
+
+Route::get('/invite/{token}', [InviteController::class, 'accept'])
+    ->name('invite.accept');
 
 /*
 |--------------------------------------------------------------------------
