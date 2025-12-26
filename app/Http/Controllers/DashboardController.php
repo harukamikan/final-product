@@ -8,6 +8,7 @@ use App\Models\UserMission;
 use App\Models\Mission;
 use App\Models\SemesterGoal;
 use App\Models\RewardSurvey;
+use App\Models\RewardDistribution;
 use Illuminate\Support\Facades\Auth;
 
 class DashboardController extends Controller
@@ -71,6 +72,23 @@ class DashboardController extends Controller
         // ランク判定
         $rank = $this->calculateRank($totalMiles);
 
+        //　ガチャが引けるかどうか
+        $canDrawGacha = RewardDistribution::where('company_id', $userId = Auth::user()->company_id)
+            ->where('is_active', true)
+            ->where(function ($q) {
+                $q->whereNull('starts_at')
+                    ->orWhere('starts_at', '<=', now());
+            })
+            ->where(function ($q) {
+                $q->whereNull('ends_at')
+                    ->orWhere('ends_at', '>=', now());
+            })
+            ->where(function ($q) {
+                $q->whereNull('quantity')
+                    ->orWhere('quantity', '>', 0);
+            })
+            ->exists();
+
         // おすすめミッション
         $recommendedMission = Mission::whereNotIn(
             'id',
@@ -88,7 +106,8 @@ class DashboardController extends Controller
             'rank',
             'recommendedMission',
             'semesterGoal',
-            'showRewardSurveyNotice'
+            'showRewardSurveyNotice',
+            'canDrawGacha'
         ));
     }
 

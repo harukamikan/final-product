@@ -3,11 +3,21 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use App\Models\Company;
 
 class InviteToken extends Model
 {
-    protected $fillable = ['company_id','token','expires_at','max_uses','used_count'];
-    protected $casts = ['expires_at' => 'datetime'];
+    protected $fillable = [
+        'company_id',
+        'token',
+        'expires_at',
+        'max_uses',
+        'used_count'
+    ];
+
+    protected $casts = [
+        'expires_at' => 'datetime'
+    ];
 
     public function company()
     {
