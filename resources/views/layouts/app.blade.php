@@ -82,22 +82,11 @@
                     </a>
 
                     {{-- 🎰 ガチャ --}}
-                    @if(isset($canDrawGacha) && $canDrawGacha)
-                    <form method="POST" action="{{ route('gacha.draw') }}"
-                        class="inline-flex items-center">
-                        @csrf
-                        <button
-                            class="inline-flex items-center px-1 pt-1 text-sm font-medium {{ $navText }} {{ $hoverText }}">
-                            ガチャ
-                        </button>
-                    </form>
-                    @else
-                    <span
-                        class="inline-flex items-center px-1 pt-1 text-sm font-medium text-gray-400 cursor-not-allowed"
-                        title="現在引けるガチャはありません">
+                    <a href="{{ route('gacha.index') }}"
+                        class="inline-flex items-center px-1 pt-1 text-sm font-medium {{ $navText }}
+   {{ request()->is('gacha*') ? 'border-b-2 border-indigo-500' : $hoverText }}">
                         ガチャ
-                    </span>
-                    @endif
+                    </a>
 
                 </div>
 

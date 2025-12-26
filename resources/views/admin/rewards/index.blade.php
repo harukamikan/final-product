@@ -48,12 +48,6 @@
         </form>
         @endif
 
-        {{-- ================= 配布管理画面への導線 ================= --}}
-        <a href="{{ route('admin.reward-distributions.index') }}"
-           class="inline-block mt-6 px-4 py-2 bg-indigo-600 text-white rounded-lg">
-            🎰 ガチャ配布設定へ
-        </a>
-
         {{-- ================= メインカード ================= --}}
         <div class="bg-white overflow-hidden shadow-2xl card-shadow sm:rounded-lg mt-8">
             <div class="p-6">

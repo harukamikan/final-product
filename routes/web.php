@@ -84,6 +84,9 @@ Route::middleware(['auth', 'company'])->group(function () {
     // ======================
     // 🎰 ガチャ
     // ======================
+    Route::get('/gacha', [GachaController::class, 'index'])
+        ->name('gacha.index');
+
     Route::post('/gacha/draw', [GachaController::class, 'draw'])
         ->name('gacha.draw');
 
