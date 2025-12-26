@@ -172,7 +172,8 @@ class MissionController extends Controller
             // ✅ アプリ内フォームへ（Googleフォームではなく）
             'event_speaker',
             'event_organizer',
-            'acquire_certificate' => redirect()->route('missions.app-form', ['mission' => $mission]),
+            'acquire_certificate'
+            => redirect()->route('missions.form.create', ['mission' => $mission]),
 
             default => view('missions.show', compact('mission')),
         };
