@@ -87,10 +87,6 @@ class ClaudeService
      */
     protected function buildPrompt($text, $availableUsers = [])
     {
-        \Log::info('=== AI Input ===');
-        \Log::info('Text:', ['text' => $text]);
-        \Log::info('Available Users:', $availableUsers);
-        
         $userList = '';
         if (!empty($availableUsers)) {
             $userList = "\n# 【重要】利用可能なユーザー名リスト:\n" . implode("\n", $availableUsers);

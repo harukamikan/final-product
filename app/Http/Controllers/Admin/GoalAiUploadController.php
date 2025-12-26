@@ -95,32 +95,35 @@ public function store(Request $request)
             continue;
         }
 
-        // 1. semester_goals 登録（定性的な目標）
-        if (isset($userData['semester_goal']) && $userData['semester_goal']) {
-            SemesterGoal::create([
-                'user_id' => $user->id,
-                'category' => '半期目標',
-                'title' => $userData['semester_goal'],
-                'deadline' => $userData['deadline'] ?? null,
-            ]);
-            $successCount++;
-        }
+       // 1. semester_goals 登録（定性的な目標）
+if (isset($userData['semester_goal']) && $userData['semester_goal']) {
+    
 
+    SemesterGoal::create([
+        'user_id' => $user->id,
+        'category' => '半期目標',
+        'title' => $userData['semester_goal'],
+        'deadline' => $userData['deadline'] ?? null,
+        'is_current'=>true,
+    ]);
+    $successCount++;
+}
         // 2. missions 登録（定量的な目標）
-        if (isset($userData['missions']) && is_array($userData['missions'])) {
-            foreach ($userData['missions'] as $mission) {
-                \App\Models\Mission::create([
+            if (isset($userData['missions']) && is_array($userData['missions'])) {
+              foreach ($userData['missions'] as $mission) {
+                 \App\Models\Mission::create([
                     'user_id' => $user->id,
                     'key' => \Illuminate\Support\Str::slug($mission['title'] ?? ''),
                     'title' => $mission['title'] ?? '',
                     'description' => "個人目標: " . ($mission['category'] ?? ''),
+                    'trigger_type' => 'manual', // ← 追加
                     'required_count' => $mission['count'] ?? 1,
-                    'reward_miles' => null, // 後で設定
+                    'reward_miles' => 0, // ← NULL → 0 に変更
                     'repeatable' => false,
-                ]);
-                $successCount++;
-            }
-        }
+        ]);
+        $successCount++;
+    }
+}
     }
 
     // セッションをクリア
