@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Company;
+use App\Models\InviteToken;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 
@@ -15,8 +16,11 @@ class CompanyController extends Controller
     {
         $user = $request->user();
 
-        // 既に所属済みならダッシュボードへ
-        if ($user->company_id) {
+        /**
+         * ✅ 既に所属済みでも、作成直後だけ「招待リンク表示」のために create 画面を見せたい
+         * そのため session('invite_link') がある場合は例外的に表示を許可する
+         */
+        if ($user->company_id && !$request->session()->has('invite_link')) {
             return redirect()->route('dashboard');
         }
 
@@ -24,7 +28,8 @@ class CompanyController extends Controller
     }
 
     /**
-     * 会社を作成して、作成者を所属させる（招待コード = slug）
+     * 会社を作成して、作成者を所属させる
+     * さらに「招待リンク（invite token）」を発行して company/create に表示する
      */
     public function store(Request $request)
     {
@@ -36,10 +41,10 @@ class CompanyController extends Controller
 
         $data = $request->validate([
             'name' => ['required', 'string', 'max:255'],
-            // 招待コードをユーザーに決めさせてもOK。空なら自動生成。
+            // slug は「会社の識別子」として残してOK（招待は token にする）
             'slug' => ['nullable', 'string', 'max:50', 'regex:/^[a-z0-9-]+$/'],
         ], [
-            'slug.regex' => '招待コードは半角英小文字・数字・ハイフンのみで入力してください。',
+            'slug.regex' => '会社slugは半角英小文字・数字・ハイフンのみで入力してください。',
         ]);
 
         $name = trim($data['name']);
@@ -52,19 +57,17 @@ class CompanyController extends Controller
             $slug = 'company-' . Str::lower(Str::random(8));
         }
 
-        // 重複したら末尾にランダムを付けて回避（手入力slugの場合はエラーにしたいなら分岐）
+        // slug 重複チェック
         if (Company::where('slug', $slug)->exists()) {
-            // 手入力で slug を入れてたならエラーにする方が親切
             if (!empty($data['slug'])) {
                 return back()->withInput()->withErrors([
-                    'slug' => 'この招待コードは既に使われています。別のコードを入力してください。',
+                    'slug' => 'この会社slugは既に使われています。別のslugを入力してください。',
                 ]);
             }
-
-            // 自動生成なら衝突回避
             $slug = $slug . '-' . Str::lower(Str::random(4));
         }
 
+        // 会社作成
         $company = Company::create([
             'name' => $name,
             'slug' => $slug,
@@ -74,13 +77,40 @@ class CompanyController extends Controller
         $user->company_id = $company->id;
         $user->save();
 
+        /**
+         * ✅ 会社ごとの「常設招待リンク」を1本にする
+         * 既に存在すればそれを再利用、なければ新規作成
+         */
+        $invite = InviteToken::where('company_id', $company->id)
+            ->where('max_uses', 0)
+            ->whereNull('expires_at')
+            ->first();
+
+        if (!$invite) {
+            $invite = InviteToken::create([
+                'company_id' => $company->id,
+                'token'      => Str::random(60),
+                'expires_at' => null,
+                'max_uses'   => 0,
+                'used_count' => 0,
+            ]);
+        }
+
+        $inviteLink = route('invite.accept', ['token' => $invite->token]);
+
+        /**
+         * ✅ 作成直後は company/create に戻して、招待リンクコピーUIを出す
+         */
         return redirect()
-            ->route('dashboard')
-            ->with('success', "会社「{$company->name}」を作成しました！招待コード：{$company->slug}");
+            ->route('company.create')
+            ->with([
+                'success'     => "会社「{$company->name}」を作成しました！このリンクをコピーしてメンバーを招待できます。",
+                'invite_link' => $inviteLink,
+            ]);
     }
 
     /**
-     * 会社参加（招待コード入力）画面
+     * 会社参加（招待コード入力）画面（保険）
      */
     public function showJoinForm(Request $request)
     {
@@ -94,7 +124,7 @@ class CompanyController extends Controller
     }
 
     /**
-     * 招待コード（slug）で会社に参加
+     * 招待コード（slug）で会社に参加（保険）
      */
     public function join(Request $request)
     {
