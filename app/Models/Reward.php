@@ -9,7 +9,9 @@ class Reward extends Model
     protected $fillable = [
         'company_id',
         'name',
-        'reward_miles',
-        'status',
+        'description',
+        'cost_miles',
+        'rank',
+        'is_active',
     ];
 }

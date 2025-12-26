@@ -77,6 +77,12 @@ Route::middleware(['auth'])->group(function () {
 */
 Route::middleware(['auth', 'company'])->group(function () {
 
+    // ======================
+    // 🎰 ガチャ
+    // ======================
+    Route::post('/gacha/draw', [GachaController::class, 'draw'])
+        ->name('gacha.draw');
+
     /*
     | Dashboard
     */
@@ -220,6 +226,14 @@ Route::middleware(['auth', 'company'])->group(function () {
             '/reward-distributions/{distribution}/toggle',
             [RewardDistributionController::class, 'toggle']
         )->name('reward-distributions.toggle');
+
+        Route::post(
+            '/rewards/decide',
+            [AdminRewardController::class, 'decide']
+        )->name('rewards.decide');
+
+        Route::post('/rewards/bulk-decide', [AdminRewardController::class, 'bulkDecide'])
+            ->name('rewards.bulk-decide');
 
         // Mission management
         Route::resource('missions', MissionCreater::class);
