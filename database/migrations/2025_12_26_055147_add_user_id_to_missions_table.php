@@ -4,32 +4,23 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration
-{
-    /**
-     * Run the migrations.
-     */
+return new class extends Migration {
     public function up(): void
     {
         Schema::table('missions', function (Blueprint $table) {
-            $table->unsignedBigInteger('user_id')->nullable()->after('id');
-            
-            // 外部キー制約
-            $table->foreign('user_id')
-                  ->references('id')
-                  ->on('users')
-                  ->onDelete('cascade');
+            if (!Schema::hasColumn('missions', 'user_id')) {
+                $table->foreignId('user_id')->nullable()->after('id')->constrained()->nullOnDelete();
+            }
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
         Schema::table('missions', function (Blueprint $table) {
-            $table->dropForeign(['user_id']);
-            $table->dropColumn('user_id');
+            if (Schema::hasColumn('missions', 'user_id')) {
+                $table->dropForeign(['user_id']);
+                $table->dropColumn('user_id');
+            }
         });
     }
 };
