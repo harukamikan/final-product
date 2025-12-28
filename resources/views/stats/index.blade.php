@@ -36,40 +36,37 @@
             </div>
         </div>
 
-        {{-- ===== 月別マイル獲得 ===== --}}
-        <div class="bg-white rounded-2xl shadow-md p-6">
-            <h3 class="text-lg font-semibold text-slate-800 mb-4">
-                📈 月別マイル獲得
-            </h3>
-
-            <div class="h-[400px] overflow-x-auto">
-                <div class="min-w-[800px] h-full">
+        {{-- ===== グラフエリア（3列レイアウト） ===== --}}
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            
+            {{-- 月別マイル獲得 --}}
+            <div class="bg-white rounded-2xl shadow-md p-6">
+                <h3 class="text-lg font-semibold text-slate-800 mb-4">
+                    📈 月別マイル獲得
+                </h3>
+                <div class="h-[300px]">
                     <canvas id="monthlyChart"></canvas>
                 </div>
             </div>
-        </div>
 
-        {{-- ===== 累積マイル推移 ===== --}}
-        <div class="bg-white rounded-2xl shadow-md p-6">
-            <h3 class="text-lg font-semibold text-slate-800 mb-4">
-                📊 累積マイル推移
-            </h3>
-
-            <div class="h-[400px] overflow-x-auto">
-                <div class="min-w-[800px] h-full">
+            {{-- 累積マイル推移 --}}
+            <div class="bg-white rounded-2xl shadow-md p-6">
+                <h3 class="text-lg font-semibold text-slate-800 mb-4">
+                    📊 累積マイル推移
+                </h3>
+                <div class="h-[300px]">
                     <canvas id="cumulativeChart"></canvas>
                 </div>
             </div>
-        </div>
 
-        {{-- ===== カテゴリ別マイル ===== --}}
-        <div class="bg-white rounded-2xl shadow-md p-6">
-            <h3 class="text-lg font-semibold text-slate-800 mb-4">
-                🎯 カテゴリ別マイル獲得
-            </h3>
-
-            <div class="h-[400px]">
-                <canvas id="categoryChart"></canvas>
+            {{-- カテゴリ別マイル --}}
+            <div class="bg-white rounded-2xl shadow-md p-6">
+                <h3 class="text-lg font-semibold text-slate-800 mb-4">
+                    🎯 カテゴリ別マイル獲得
+                </h3>
+                <div class="h-[300px]">
+                    <canvas id="categoryChart"></canvas>
+                </div>
             </div>
         </div>
 
