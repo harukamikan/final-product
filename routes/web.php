@@ -162,8 +162,7 @@ Route::middleware(['auth', 'company'])->group(function () {
     */
     Route::get('/ranking', [RankingController::class, 'index'])
         ->name('ranking.index');
-
-    Route::get('/stats', [StatsController::class, 'index'])
+Route::get('/stats', [StatsController::class, 'index'])
         ->name('stats.index');
 
     /*
@@ -175,6 +174,24 @@ Route::middleware(['auth', 'company'])->group(function () {
     Route::get('/missions/completed', [MissionListController::class, 'completed'])
         ->name('missions.completed');
 
+    Route::get('/missions/personal', [MissionListController::class, 'personal'])
+        ->name('missions.personal');
+
+    Route::get('/missions/{mission}', [MissionController::class, 'show'])
+        ->name('missions.show');
+
+    Route::post('/missions/{mission}/complete', [UserMissionController::class, 'complete'])
+        ->name('missions.complete');
+
+    /*
+    | Missions
+    */
+    Route::get('/missions', [MissionListController::class, 'index'])
+        ->name('missions.index');
+    
+    Route::get('/missions/completed', [MissionListController::class, 'completed'])
+        ->name('missions.completed');
+    
     Route::get('/missions/personal', [MissionListController::class, 'personal'])
         ->name('missions.personal');
 

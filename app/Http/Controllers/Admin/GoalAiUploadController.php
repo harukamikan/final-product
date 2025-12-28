@@ -24,7 +24,7 @@ class GoalAiUploadController extends Controller
     }
 
     // テキストファイルを処理
-    public function upload(Request $request)
+   public function upload(Request $request)
 {
     $request->validate([
         'file' => 'required|mimes:txt,xlsx,xls,docx'
@@ -34,14 +34,12 @@ class GoalAiUploadController extends Controller
     $file = $request->file('file');
     $content = $this->extractContent($file);
 
-        try {
-            // 利用可能なユーザー名リストを取得
-        $availableUsers = \App\Models\User::all()->pluck('name')->toArray();
+    // ユーザー一覧を取得
+    $availableUsers = \App\Models\User::pluck('name')->toArray();
 
-        // AI抽出時にユーザーリストを渡す
-        $extractedData = $this->claudeService->extractGoals($content, $availableUsers);
-            // セッションに保存して確認画面へ
-            session(['extracted_goals' => $extractedData]);
+    try {
+        // AI で目標を分類（新メソッド使用）
+        $extractedData = $this->claudeService->classifyGoals($content, $availableUsers);
 
         // セッションに保存して確認画面へ
         session(['extracted_goals' => $extractedData]);
@@ -68,7 +66,7 @@ public function store(Request $request)
 {
     $extractedData = session('extracted_goals');
 
-if (!$extractedData) {
+    if (!$extractedData) {
         return redirect()->route('admin.goals.ai.index')->with('error', 'データがありません');
     }
 
@@ -77,8 +75,7 @@ if (!$extractedData) {
 
     foreach ($extractedData as $userData) {
         $name = $userData['name'] ?? null;
-        $goals = $userData['goals'] ?? [];
-
+        
         if (!$name) continue;
 
         // ユーザーを名前で検索（3段階）
@@ -93,42 +90,40 @@ if (!$extractedData) {
             $user = User::where('name', 'like', "%{$name}%")->first();
         }
 
-        if ($user) {
-            // AI で目標を分類
-            $classified = $this->claudeService->classifyGoals($goals);
-
-            // 定量的な目標 → missions テーブル
-            if (isset($classified['missions'])) {
-                foreach ($classified['missions'] as $mission) {
-                    \App\Models\Mission::create([
-                        'user_id' => $user->id,
-                        'key' => $mission['key'] ?? uniqid('mission_'),
-                        'title' => $mission['title'],
-                        'description' => $mission['description'] ?? null,
-                        'trigger_type' => $mission['trigger_type'],
-                        'required_count' => $mission['required_count'],
-                        'reward_miles' => $mission['reward_miles'] ?? 0,
-                        'repeatable' => $mission['repeatable'] ?? false,
-                    ]);
-                    $successCount++;
-                }
-            }
-
-            // 定性的な目標 → semester_goals テーブル
-            if (isset($classified['semester_goals'])) {
-                foreach ($classified['semester_goals'] as $goal) {
-                    SemesterGoal::create([
-                        'user_id' => $user->id,
-                        'category' => $goal['category'] ?? '定性目標',
-                        'title' => $goal['goal'],
-                        'deadline' => $goal['deadline'] ?? null,
-                    ]);
-                    $successCount++;
-                }
-            }
-        } else {
+        if (!$user) {
             $errorUsers[] = $name;
+            continue;
         }
+
+       // 1. semester_goals 登録（定性的な目標）
+if (isset($userData['semester_goal']) && $userData['semester_goal']) {
+    
+
+    SemesterGoal::create([
+        'user_id' => $user->id,
+        'category' => '半期目標',
+        'title' => $userData['semester_goal'],
+        'deadline' => $userData['deadline'] ?? null,
+        'is_current'=>true,
+    ]);
+    $successCount++;
+}
+        // 2. missions 登録（定量的な目標）
+            if (isset($userData['missions']) && is_array($userData['missions'])) {
+              foreach ($userData['missions'] as $mission) {
+                 \App\Models\Mission::create([
+                    'user_id' => $user->id,
+                    'key' => \Illuminate\Support\Str::slug($mission['title'] ?? ''),
+                    'title' => $mission['title'] ?? '',
+                    'description' => "個人目標: " . ($mission['category'] ?? ''),
+                    'trigger_type' => 'manual', // ← 追加
+                    'required_count' => $mission['count'] ?? 1,
+                    'reward_miles' => 0, // ← NULL → 0 に変更
+                    'repeatable' => false,
+        ]);
+        $successCount++;
+    }
+}
     }
 
     // セッションをクリア

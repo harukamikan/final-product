@@ -17,7 +17,7 @@ class ClaudeService
     /**
      * 自由形式のテキストから目標を抽出
      */
-    public function extractGoals($text,$availableUsers = [])
+    public function extractGoals($text, $availableUsers = [])
     {
         $prompt = $this->buildPrompt($text, $availableUsers);
 
@@ -40,24 +40,59 @@ class ClaudeService
             $result = $response->json();
             $content = $result['content'][0]['text'] ?? '';
             
-            // JSON部分を抽出
+            \Log::info('=== AI Response ===', ['content' => $content]);
+            
             return $this->parseResponse($content);
         }
 
         throw new \Exception('Claude API request failed: ' . $response->body());
     }
 
-/**
- * プロンプトを構築
- */
-protected function buildPrompt($text, $availableUsers = [])
-{
-   $userList = '';
-    if (!empty($availableUsers)) {
-        $userList = "\n# 【重要】利用可能なユーザー名リスト:\n" . implode("\n", $availableUsers);
+    /**
+     * 半期目標を定性的/定量的に分類
+     */
+    public function classifyGoals($text, $availableUsers = [])
+    {
+        $prompt = $this->buildClassifyPrompt($text, $availableUsers);
+
+        $response = Http::withHeaders([
+            'x-api-key' => $this->apiKey,
+            'anthropic-version' => '2023-06-01',
+            'content-type' => 'application/json',
+        ])->post($this->apiUrl, [
+            'model' => 'claude-sonnet-4-5-20250929',
+            'max_tokens' => 2000,
+            'messages' => [
+                [
+                    'role' => 'user',
+                    'content' => $prompt
+                ]
+            ]
+        ]);
+
+        if ($response->successful()) {
+            $result = $response->json();
+            $content = $result['content'][0]['text'] ?? '';
+            
+            \Log::info('=== Claude Classify Response ===', ['content' => $content]);
+            
+            return $this->parseResponse($content);
+        }
+
+        throw new \Exception('Claude API request failed: ' . $response->body());
     }
-    
-    return <<<PROMPT
+
+    /**
+     * プロンプトを構築
+     */
+    protected function buildPrompt($text, $availableUsers = [])
+    {
+        $userList = '';
+        if (!empty($availableUsers)) {
+            $userList = "\n# 【重要】利用可能なユーザー名リスト:\n" . implode("\n", $availableUsers);
+        }
+        
+        return <<<PROMPT
 あなたはエンジニアの半期目標を抽出するアシスタントです。
 
 以下のテキストから、各メンバーの目標情報を抽出して、JSON形式で返してください。
@@ -68,10 +103,6 @@ protected function buildPrompt($text, $availableUsers = [])
 2. 上記の「利用可能なユーザー名リスト」から、**完全一致**で該当するユーザーを探す
 3. 完全一致がない場合は、入力テキストの名前をそのまま使用する
 
-例:
-- 入力テキスト: "haruka:" 
-- 利用可能なユーザー名: ["test", "haruka", "haruka", "haruka"]
-- 出力: "haruka" ✅（リストから完全一致を選択）
 # 抽出ルール
 - 名前（name）: 上記のルールに従って正確に抽出
 - 目標（goals）: 配列形式で複数可
@@ -100,12 +131,65 @@ protected function buildPrompt($text, $availableUsers = [])
 
 JSONのみを返してください。説明文は不要です。
 PROMPT;
-}    /**
+    }
+
+    /**
+     * 分類用プロンプトを構築
+     */
+    protected function buildClassifyPrompt($text, $availableUsers = [])
+    {
+        $userList = '';
+        if (!empty($availableUsers)) {
+            $userList = "\n# 【重要】利用可能なユーザー名リスト:\n" . implode("\n", $availableUsers);
+        }
+        
+        return <<<PROMPT
+あなたは半期目標を分析するアシスタントです。
+{$userList}
+
+【タスク】
+以下のテキストから、各メンバーの目標を抽出して分類してください。
+
+# 名前の抽出ルール
+- 入力テキストの最初の行が名前です
+- 上記の「利用可能なユーザー名リスト」から、最も近いものを選択してください
+
+# 分類ルール
+
+**定量的な目標（missions）:**
+- 数値がある（○本、○回、○個など）
+- 例: ブログ5本、資格2個取得、登壇3回
+
+**定性的な目標（semester_goal）:**
+- 数値なし
+- 例: 商談を成功させる、スキルアップする
+
+# 入力テキスト
+{$text}
+
+# 出力例
+```json
+[
+  {
+    "name": "haruka",
+    "semester_goal": "商談を成功させる",
+    "missions": [
+      {"category": "ブログ", "title": "ブログ投稿", "count": 5},
+      {"category": "資格", "title": "一陸技取得", "count": 1}
+    ]
+  }
+]
+```
+
+必ずこの形式のJSONのみを返してください。説明文は不要です。
+PROMPT;
+    }
+
+    /**
      * レスポンスをパース
      */
     protected function parseResponse($content)
     {
-        // ```json ... ``` を削除
         $content = preg_replace('/```json\s*|\s*```/', '', $content);
         $content = trim($content);
 
@@ -116,103 +200,5 @@ PROMPT;
         }
 
         return $data;
-    }
-
-    /**
-     * 目標を定量的・定性的に分類
-     */
-    public function classifyGoals($goals)
-    {
-        $prompt = $this->buildClassificationPrompt($goals);
-
-        $response = Http::withHeaders([
-            'x-api-key' => $this->apiKey,
-            'anthropic-version' => '2023-06-01',
-            'content-type' => 'application/json',
-        ])->post($this->apiUrl, [
-            'model' => 'claude-sonnet-4-5-20250929',
-            'max_tokens' => 2000,
-            'messages' => [
-                [
-                    'role' => 'user',
-                    'content' => $prompt
-                ]
-            ]
-        ]);
-
-        if ($response->successful()) {
-            $result = $response->json();
-            $content = $result['content'][0]['text'] ?? '';
-            return $this->parseResponse($content);
-        }
-
-        throw new \Exception('Claude API request failed: ' . $response->body());
-    }
-
-    /**
-     * 分類用プロンプトを構築
-     */
-    protected function buildClassificationPrompt($goals)
-    {
-        $goalsJson = json_encode($goals, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT);
-        
-        return <<<PROMPT
-あなたは目標を分類するアシスタントです。
-
-以下の目標リストを、**定量的な目標**と**定性的な目標**に分類してください。
-
-# 分類基準
-
-## 定量的な目標（missions）
-- 数値で測定可能
-- 繰り返し可能
-- 具体的なアクション
-
-**例:**
-- ブログを5本書く → missions（trigger_type: "blog", required_count: 5）
-- 資格を2個取得 → missions（trigger_type: "certification", required_count: 2）
-- 登壇を3回行う → missions（trigger_type: "presentation", required_count: 3）
-
-## 定性的な目標（semester_goals）
-- 数値化困難
-- 一度きりの達成
-- 抽象的・概念的
-
-**例:**
-- チームリーダーとしてスキルアップ
-- 商談を成功させる
-- 新技術を習得する
-
-# 入力目標
-{$goalsJson}
-
-# 出力形式
-```json
-{
-  "missions": [
-    {
-      "title": "ブログを5本書く",
-      "trigger_type": "blog",
-      "required_count": 5,
-      "key": "blog_5"
-    }
-  ],
-  "semester_goals": [
-    {
-      "goal": "チームリーダーとしてスキルアップ"
-    }
-  ]
-}
-```
-
-**trigger_typeの種類:**
-- blog（ブログ執筆）
-- certification（資格取得）
-- presentation（登壇・発表）
-- development（開発プロジェクト）
-- study（学習・研修）
-
-JSONのみを返してください。説明文は不要です。
-PROMPT;
     }
 }
