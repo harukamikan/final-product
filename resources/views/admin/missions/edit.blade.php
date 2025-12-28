@@ -1,5 +1,5 @@
 {{-- resources/views/admin/missions/edit.blade.php --}}
-@extends('layouts.app')
+@extends('layouts.admin')
 
 @section('content')
 <div class="max-w-5xl mx-auto px-4 py-8 space-y-6">

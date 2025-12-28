@@ -19,4 +19,8 @@ class Goal extends Model
         'criteria',
         'memo',
     ];
+
+    protected $casts = [
+        'deadline' => 'date',
+    ];
 }

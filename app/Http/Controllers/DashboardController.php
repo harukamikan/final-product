@@ -7,12 +7,35 @@ use App\Models\MileHistory;
 use App\Models\UserMission;
 use App\Models\Mission;
 use App\Models\SemesterGoal;
+use App\Models\RewardSurvey;
+use App\Models\RewardDistribution;
+use Illuminate\Support\Facades\Auth;
 
 class DashboardController extends Controller
 {
     public function index()
     {
-        $userId = auth()->id();
+        $user = Auth::user();
+        $userId = $user->id;
+        $company = $user->company;
+
+        // 初期値（会社未所属でも落ちない）
+        $showRewardSurveyNotice = false;
+
+        // 会社に所属している場合のみ判定
+        if ($company) {
+            $hasAnsweredSurvey = RewardSurvey::where('user_id', $userId)
+                ->where('company_id', $company->id)
+                ->exists();
+
+            $showRewardSurveyNotice =
+                $company->reward_survey_active
+                && ! $hasAnsweredSurvey
+                && (
+                    !$company->reward_survey_deadline
+                    || now()->lte($company->reward_survey_deadline)
+                );
+        }
 
         // 最近の目標（3件）
         $recentGoals = Goal::where('user_id', $userId)
@@ -49,13 +72,30 @@ class DashboardController extends Controller
         // ランク判定
         $rank = $this->calculateRank($totalMiles);
 
+        //　ガチャが引けるかどうか
+        $canDrawGacha = RewardDistribution::where('company_id', $userId = Auth::user()->company_id)
+            ->where('is_active', true)
+            ->where(function ($q) {
+                $q->whereNull('starts_at')
+                    ->orWhere('starts_at', '<=', now());
+            })
+            ->where(function ($q) {
+                $q->whereNull('ends_at')
+                    ->orWhere('ends_at', '>=', now());
+            })
+            ->where(function ($q) {
+                $q->whereNull('quantity')
+                    ->orWhere('quantity', '>', 0);
+            })
+            ->exists();
+
         // おすすめミッション
         $recommendedMission = Mission::whereNotIn(
             'id',
             UserMission::where('user_id', $userId)->pluck('mission_id')
         )
-        ->orderBy('reward_miles', 'desc')
-        ->first();
+            ->orderBy('reward_miles', 'desc')
+            ->first();
 
         return view('dashboard', compact(
             'recentGoals',
@@ -65,7 +105,9 @@ class DashboardController extends Controller
             'recentMissions',
             'rank',
             'recommendedMission',
-            'semesterGoal'
+            'semesterGoal',
+            'showRewardSurveyNotice',
+            'canDrawGacha'
         ));
     }
 

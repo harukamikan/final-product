@@ -18,13 +18,18 @@ use App\Http\Controllers\{
     SemesterGoalController,
     ActivityController,
     CompanyController,
-    MissionFormController
+    MissionFormController,
+    GachaController,
+    InviteController,
 };
 
 use App\Http\Controllers\Admin\{
     MissionCreater,
     GoalUploadController,
-    GoalAiUploadController
+    GoalAiUploadController,
+    AdminDashboardController,
+    AdminRewardController,
+    RewardDistributionController,
 };
 
 /*
@@ -42,6 +47,9 @@ Route::get('/auth/slack/redirect', [SlackAuthController::class, 'redirect'])
 
 Route::get('/auth/slack/callback', [SlackAuthController::class, 'callback'])
     ->name('slack.callback');
+
+Route::get('/invite/{token}', [InviteController::class, 'accept'])
+    ->name('invite.accept');
 
 /*
 |--------------------------------------------------------------------------
@@ -72,6 +80,15 @@ Route::middleware(['auth'])->group(function () {
 |--------------------------------------------------------------------------
 */
 Route::middleware(['auth', 'company'])->group(function () {
+
+    // ======================
+    // 🎰 ガチャ
+    // ======================
+    Route::get('/gacha', [GachaController::class, 'index'])
+        ->name('gacha.index');
+
+    Route::post('/gacha/draw', [GachaController::class, 'draw'])
+        ->name('gacha.draw');
 
     /*
     | Dashboard
@@ -133,7 +150,7 @@ Route::middleware(['auth', 'company'])->group(function () {
     Route::post('/missions/{mission}/form', [MissionFormController::class, 'store'])
         ->name('missions.form.store');
 
-  
+
     /*
     | Activities
     */
@@ -143,7 +160,7 @@ Route::middleware(['auth', 'company'])->group(function () {
     /*
     | Ranking / Stats
     */
-   Route::get('/ranking', [RankingController::class, 'index'])
+    Route::get('/ranking', [RankingController::class, 'index'])
         ->name('ranking.index');
 Route::get('/stats', [StatsController::class, 'index'])
         ->name('stats.index');
@@ -153,10 +170,10 @@ Route::get('/stats', [StatsController::class, 'index'])
     */
     Route::get('/missions', [MissionListController::class, 'index'])
         ->name('missions.index');
-    
+
     Route::get('/missions/completed', [MissionListController::class, 'completed'])
         ->name('missions.completed');
-    
+
     Route::get('/missions/personal', [MissionListController::class, 'personal'])
         ->name('missions.personal');
 
@@ -193,13 +210,60 @@ Route::get('/stats', [StatsController::class, 'index'])
 
     /*
     |--------------------------------------------------------------------------
+    | Reward Survey（社員用）
+    |--------------------------------------------------------------------------
+    */
+    Route::get('/reward-survey', [\App\Http\Controllers\RewardSurveyController::class, 'create'])
+        ->name('reward-survey.create');
+
+    Route::post('/reward-survey', [\App\Http\Controllers\RewardSurveyController::class, 'store'])
+        ->name('reward-survey.store');
+
+    /*
+    |--------------------------------------------------------------------------
     | Admin Routes（まずは company 内。あとで admin middleware を追加）
     |--------------------------------------------------------------------------
     */
     Route::prefix('admin')->name('admin.')->group(function () {
 
+        Route::get('/dashboard', [AdminDashboardController::class, 'index'])
+            ->name('dashboard');
+
+        Route::post('/rewards/toggle', [AdminRewardController::class, 'toggle'])
+            ->name('rewards.toggle');
+
+        Route::post('/rewards/deadline', [AdminRewardController::class, 'setDeadline'])
+            ->name('rewards.deadline');
+
+        //報酬配布管理
+        Route::get(
+            '/reward-distributions',
+            [RewardDistributionController::class, 'index']
+        )->name('reward-distributions.index');
+
+        Route::post(
+            '/reward-distributions',
+            [RewardDistributionController::class, 'store']
+        )->name('reward-distributions.store');
+
+        Route::patch(
+            '/reward-distributions/{distribution}/toggle',
+            [RewardDistributionController::class, 'toggle']
+        )->name('reward-distributions.toggle');
+
+        Route::post(
+            '/rewards/decide',
+            [AdminRewardController::class, 'decide']
+        )->name('rewards.decide');
+
+        Route::post('/rewards/bulk-decide', [AdminRewardController::class, 'bulkDecide'])
+            ->name('rewards.bulk-decide');
+
         // Mission management
         Route::resource('missions', MissionCreater::class);
+
+        Route::get('/rewards', [AdminRewardController::class, 'index'])
+            ->name('rewards.index');
 
         // CSV Upload
         Route::get('/goals/upload', [GoalUploadController::class, 'index'])
@@ -251,4 +315,4 @@ Route::middleware(['auth', 'company'])->get('/debug/users', function () {
     return response()->json(
         \App\Models\User::all(['id', 'name', 'email', 'slack_id', 'company_id'])
     );
-});  
+});

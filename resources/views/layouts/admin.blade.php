@@ -39,55 +39,58 @@
     $b = hexdec(substr($bgValue, 5, 2));
     $brightness = ($r * 299 + $g * 587 + $b * 114) / 1000;
 
-    // 明るい背景なら暗いナビゲーション、暗い背景なら明るいナビゲーション
+    // 明るい背景なら暗い文字、暗い背景なら明るい文字
     $navText = $brightness > 155 ? 'text-white' : 'text-gray-900';
     $navBorder = $brightness > 155 ? 'border-gray-700' : 'border-gray-200';
     $hoverText = $brightness > 155 ? 'hover:text-gray-300' : 'hover:text-gray-700';
     @endphp
 
-    <nav class="{backdrop-blur border-b {{ $navBorder }} shadow-sm">
+    <nav class="backdrop-blur border-b {{ $navBorder }} shadow-sm">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between h-16">
 
-                {{-- 左メニュー --}}
+                {{-- 管理者メニュー --}}
                 <div class="flex space-x-8">
+                    <a href="{{ route('admin.dashboard') }}"
+                        class="inline-flex items-center px-1 pt-1 text-sm font-medium {{ $navText }}
+                       {{ request()->is('admin/dashboard') ? 'border-b-2 border-indigo-500' : $hoverText }}">
+                        📊 ダッシュボード
+                    </a>
+
+                    <a href="{{ route('admin.missions.index') }}"
+                        class="inline-flex items-center px-1 pt-1 text-sm font-medium {{ $navText }}
+                       {{ request()->is('admin/missions*') ? 'border-b-2 border-indigo-500' : $hoverText }}">
+                        🎯 ミッション管理
+                    </a>
+
+                    <a href="{{ route('admin.rewards.index') }}"
+                        class="inline-flex items-center px-1 pt-1 text-sm font-medium {{ $navText }}
+                        {{ request()->is('admin/rewards*') ? 'border-b-2 border-indigo-500' : $hoverText }}">
+                        🎁 報酬決定
+                    </a>
+
+                    <a href="{{ route('admin.reward-distributions.index') }}"
+                        class="inline-flex items-center px-1 pt-1 text-sm font-medium {{ $navText }}
+                        {{ request()->is('admin/reward_distributions*') ? 'border-b-2 border-indigo-500' : $hoverText }}">
+                        🎰 報酬配布管理
+                    </a>
+
+                    <a href="{{ route('admin.goals.upload.index') }}"
+                        class="inline-flex items-center px-1 pt-1 text-sm font-medium {{ $navText }}
+                       {{ request()->is('admin/goals/upload') ? 'border-b-2 border-indigo-500' : $hoverText }}">
+                        📊 Excel アップロード
+                    </a>
+
+                    <a href="{{ route('admin.goals.ai.index') }}"
+                        class="inline-flex items-center px-1 pt-1 text-sm font-medium {{ $navText }}
+                       {{ request()->is('admin/goals/ai-upload') ? 'border-b-2 border-indigo-500' : $hoverText }}">
+                        🤖 AI 自動抽出
+                    </a>
+
                     <a href="/dashboard"
-                        class="inline-flex items-center px-1 pt-1 text-sm font-medium {{ $navText }}
-                       {{ request()->is('dashboard') && !request()->is('*/') ? 'border-b-2 border-indigo-500' : $hoverText }}">
-                        ホーム
+                        class="inline-flex items-center px-1 pt-1 text-sm font-medium {{ $navText }} {{ $hoverText }}">
+                        ← 通常画面に戻る
                     </a>
-
-                    <a href="/missions"
-                        class="inline-flex items-center px-1 pt-1 text-sm font-medium {{ $navText }}
-                       {{ request()->is('missions*') ? 'border-b-2 border-indigo-500' : $hoverText }}">
-                        ミッション
-                    </a>
-
-                    <a href="/stats"
-                        class="inline-flex items-center px-1 pt-1 text-sm font-medium {{ $navText }}
-                       {{ request()->is('stats*') ? 'border-b-2 border-indigo-500' : $hoverText }}">
-                        統計
-                    </a>
-
-                    <a href="/activities"
-                        class="inline-flex items-center px-1 pt-1 text-sm font-medium {{ $navText }}
-                       {{ request()->is('activities*') ? 'border-b-2 border-indigo-500' : $hoverText }}">
-                        活動履歴
-                    </a>
-
-                    <a href="/ranking"
-                        class="inline-flex items-center px-1 pt-1 text-sm font-medium {{ $navText }}
-                       {{ request()->is('ranking*') ? 'border-b-2 border-indigo-500' : $hoverText }}">
-                        ランキング
-                    </a>
-
-                    {{-- 🎰 ガチャ --}}
-                    <a href="{{ route('gacha.index') }}"
-                        class="inline-flex items-center px-1 pt-1 text-sm font-medium {{ $navText }}
-   {{ request()->is('gacha*') ? 'border-b-2 border-indigo-500' : $hoverText }}">
-                        ガチャ
-                    </a>
-
                 </div>
 
                 {{-- 右メニュー（ユーザー） --}}
