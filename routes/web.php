@@ -21,6 +21,8 @@ use App\Http\Controllers\{
     MissionFormController,
     GachaController,
     InviteController,
+    RewardPlayController,
+    RewardHistoryController,
 };
 
 use App\Http\Controllers\Admin\{
@@ -31,6 +33,7 @@ use App\Http\Controllers\Admin\{
     AdminRewardController,
     RewardDistributionController,
 };
+use App\Models\RewardHistory;
 
 /*
 |--------------------------------------------------------------------------
@@ -71,6 +74,17 @@ Route::middleware(['auth'])->group(function () {
 
     Route::post('/company/join', [CompanyController::class, 'join'])
         ->name('company.join.submit');
+
+    //報酬画面(ガチャ+スクラッチ)
+    Route::post('/rewards/play/gacha', [RewardPlayController::class, 'gacha'])
+        ->name('rewards.gacha');
+
+    Route::post('/rewards/play/scratch', [RewardPlayController::class, 'scratch'])
+        ->name('rewards.scratch');
+
+    //取得報酬履歴
+    Route::get('/rewards/history', [RewardHistoryController::class, 'index'])
+        ->name('rewards.history');
 });
 
 /*
@@ -162,7 +176,7 @@ Route::middleware(['auth', 'company'])->group(function () {
     */
     Route::get('/ranking', [RankingController::class, 'index'])
         ->name('ranking.index');
-Route::get('/stats', [StatsController::class, 'index'])
+    Route::get('/stats', [StatsController::class, 'index'])
         ->name('stats.index');
 
     /*
@@ -188,10 +202,10 @@ Route::get('/stats', [StatsController::class, 'index'])
     */
     Route::get('/missions', [MissionListController::class, 'index'])
         ->name('missions.index');
-    
+
     Route::get('/missions/completed', [MissionListController::class, 'completed'])
         ->name('missions.completed');
-    
+
     Route::get('/missions/personal', [MissionListController::class, 'personal'])
         ->name('missions.personal');
 
