@@ -26,6 +26,7 @@ class User extends Authenticatable
         'password',
         'background_type',
         'background_value',
+        'nickname',
     ];
 
     /**
