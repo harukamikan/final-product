@@ -25,7 +25,7 @@
 
                 {{-- モーダル --}}
                 <div x-show="open" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" @click="open = false">
-                    <div class="bg-white rounded-lg shadow p-6 w-96" @click.stop>
+                    <div class="bg-white rounded-lg shadow p-6 w-96" @click.stop x-data="{ nicknameInput: '{{ $user->nickname ?? '' }}' }">
                         <h3 class="text-lg font-semibold mb-4">プレイヤー名</h3>
                         
                         <form method="POST" action="{{ route('profile.update') }}">
@@ -35,12 +35,27 @@
                             <input 
                                 type="text" 
                                 name="nickname" 
-                                value="{{ $user->nickname ?? '' }}" 
-                                placeholder="ニックネームを入力"
+                                x-model="nicknameInput"
+                                placeholder="例：素早い猫"
                                 maxlength="8"
                                 class="w-full rounded px-3 py-2 border border-gray-300 mb-2">
                             
                             <p class="text-xs text-gray-500 mb-4">8文字まで入力できます</p>
+                            
+                            <div class="flex gap-2 mb-4">
+                                <button 
+                                    type="button"
+                                    @click="
+                                        const adjectives = ['素早い', '賢い', '勇敢な', '静かな', '輝く', '優しい', '強い', '美しい', '清い', '深い'];
+                                        const nouns = ['猫', '狼', '竜', '鳥', '月', '星', '風', '火', '水', '木', '石', '雲', '波', '光', '影', '夢', '音', '香'];
+                                        const adj = adjectives[Math.floor(Math.random() * adjectives.length)];
+                                        const noun = nouns[Math.floor(Math.random() * nouns.length)];
+                                        nicknameInput = (adj + noun).substring(0, 8);
+                                    "
+                                    class="flex-1 px-4 py-2 border rounded-md text-gray-600 hover:bg-gray-100">
+                                    🎲 ランダム
+                                </button>
+                            </div>
                             
                             <div class="flex gap-3">
                                 <button 
