@@ -12,9 +12,54 @@
             <p class="font-medium mb-4">{{ $user->name }}</p>
 
             <p class="text-sm text-gray-600">メールアドレス</p>
-            <p class="font-medium">{{ $user->email }}</p>
-        </div>
+            <p class="font-medium mb-4">{{ $user->email }}</p>
+            <p class="text-sm text-gray-600">ニックネーム</p>
+            <div class="border rounded p-3" x-data="{ open: false }">
+                 <div class="flex items-center justify-between">
+                    <p class="font-medium">{{ $user->nickname ?? '未設定' }}</p>
+                    <button @click="open = true" class="text-indigo-600 hover:text-indigo-700">
+                        ✏️
+                    </button>
+                </div>
+                
 
+                {{-- モーダル --}}
+                <div x-show="open" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" @click="open = false">
+                    <div class="bg-white rounded-lg shadow p-6 w-96" @click.stop>
+                        <h3 class="text-lg font-semibold mb-4">プレイヤー名</h3>
+                        
+                        <form method="POST" action="{{ route('profile.update') }}">
+                            @csrf
+                            @method('PATCH')
+                            
+                            <input 
+                                type="text" 
+                                name="nickname" 
+                                value="{{ $user->nickname ?? '' }}" 
+                                placeholder="ニックネームを入力"
+                                maxlength="8"
+                                class="w-full rounded px-3 py-2 border border-gray-300 mb-2">
+                            
+                            <p class="text-xs text-gray-500 mb-4">8文字まで入力できます</p>
+                            
+                            <div class="flex gap-3">
+                                <button 
+                                    type="button"
+                                    @click="open = false"
+                                    class="flex-1 px-4 py-2 border rounded-md text-gray-600 hover:bg-gray-100">
+                                    キャンセル
+                                </button>
+                                <button 
+                                    type="submit"
+                                    class="flex-1 px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700">
+                                    OK
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
         {{-- ================= 表示設定 ================= --}}
         <div class="bg-white p-6 rounded-lg shadow">
             <h3 class="text-lg font-semibold mb-4">表示設定</h3>
@@ -255,7 +300,7 @@
                                 キャンセル
                             </button>
 
-                            <a
+                            
                                 href="{{ route('profile.delete.confirm') }}"
                                 class="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700">
                                 削除する
