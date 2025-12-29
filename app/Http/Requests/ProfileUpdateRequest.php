@@ -40,6 +40,12 @@ class ProfileUpdateRequest extends FormRequest
                 'string',
                 'max:255',
             ],
+            'nickname' => [
+                'sometimes', 
+                'nullable',
+                'string',
+                'max:255'
+            ],
         ];
     }
 }

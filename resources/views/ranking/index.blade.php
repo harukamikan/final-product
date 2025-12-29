@@ -76,7 +76,7 @@
                 <div class="flex justify-between items-center
                             p-4 rounded-lg border shadow-sm {{ $rankClass }}">
                     <div class="font-semibold">
-                        {{ $rank }} 位　{{ $user->name }}
+                        {{ $rank }} 位　{{ $user->nickname ?? $user->name }}
                     </div>
                     <div class="font-bold">
                         {{ $user->total_miles }} mile
@@ -102,7 +102,7 @@
                 <div class="flex justify-between items-center
                             p-4 rounded-lg border shadow-sm {{ $rankClass }}">
                     <div class="font-semibold">
-                        {{ $rank }} 位　{{ $user->name }}
+                        {{ $rank }} 位　{{ $user->nickname ?? $user->name }}
                     </div>
                     <div class="font-bold">
                         {{ $user->completed_missions }} 件
