@@ -14,7 +14,7 @@ class GoalAiUploadController extends Controller
     protected $claudeService;
     protected $slackService; 
 
-    public function __construct(ClaudeService $claudeService)
+    public function __construct(ClaudeService $claudeService,SlackService $slackService)
     {
         $this->claudeService = $claudeService;
         $this->slackService = $slackService;
