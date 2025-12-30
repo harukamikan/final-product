@@ -7,16 +7,20 @@ use Illuminate\Support\Facades\Schema;
 return new class extends Migration {
     public function up()
     {
-        Schema::table('rewards', function (Blueprint $table) {
-            $table->string('rank', 20)->change();
-        });
+        // rewardsテーブルが存在する場合のみ変更
+        if (Schema::hasTable('rewards')) {
+            Schema::table('rewards', function (Blueprint $table) {
+                $table->string('rank', 20)->change();
+            });
+        }
     }
 
     public function down()
     {
-        Schema::table('rewards', function (Blueprint $table) {
-            $table->string('rank', 1)->change(); // 元が char(1) 等なら合わせる
-        });
+        if (Schema::hasTable('rewards')) {
+            Schema::table('rewards', function (Blueprint $table) {
+                $table->string('rank', 1)->change();
+            });
+        }
     }
 };
-
