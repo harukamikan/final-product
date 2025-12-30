@@ -5,16 +5,19 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Services\ClaudeService;
+use App\Services\SlackService;
 use App\Models\User;
 use App\Models\SemesterGoal;
 
 class GoalAiUploadController extends Controller
 {
     protected $claudeService;
+    protected $slackService; 
 
     public function __construct(ClaudeService $claudeService)
     {
         $this->claudeService = $claudeService;
+        $this->slackService = $slackService;
     }
 
     // アップロード画面を表示
@@ -82,7 +85,31 @@ class GoalAiUploadController extends Controller
 
             // 同姓同名エラーをチェック
             if ($name === 'error_duplicate_name') {
-                $duplicateNameErrors[] = '同姓同名のユーザーが存在します。Slack で手動入力するか、管理者に確認してください。';
+                $originalInput = $userData['original_input'] ?? '不明';
+                $candidates = $userData['candidates'] ?? [];
+                
+                $errorMessage = '同姓同名のユーザーが存在します。Slack で手動入力するか、管理者に確認してください。';
+                $duplicateNameErrors[] = $errorMessage;
+                
+                // 管理者にSlack通知を送信
+                $this->slackService->notifyDuplicateNameError($originalInput, $candidates);
+                
+                // 該当ユーザー全員にDMを送信
+                foreach ($candidates as $candidateName) {
+                    $user = User::where('name', $candidateName)->first();
+                    if ($user && $user->slack_id) {
+                        $this->slackService->sendDM(
+                            $user->slack_id,
+                            "⚠️ 半期目標の登録に失敗しました。\n\n同姓同名のため、次回から社員番号やメールアドレスも記入してください。\n\n今回の目標は /goal コマンドで登録できます。"
+                        );
+                    }
+                }
+                
+                \Log::error('同姓同名エラー検出', [
+                    'original_input' => $originalInput,
+                    'candidates' => $candidates
+                ]);
+                
                 continue;
             }
 

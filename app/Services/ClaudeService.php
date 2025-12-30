@@ -163,6 +163,8 @@ PROMPT;
 
 **ステップ3: 複数人該当または0人の場合（同姓同名エラー）**
 - JSON の name フィールドに 「error_duplicate_name」 と入力
+- candidates フィールドに該当した全ユーザー名を配列で入力
+- original_input フィールドに入力テキストから抽出した名前を入力
 - semester_goal と missions フィールドは空にする
 - 理由: 同じ名前の複数ユーザーが存在するため、正確に判定できない
 
@@ -205,6 +207,8 @@ PROMPT;
 [
   {
     "name": "error_duplicate_name",
+    "candidates": ["田中太郎_開発部", "田中太郎_営業部"],
+    "original_input": "田中太郎",
     "semester_goal": null,
     "missions": []
   }
