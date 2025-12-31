@@ -45,12 +45,19 @@
     $hoverText = $brightness > 155 ? 'hover:text-gray-300' : 'hover:text-gray-700';
     @endphp
 
-    <nav class="{backdrop-blur border-b {{ $navBorder }} shadow-sm">
+    <nav class="backdrop-blur border-b {{ $navBorder }} shadow-sm" x-data="{ mobileMenuOpen: false }">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex justify-between h-16">
+            <div class="flex justify-between items-center h-16">
 
-                {{-- 左メニュー --}}
-                <div class="flex space-x-8">
+                  {{-- ハンバーガーボタン（スマホのみ表示） --}}
+                <button @click="mobileMenuOpen = !mobileMenuOpen" class="md:hidden {{ $navText }} focus:outline-none">
+                    <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
+                    </svg>
+                </button>
+
+                {{-- 左メニュー（PC表示） --}}
+                <div class="hidden md:flex space-x-8">
                     <a href="/dashboard"
                         class="inline-flex items-center px-1 pt-1 text-sm font-medium {{ $navText }}
                        {{ request()->is('dashboard') && !request()->is('*/') ? 'border-b-2 border-indigo-500' : $hoverText }}">
@@ -126,6 +133,50 @@
                     @endauth
                 </div>
 
+            </div>
+        </div>
+
+        {{-- モバイルメニュー --}}
+         <div x-show="mobileMenuOpen"
+             x-transition:enter="transition ease-out duration-200"
+             x-transition:enter-start="-translate-x-full"
+             x-transition:enter-end="translate-x-0"
+             x-transition:leave="transition ease-in duration-150"
+             x-transition:leave-start="translate-x-0"
+             x-transition:leave-end="-translate-x-full"
+             @click.away="mobileMenuOpen = false"
+             class="md:hidden fixed fixed top-0 left-0 bottom-00 w-64 @if($brightness > 155) bg-gray-800 @else bg-white @endif border-r {{ $navBorder }} shadow-xl z-50 overflow-y-auto">
+            <div class="px-2 pt-2 pb-3 space-y-1 @if($brightness > 155) bg-gray-800 @else bg-white @endif h-full">
+                <a href="/dashboard"
+                    class="block px-3 py-2 rounded-md text-base font-medium @if($brightness > 155) text-white hover:bg-gray-700 @else text-gray-900 hover:bg-gray-100 @endif
+                           {{ request()->is('dashboard') ? 'bg-indigo-500 bg-opacity-20' : '' }}">
+                    ホーム
+                </a>
+                <a href="/missions"
+                    class="block px-3 py-2 rounded-md text-base font-medium @if($brightness > 155) text-white hover:bg-gray-700 @else text-gray-900 hover:bg-gray-100 @endif
+                           {{ request()->is('missions*') ? 'bg-indigo-500 bg-opacity-20' : '' }}">
+                    ミッション
+                </a>
+                <a href="/stats"
+                    class="block px-3 py-2 rounded-md text-base font-medium @if($brightness > 155) text-white hover:bg-gray-700 @else text-gray-900 hover:bg-gray-100 @endif
+                           {{ request()->is('stats*') ? 'bg-indigo-500 bg-opacity-20' : '' }}">
+                    統計
+                </a>
+                <a href="/activities"
+                    class="block px-3 py-2 rounded-md text-base font-medium @if($brightness > 155) text-white hover:bg-gray-700 @else text-gray-900 hover:bg-gray-100 @endif
+                           {{ request()->is('activities*') ? 'bg-indigo-500 bg-opacity-20' : '' }}">
+                    活動履歴
+                </a>
+                <a href="/ranking"
+                    class="block px-3 py-2 rounded-md text-base font-medium @if($brightness > 155) text-white hover:bg-gray-700 @else text-gray-900 hover:bg-gray-100 @endif
+                           {{ request()->is('ranking*') ? 'bg-indigo-500 bg-opacity-20' : '' }}">
+                    ランキング
+                </a>
+                <a href="{{ route('gacha.index') }}"
+                    class="block px-3 py-2 rounded-md text-base font-medium @if($brightness > 155) text-white hover:bg-gray-700 @else text-gray-900 hover:bg-gray-100 @endif
+                           {{ request()->is('gacha*') ? 'bg-indigo-500 bg-opacity-20' : '' }}">
+                    ガチャ
+                </a>
             </div>
         </div>
     </nav>
