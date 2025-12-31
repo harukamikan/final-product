@@ -22,7 +22,10 @@ class SlackService
     public function sendMessage($message, $channel = null)
     {
         $channel = $channel ?? $this->defaultChannel;
-
+        if (app()->environment('local') && !$this->botToken) {
+                \Log::info('Slack message (local):', ['message' => $message, 'channel' => $channel]);
+                return true; // 成功として扱う
+            }
         try {
             $response = Http::withHeaders([
                 'Authorization' => 'Bearer ' . $this->botToken,
