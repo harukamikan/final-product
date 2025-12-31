@@ -11,25 +11,28 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('reward_distributions', function (Blueprint $table) {
-            $table->id();
+        // テーブルが存在しない場合のみ作成
+        if (!Schema::hasTable('reward_distributions')) {
+            Schema::create('reward_distributions', function (Blueprint $table) {
+                $table->id();
 
-            $table->foreignId('company_id')
-                ->constrained()
-                ->cascadeOnDelete();
+                $table->foreignId('company_id')
+                    ->constrained()
+                    ->cascadeOnDelete();
 
-            $table->foreignId('reward_id')
-                ->constrained()
-                ->cascadeOnDelete();
+                $table->foreignId('reward_id')
+                    ->constrained()
+                    ->cascadeOnDelete();
 
-            $table->unsignedInteger('quantity')->nullable();
-            $table->boolean('is_active')->default(false);
+                $table->unsignedInteger('quantity')->nullable();
+                $table->boolean('is_active')->default(false);
 
-            $table->timestamp('starts_at')->nullable();
-            $table->timestamp('ends_at')->nullable();
+                $table->timestamp('starts_at')->nullable();
+                $table->timestamp('ends_at')->nullable();
 
-            $table->timestamps();
-        });
+                $table->timestamps();
+            });
+        }
     }
 
     /**
