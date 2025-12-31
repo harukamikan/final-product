@@ -11,9 +11,10 @@ class GachaController extends Controller
     {
         $user = Auth::user();
 
-        $canDrawGacha = $user->miles > 0; // 条件は自由に調整OK
+        $totalMiles = $user->total_miles;
+        $canDrawGacha = $totalMiles >= GachaService::COST_MILES;
 
-        return view('gacha.index', compact('canDrawGacha'));
+        return view('gacha.index', compact('canDrawGacha', 'totalMiles'));
     }
 
     public function draw(GachaService $gacha)
