@@ -39,6 +39,7 @@ class GoalAiUploadController extends Controller
 
         // ユーザー一覧を取得
         $availableUsers = \App\Models\User::pluck('name')->toArray();
+        \Log::info('=== Available Users ===', $availableUsers);
 
         try {
             // AI で目標を分類（新メソッド使用）
