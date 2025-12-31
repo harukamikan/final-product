@@ -2,47 +2,58 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Reward;
-use App\Models\RewardHistory;
 use Illuminate\Support\Facades\Auth;
+use App\Services\GachaService;
+use App\Models\Reward;
 
 class RewardPlayController extends Controller
 {
-    public function index()
+    public function gacha(\App\Services\GachaService $gacha)
     {
-        return view('rewards.play');
+        $reward = $gacha->draw(
+            Auth::id(),
+            Auth::user()->company_id,
+            'gacha'
+        );
+
+        return view('rewards.result', [
+            'reward' => $reward,
+            'via'    => 'gacha',
+        ]);
     }
 
-    public function gacha()
+    public function scratch(GachaService $gacha)
     {
-        $reward = Reward::where('company_id', Auth::user()->company_id)
-            ->where('is_active', true)
-            ->inRandomOrder()
-            ->first();
+        $reward = $gacha->draw(
+            Auth::id(),
+            Auth::user()->company_id,
+            'scratch'
+        );
 
-        RewardHistory::create([
-            'user_id' => Auth::id(),
-            'reward_id' => $reward->id,
-            'source' => 'gacha',
+        return view('rewards.result', [
+            'reward' => $reward,
+            'via'    => 'scratch',
         ]);
-
-        return back()->with('result', $reward);
     }
 
-    public function scratch()
+    public function gachaPage()
     {
-        $reward = Reward::where('company_id', Auth::user()->company_id)
+        $user = Auth::user();
+
+        $totalMiles = $user->total_miles ?? 0;
+
+        //ガチャが引けるか
+        $canDrawGacha = $user->total_miles > 0;
+
+        //有効なガチャ報酬があるか
+        $hasActiveGachaReward = Reward::where('company_id', $user->company_id)
             ->where('is_active', true)
-            ->inRandomOrder()
-            ->first();
-
-        RewardHistory::create([
-            'user_id' => Auth::id(),
-            'reward_id' => $reward->id,
-            'source' => 'scratch',
-        ]);
-
-        return back()->with('result', $reward);
+            ->exists();
+        
+        return view('gacha.index', compact(
+            'totalMiles',
+            'canDrawGacha',
+            'hasActiveGachaReward'
+        ));
     }
 }
-

@@ -8,6 +8,9 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Database\Eloquent\Builder;
 use App\Models\Company;
+use App\Models\MileHistory;
+use App\Models\RewardHistory;
+use App\Models\UserMission;
 
 
 class User extends Authenticatable
@@ -56,11 +59,6 @@ class User extends Authenticatable
         return $this->hasMany(UserMission::class);
     }
 
-    public function mileHistories()
-    {
-        return $this->hasMany(\App\Models\MileHistory::class);
-    }
-
     public function scopeForCompany(Builder $query, int $companyId): Builder
     {
         return $query->where('company_id', $companyId);
@@ -74,5 +72,15 @@ class User extends Authenticatable
     public function rewardHistories()
     {
         return $this->hasMany(RewardHistory::class);
+    }
+
+    public function mileHistories()
+    {
+        return $this->hasMany(MileHistory::class);
+    }
+
+    public function getTotalMilesAttribute(): int
+    {
+        return $this->mileHistories()->sum('miles');
     }
 }

@@ -82,18 +82,22 @@
                     </a>
 
                     {{-- 🎰 ガチャ --}}
-                    <a href="{{ route('gacha.index') }}"
+                    <a href="{{ route('rewards.gacha') }}"
                         class="inline-flex items-center px-1 pt-1 text-sm font-medium {{ $navText }}
-   {{ request()->is('gacha*') ? 'border-b-2 border-indigo-500' : $hoverText }}">
+   {{ request()->is('rewards/gacha*') || request()->is('rewards/play/*')
+        ? 'border-b-2 border-indigo-500'
+        : $hoverText }}">
                         ガチャ
                     </a>
+
 
                     {{-- 報酬履歴 --}}
                     <a href="{{ route('rewards.history') }}"
                         class="inline-flex items-center px-1 pt-1 text-sm font-medium {{ $navText }}
-   {{ request()->is('rewards*') ? 'border-b-2 border-indigo-500' : $hoverText }}">
+   {{ request()->is('rewards/history*') ? 'border-b-2 border-indigo-500' : $hoverText }}">
                         報酬履歴
                     </a>
+
                 </div>
 
                 {{-- 右メニュー（ユーザー） --}}

@@ -4,15 +4,38 @@ namespace App\Services;
 
 use App\Models\RewardDistribution;
 use App\Models\RewardHistory;
+use App\Models\MileHistory;
+use App\Models\User;
 use Illuminate\Support\Facades\DB;
 
 class GachaService
 {
+    const COST_MILES = 100; // 🎰 ガチャ1回の必要マイル
+
     public function draw(int $userId, int $companyId, string $via = 'gacha')
     {
         return DB::transaction(function () use ($userId, $companyId, $via) {
 
-            // ① 配布中の報酬を取得
+            // ① ユーザー取得
+            $user = User::lockForUpdate()->findOrFail($userId);
+
+            // ② 現在のマイル残高を計算
+            $currentMiles = $user->mileHistories()->sum('miles');
+
+            if ($currentMiles < self::COST_MILES) {
+                return null; // マイル不足
+            }
+
+            // ③ マイル消費
+            MileHistory::create([
+                'user_id'    => $userId,
+                'company_id' => $companyId,
+                'miles'      => -self::COST_MILES,
+                'type'       => $via,
+                'memo'       => 'ガチャ消費',
+            ]);
+
+            // ④ 配布中の報酬を取得
             $pool = RewardDistribution::where('company_id', $companyId)
                 ->where('is_active', true)
                 ->where(function ($q) {
@@ -27,17 +50,17 @@ class GachaService
                     $q->whereNull('quantity')
                       ->orWhere('quantity', '>', 0);
                 })
-                ->lockForUpdate() // ★同時ガチャ対策
+                ->lockForUpdate()
                 ->get();
 
             if ($pool->isEmpty()) {
-                return null; // ガチャに何も入っていない
+                return null;
             }
 
-            // ② ランダム抽選（今は等確率）
+            // ⑤ 抽選
             $selected = $pool->random();
 
-            // ③ 数量を減らす（制限ありの場合）
+            // ⑥ 数量を減らす
             if (!is_null($selected->quantity)) {
                 $selected->decrement('quantity');
 
@@ -46,11 +69,11 @@ class GachaService
                 }
             }
 
-            // ④ 履歴保存
+            // ⑦ 報酬履歴
             RewardHistory::create([
                 'user_id'   => $userId,
                 'reward_id' => $selected->reward_id,
-                'via'       => $via, // gacha / scratch
+                'via'       => $via,
             ]);
 
             return $selected->reward;

@@ -23,6 +23,7 @@ use App\Http\Controllers\{
     InviteController,
     RewardPlayController,
     RewardHistoryController,
+    DebugController,
 };
 
 use App\Http\Controllers\Admin\{
@@ -75,17 +76,18 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/company/join', [CompanyController::class, 'join'])
         ->name('company.join.submit');
 
-    //報酬画面(ガチャ+スクラッチ)
-    Route::post('/rewards/play/gacha', [RewardPlayController::class, 'gacha'])
+    // ===== 表示画面（GET）=====
+    Route::get('/rewards/gacha', [RewardPlayController::class, 'gachaPage'])
         ->name('rewards.gacha');
 
-    Route::post('/rewards/play/scratch', [RewardPlayController::class, 'scratch'])
-        ->name('rewards.scratch');
+    // ===== 実行処理（POST）=====
+    Route::post('/rewards/play/gacha', [RewardPlayController::class, 'gacha'])
+        ->name('rewards.play.gacha');
 
-    //取得報酬履歴
-    Route::get('/rewards/history', [RewardHistoryController::class, 'index'])
-        ->name('rewards.history');
+    Route::post('/rewards/play/scratch', [RewardPlayController::class, 'scratch'])
+        ->name('rewards.play.scratch');
 });
+
 
 /*
 |--------------------------------------------------------------------------
@@ -94,15 +96,6 @@ Route::middleware(['auth'])->group(function () {
 |--------------------------------------------------------------------------
 */
 Route::middleware(['auth', 'company'])->group(function () {
-
-    // ======================
-    // 🎰 ガチャ
-    // ======================
-    Route::get('/gacha', [GachaController::class, 'index'])
-        ->name('gacha.index');
-
-    Route::post('/gacha/draw', [GachaController::class, 'draw'])
-        ->name('gacha.draw');
 
     /*
     | Dashboard
@@ -223,6 +216,12 @@ Route::middleware(['auth', 'company'])->group(function () {
         ->name('qiita.index');
 
     /*
+    | 報酬履歴
+    */
+    Route::get('/rewards/history', [RewardHistoryController::class, 'index'])
+    ->name('rewards.history');
+
+    /*
     |--------------------------------------------------------------------------
     | Reward Survey（社員用）
     |--------------------------------------------------------------------------
@@ -325,8 +324,18 @@ require __DIR__ . '/auth.php';
 | Debug (開発用)
 |--------------------------------------------------------------------------
 */
-Route::middleware(['auth', 'company'])->get('/debug/users', function () {
-    return response()->json(
-        \App\Models\User::all(['id', 'name', 'email', 'slack_id', 'company_id'])
-    );
-});
+Route::middleware(['auth', 'company'])
+    ->prefix('admin/debug')
+    ->group(function () {
+
+        // ユーザー一覧
+        Route::get('/users', function () {
+            return response()->json(
+                \App\Models\User::all(['id', 'name', 'email', 'slack_id', 'company_id'])
+            );
+        });
+
+        // 🧪 テスト用マイル付与
+        Route::post('/add-miles', [DebugController::class, 'addMiles'])
+            ->name('debug.add-miles');
+    });
