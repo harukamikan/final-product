@@ -80,6 +80,9 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/rewards/gacha', [RewardPlayController::class, 'gachaPage'])
         ->name('rewards.gacha');
 
+    Route::get('/rewards/scratch', [RewardPlayController::class, 'scratchPage'])
+        ->name('rewards.scratch');
+
     // ===== 実行処理（POST）=====
     Route::post('/rewards/play/gacha', [RewardPlayController::class, 'gacha'])
         ->name('rewards.play.gacha');
