@@ -21,6 +21,9 @@ use App\Http\Controllers\{
     MissionFormController,
     GachaController,
     InviteController,
+    RewardPlayController,
+    RewardHistoryController,
+    DebugController,
 };
 
 use App\Http\Controllers\Admin\{
@@ -31,6 +34,7 @@ use App\Http\Controllers\Admin\{
     AdminRewardController,
     RewardDistributionController,
 };
+use App\Models\RewardHistory;
 
 /*
 |--------------------------------------------------------------------------
@@ -71,7 +75,19 @@ Route::middleware(['auth'])->group(function () {
 
     Route::post('/company/join', [CompanyController::class, 'join'])
         ->name('company.join.submit');
+
+    // ===== 表示画面（GET）=====
+    Route::get('/rewards/gacha', [RewardPlayController::class, 'gachaPage'])
+        ->name('rewards.gacha');
+
+    // ===== 実行処理（POST）=====
+    Route::post('/rewards/play/gacha', [RewardPlayController::class, 'gacha'])
+        ->name('rewards.play.gacha');
+
+    Route::post('/rewards/play/scratch', [RewardPlayController::class, 'scratch'])
+        ->name('rewards.play.scratch');
 });
+
 
 /*
 |--------------------------------------------------------------------------
@@ -80,15 +96,6 @@ Route::middleware(['auth'])->group(function () {
 |--------------------------------------------------------------------------
 */
 Route::middleware(['auth', 'company'])->group(function () {
-
-    // ======================
-    // 🎰 ガチャ
-    // ======================
-    Route::get('/gacha', [GachaController::class, 'index'])
-        ->name('gacha.index');
-
-    Route::post('/gacha/draw', [GachaController::class, 'draw'])
-        ->name('gacha.draw');
 
     /*
     | Dashboard
@@ -162,7 +169,7 @@ Route::middleware(['auth', 'company'])->group(function () {
     */
     Route::get('/ranking', [RankingController::class, 'index'])
         ->name('ranking.index');
-Route::get('/stats', [StatsController::class, 'index'])
+    Route::get('/stats', [StatsController::class, 'index'])
         ->name('stats.index');
 
     /*
@@ -188,10 +195,10 @@ Route::get('/stats', [StatsController::class, 'index'])
     */
     Route::get('/missions', [MissionListController::class, 'index'])
         ->name('missions.index');
-    
+
     Route::get('/missions/completed', [MissionListController::class, 'completed'])
         ->name('missions.completed');
-    
+
     Route::get('/missions/personal', [MissionListController::class, 'personal'])
         ->name('missions.personal');
 
@@ -207,6 +214,12 @@ Route::get('/stats', [StatsController::class, 'index'])
     */
     Route::get('/qiita', [QiitaArticleController::class, 'index'])
         ->name('qiita.index');
+
+    /*
+    | 報酬履歴
+    */
+    Route::get('/rewards/history', [RewardHistoryController::class, 'index'])
+    ->name('rewards.history');
 
     /*
     |--------------------------------------------------------------------------
@@ -316,8 +329,18 @@ require __DIR__ . '/auth.php';
 | Debug (開発用)
 |--------------------------------------------------------------------------
 */
-Route::middleware(['auth', 'company'])->get('/debug/users', function () {
-    return response()->json(
-        \App\Models\User::all(['id', 'name', 'email', 'slack_id', 'company_id'])
-    );
-});
+Route::middleware(['auth', 'company'])
+    ->prefix('admin/debug')
+    ->group(function () {
+
+        // ユーザー一覧
+        Route::get('/users', function () {
+            return response()->json(
+                \App\Models\User::all(['id', 'name', 'email', 'slack_id', 'company_id'])
+            );
+        });
+
+        // 🧪 テスト用マイル付与
+        Route::post('/add-miles', [DebugController::class, 'addMiles'])
+            ->name('debug.add-miles');
+    });
