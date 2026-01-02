@@ -86,6 +86,13 @@
                        {{ request()->is('admin/goals/ai-upload') ? 'border-b-2 border-indigo-500' : $hoverText }}">
                         🤖 AI 自動抽出
                     </a>
+                    <!-- これを追加 -->
+                    <a href="{{ route('admin.settings.index') }}"
+                        class="inline-flex items-center px-1 pt-1 text-sm font-medium {{ $navText }}
+                    {{ request()->is('admin/settings') ? 'border-b-2 border-indigo-500' : $hoverText }}">
+                        ⚙️ 設定
+                    </a>
+                    
 
                     <a href="/dashboard"
                         class="inline-flex items-center px-1 pt-1 text-sm font-medium {{ $navText }} {{ $hoverText }}">

@@ -284,6 +284,11 @@ Route::get('/stats', [StatsController::class, 'index'])
 
         Route::post('/goals/ai-store', [GoalAiUploadController::class, 'store'])
             ->name('goals.ai.store');
+
+        Route::get('/settings', [App\Http\Controllers\Admin\AdminSettingController::class, 'index'])
+            ->name('settings.index');
+        Route::post('/settings', [App\Http\Controllers\Admin\AdminSettingController::class, 'store'])
+            ->name('settings.store');
     });
 });
 
