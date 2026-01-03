@@ -13,6 +13,27 @@
 
             <p class="text-sm text-gray-600">メールアドレス</p>
             <p class="font-medium mb-4">{{ $user->email }}</p>
+             <!-- Slack ID 編集フォーム -->
+            <form action="{{ route('profile.update') }}" method="POST">
+                @csrf
+                @method('PATCH')
+                
+                <div class="mb-4">
+                    <label for="slack_id" class="block text-sm font-medium text-gray-700">
+                        Slack User ID
+                    </label>
+                    <input type="text" name="slack_id" id="slack_id"
+                        value="{{ old('slack_id', $user->slack_id) }}"
+                        class="mt-1 block w-full rounded-md border-gray-300 shadow-sm">
+                    <p class="mt-1 text-sm text-gray-500">
+                        Slack ID（例: U01234ABCDE）を入力してください
+                    </p>
+                </div>
+
+                <button type="submit" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+                    保存
+                </button>
+            </form>
             <p class="text-sm text-gray-600">ニックネーム</p>
             <div class="border rounded p-3" x-data="{ open: false }">
                  <div class="flex items-center justify-between">
