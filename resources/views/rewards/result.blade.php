@@ -2,7 +2,7 @@
 
 @section('content')
 @php
-    $via = $via ?? 'gacha';
+$via = $via ?? 'gacha';
 @endphp
 
 <div class="min-h-screen flex items-center justify-center">
@@ -61,101 +61,147 @@
 
         @else
 
-        {{-- 通常ガチャ --}}
-        <div class="border-2 border-dashed border-indigo-400 rounded-xl p-6 text-center">
-            <p class="text-sm text-gray-500 mb-2">獲得した報酬</p>
-            <p class="text-2xl font-semibold text-indigo-600">
-                {{ $reward->name }}
+        {{-- ガチャ演出 --}}
+        <div class="flex flex-col items-center space-y-6">
+
+            <p id="gachaText" class="text-sm text-gray-500">
+                ガチャを回しています…
             </p>
+
+            {{--ガチャカード--}}
+            <div
+                id="gachaCard"
+                data-reward-name="{{ $reward->name }}"
+                class="w-64 h-32 flex items-center justify-center
+           bg-indigo-100 rounded-xl
+           text-2xl font-bold text-indigo-600
+           transition-all duration-300">
+                ？
+            </div>
+
+
+            {{--戻るボタン--}}
+            <a
+                href="{{ route('rewards.gacha') }}"
+                id="gachaBackBtn"
+                class="hidden px-5 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700">
+                戻る
+            </a>
         </div>
 
         @endif
     </div>
 </div>
 
-{{-- ===== スクラッチJS ===== --}}
+{{--スクラッチJS--}}
 @if($via === 'scratch')
 <script>
-document.addEventListener('DOMContentLoaded', () => {
-    const canvas = document.getElementById('scratchCanvas');
-    const wrapper = document.getElementById('scratchWrapper');
-    const rewardCard = document.getElementById('rewardCard');
-    const backBtn = document.getElementById('backBtn');
+    document.addEventListener('DOMContentLoaded', () => {
+        const canvas = document.getElementById('scratchCanvas');
+        const wrapper = document.getElementById('scratchWrapper');
+        const rewardCard = document.getElementById('rewardCard');
+        const backBtn = document.getElementById('backBtn');
 
-    const ctx = canvas.getContext('2d');
+        if (!canvas) return;
 
-    // サイズ完全一致（黄色はみ出し防止）
-    canvas.width = wrapper.offsetWidth;
-    canvas.height = wrapper.offsetHeight;
+        const ctx = canvas.getContext('2d');
 
-    // 初期：銀色で完全に覆う
-    ctx.globalCompositeOperation = 'source-over';
-    ctx.fillStyle = '#bfbfbf';
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
+        canvas.width = wrapper.offsetWidth;
+        canvas.height = wrapper.offsetHeight;
 
-    ctx.globalCompositeOperation = 'destination-out';
+        ctx.globalCompositeOperation = 'source-over';
+        ctx.fillStyle = '#bfbfbf';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.globalCompositeOperation = 'destination-out';
 
-    let isDrawing = false;
-    let revealed = false;
+        let isDrawing = false;
+        let revealed = false;
 
-    const start = () => isDrawing = true;
-    const end = () => {
-        isDrawing = false;
-        checkCleared();
-    };
+        const start = () => isDrawing = true;
+        const end = () => {
+            isDrawing = false;
+            checkCleared();
+        };
 
-    canvas.addEventListener('mousedown', start);
-    canvas.addEventListener('mouseup', end);
-    canvas.addEventListener('mousemove', draw);
+        canvas.addEventListener('mousedown', start);
+        canvas.addEventListener('mouseup', end);
+        canvas.addEventListener('mousemove', draw);
+        canvas.addEventListener('touchstart', start);
+        canvas.addEventListener('touchend', end);
+        canvas.addEventListener('touchmove', draw);
 
-    canvas.addEventListener('touchstart', start);
-    canvas.addEventListener('touchend', end);
-    canvas.addEventListener('touchmove', draw);
-
-    function draw(e) {
-        if (!isDrawing || revealed) return;
-
-        const rect = canvas.getBoundingClientRect();
-        const x = (e.touches ? e.touches[0].clientX : e.clientX) - rect.left;
-        const y = (e.touches ? e.touches[0].clientY : e.clientY) - rect.top;
-
-        ctx.beginPath();
-        ctx.arc(x, y, 18, 0, Math.PI * 2);
-        ctx.fill();
-    }
-
-    function checkCleared() {
-        if (revealed) return;
-
-        const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-        let cleared = 0;
-
-        for (let i = 3; i < imageData.data.length; i += 4) {
-            if (imageData.data[i] === 0) cleared++;
+        function draw(e) {
+            if (!isDrawing || revealed) return;
+            const rect = canvas.getBoundingClientRect();
+            const x = (e.touches ? e.touches[0].clientX : e.clientX) - rect.left;
+            const y = (e.touches ? e.touches[0].clientY : e.clientY) - rect.top;
+            ctx.beginPath();
+            ctx.arc(x, y, 18, 0, Math.PI * 2);
+            ctx.fill();
         }
 
-        const percent = cleared / (canvas.width * canvas.height) * 100;
-
-        if (percent > 40) {
-            revealReward();
+        function checkCleared() {
+            if (revealed) return;
+            const data = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
+            let cleared = 0;
+            for (let i = 3; i < data.length; i += 4) {
+                if (data[i] === 0) cleared++;
+            }
+            if ((cleared / (canvas.width * canvas.height)) * 100 > 40) {
+                revealReward();
+            }
         }
-    }
 
-    function revealReward() {
-        revealed = true;
+        function revealReward() {
+            revealed = true;
+            canvas.style.transition = 'opacity 0.6s ease';
+            canvas.style.opacity = 0;
+            rewardCard.classList.remove('opacity-0', 'scale-95');
+            rewardCard.classList.add('opacity-100', 'scale-100');
+            backBtn.classList.remove('hidden');
+        }
+    });
+</script>
+@endif
 
-        // Canvas フェードアウト
-        canvas.style.transition = 'opacity 0.6s ease';
-        canvas.style.opacity = 0;
+{{--ガチャJS--}}
+@if($via !== 'scratch')
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const card = document.getElementById('gachaCard');
+        const backBtn = document.getElementById('gachaBackBtn');
+        const text = document.getElementById('gachaText');
 
-        // 報酬表示
-        rewardCard.classList.remove('opacity-0', 'scale-95');
-        rewardCard.classList.add('opacity-100', 'scale-100');
+        if (!card || !backBtn || !text) return;
 
-        // 戻るボタン表示
-        backBtn.classList.remove('hidden');
-    }
-});
+        const dummyRewards = ['？', '🎁', '⭐', '💎', '📦', '🎫'];
+        let count = 0;
+        let speed = 80;
+        const maxCount = 25;
+
+        const timer = setInterval(() => {
+            card.textContent =
+                dummyRewards[Math.floor(Math.random() * dummyRewards.length)];
+            count++;
+            speed += 20;
+            if (count > maxCount) {
+                clearInterval(timer);
+                revealReward();
+            }
+        }, speed);
+
+        function revealReward() {
+            const rewardName = card.dataset.rewardName;
+            if (!rewardName) return;
+
+            card.textContent = rewardName;
+            card.classList.add('scale-110');
+            setTimeout(() => card.classList.remove('scale-110'), 300);
+            card.classList.replace('bg-indigo-100', 'bg-yellow-100');
+            text.textContent = '獲得しました！';
+            backBtn.classList.remove('hidden');
+        }
+    });
 </script>
 @endif
 @endsection
