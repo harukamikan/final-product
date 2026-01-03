@@ -27,6 +27,7 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'slack_id',
         'background_type',
         'background_value',
         'nickname',
