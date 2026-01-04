@@ -29,7 +29,7 @@
                 </div>
 
                 <a
-                    href="{{ route('reward-survey.create') }}"
+                    href="{{ route('reward-survey.create', $pendingSurvey) }}"
                     class="shrink-0 inline-flex items-center
                    px-4 py-2 rounded-lg
                    bg-indigo-600 text-white
