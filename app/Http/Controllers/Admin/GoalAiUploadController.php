@@ -109,7 +109,7 @@ class GoalAiUploadController extends Controller
                     if ($user && $user->slack_id) {
                         $this->slackService->sendDM(
                             $user->slack_id,
-                            "⚠️ 半期目標の登録に失敗しました。\n\n同姓同名のため、次回から社員番号やメールアドレスも記入してください。\n\n今回の目標は /goal コマンドで登録できます。"
+                            "⚠️ 半期目標の登録に失敗しました。\n\n同姓同名のため、次回から社員番号やメールアドレスも記入してください。\n\n目標登録：" . config('app.url') . "/semester-goals/create"
                         );
                     }
                 }
