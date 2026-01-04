@@ -145,8 +145,8 @@
              x-transition:leave-start="translate-x-0"
              x-transition:leave-end="-translate-x-full"
              @click.away="mobileMenuOpen = false"
-             class="md:hidden fixed top-0 left-0 bottom-0 w-64 @if($brightness > 155) bg-gray-800 @else bg-white @endif border-r {{ $navBorder }} shadow-xl z-50 overflow-y-auto">
-            <div class="px-2 pt-2 pb-3 space-y-1  min-h-full @if($brightness > 155) bg-gray-800 @else bg-white @endif">
+             class="md:hidden fixed top-0 left-0 h-screen w-64 @if($brightness > 155) bg-gray-800 @else bg-white @endif border-r {{ $navBorder }} shadow-xl z-50 overflow-y-auto">
+            <div class="h-full px-2 pt-2 pb-3 space-y-1 @if($brightness > 155) bg-gray-800 @else bg-white @endif">
                 <a href="/dashboard"
                     class="block px-3 py-2 rounded-md text-base font-medium {{ $navText }} {{ $hoverText }}
                            {{ request()->is('dashboard') ? 'bg-indigo-500 bg-opacity-20' : '' }}">
