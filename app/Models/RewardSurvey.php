@@ -22,15 +22,28 @@ class RewardSurvey extends Model
         'end_at'   => 'datetime',
     ];
 
-    // 回答一覧
+    /**
+     * 回答受付中のアンケート
+     */
+    public function scopeAccepting($query)
+    {
+        return $query
+            ->where('status', 'active')
+            ->where(function ($q) {
+                $q->whereNull('start_at')
+                  ->orWhere('start_at', '<=', now());
+            })
+            ->where(function ($q) {
+                $q->whereNull('end_at')
+                  ->orWhere('end_at', '>=', now());
+            });
+    }
+
+    /**
+     * 回答一覧
+     */
     public function answers()
     {
         return $this->hasMany(RewardSurveyAnswer::class);
-    }
-
-    // 受付中スコープ（便利）
-    public function scopeActive($query)
-    {
-        return $query->where('status', 'active');
     }
 }

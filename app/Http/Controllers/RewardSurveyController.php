@@ -12,11 +12,9 @@ class RewardSurveyController extends Controller
     // 回答フォーム表示
     public function create(RewardSurvey $rewardSurvey)
     {
-        // 受付中でないアンケートは拒否
+        // ★ 受付中でないアンケートは拒否
         abort_if(
-            $rewardSurvey->status !== 'active' ||
-            ($rewardSurvey->start_at && $rewardSurvey->start_at->isFuture()) ||
-            ($rewardSurvey->end_at && $rewardSurvey->end_at->isPast()),
+            ! RewardSurvey::accepting()->where('id', $rewardSurvey->id)->exists(),
             403
         );
 
@@ -32,6 +30,7 @@ class RewardSurveyController extends Controller
 
         return view('reward-survey.create', compact('rewardSurvey'));
     }
+
 
     // 回答保存
     public function store(Request $request, RewardSurvey $rewardSurvey)
