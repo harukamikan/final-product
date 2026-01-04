@@ -156,8 +156,7 @@ class DashboardController extends Controller
             'canDrawGacha',
             'weeklyLabels',
             'weeklyData',
-            'pendingSurvey',
-            'canDrawGacha'
+            'pendingSurvey'
         ));
     }
 
