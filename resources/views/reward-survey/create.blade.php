@@ -13,7 +13,9 @@
             回答内容は管理者が確認のうえ報酬に反映されます。
         </p>
 
-        <form method="POST" action="{{ route('reward-survey.store') }}" class="space-y-4">
+        <form method="POST"
+            action="{{ route('reward-survey.store', $rewardSurvey) }}">
+
             @csrf
 
             <div>

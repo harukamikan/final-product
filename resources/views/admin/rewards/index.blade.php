@@ -10,18 +10,28 @@
         </h2>
 
         {{-- ================= アンケート ON / OFF ================= --}}
+        @if($activeSurvey)
+        {{-- アンケート停止 --}}
         <form method="POST" action="{{ route('admin.rewards.toggle') }}" class="mb-6">
             @csrf
             <button
                 class="px-4 py-2 rounded-lg text-sm font-semibold
-                {{ auth()->user()->company->reward_survey_active
-                    ? 'bg-red-600 text-white hover:bg-red-700'
-                    : 'bg-indigo-600 text-white hover:bg-indigo-700' }}">
-                {{ auth()->user()->company->reward_survey_active
-                    ? 'アンケートを停止する'
-                    : 'アンケートを開始する' }}
+                   bg-red-600 text-white hover:bg-red-700">
+                アンケートを停止する
             </button>
         </form>
+        @else
+        {{-- アンケート開始 --}}
+        <form method="POST" action="{{ route('admin.rewards.toggle') }}" class="mb-6">
+            @csrf
+            <button
+                class="px-4 py-2 rounded-lg text-sm font-semibold
+                   bg-indigo-600 text-white hover:bg-indigo-700">
+                アンケートを開始する
+            </button>
+        </form>
+        @endif
+
 
         {{-- ================= 回答期限 ================= --}}
         @if($company)
@@ -34,10 +44,8 @@
                     </label>
                     <input
                         type="date"
-                        name="reward_survey_deadline"
-                        value="{{ $company->reward_survey_deadline }}"
-                        class="mt-1 rounded-md border-gray-300"
-                        required>
+                        name="end_at"
+                        value="{{ $activeSurvey?->end_at?->format('Y-m-d') }}">
                 </div>
 
                 <button
@@ -69,9 +77,9 @@
 
                 {{-- ================= 報酬別カード（社員情報なし） ================= --}}
                 @if(empty($rewardStats))
-                    <p class="text-sm text-gray-500">
-                        現在、アンケートの回答はありません。
-                    </p>
+                <p class="text-sm text-gray-500">
+                    現在、アンケートの回答はありません。
+                </p>
                 @else
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     @foreach($rewardStats as $rewardName => $data)
@@ -89,7 +97,7 @@
 
                         {{-- 一括採用ボタン --}}
                         <form method="POST"
-                              action="{{ route('admin.rewards.bulk-decide') }}">
+                            action="{{ route('admin.rewards.bulk-decide') }}">
                             @csrf
                             <input type="hidden" name="reward_name" value="{{ $rewardName }}">
 
@@ -111,8 +119,8 @@
 </div>
 
 <style>
-.card-shadow {
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.12) !important;
-}
+    .card-shadow {
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.12) !important;
+    }
 </style>
 @endsection

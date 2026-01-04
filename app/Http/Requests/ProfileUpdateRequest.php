@@ -46,6 +46,13 @@ class ProfileUpdateRequest extends FormRequest
                 'string',
                 'max:255'
             ],
+
+            'slack_id' => [
+            'sometimes',
+            'nullable',
+            'string',
+            'max:255'
+        ],
         ];
     }
 }

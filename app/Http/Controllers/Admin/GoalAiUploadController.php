@@ -88,10 +88,18 @@ class GoalAiUploadController extends Controller
             if ($name === 'error_duplicate_name') {
                 $originalInput = $userData['original_input'] ?? '不明';
                 $candidates = $userData['candidates'] ?? [];
-                
-                $errorMessage = '同姓同名のユーザーが存在します。Slack で手動入力するか、管理者に確認してください。';
-                $duplicateNameErrors[] = $errorMessage;
-                
+                 if (empty($candidates)) {
+                    // 未登録ユーザー
+                    $errorMessage = '登録されていないユーザー名です: ' . $originalInput;
+                    $duplicateNameErrors[] = $errorMessage;
+                    
+                    // 管理者にSlack通知
+                    $this->slackService->notifyUnregisteredUser($originalInput);
+                } else {
+                    // 同姓同名
+                    $errorMessage = '同姓同名のユーザーが存在します: ' . $originalInput;
+                    $duplicateNameErrors[] = $errorMessage;
+                           
                 // 管理者にSlack通知を送信
                 $this->slackService->notifyDuplicateNameError($originalInput, $candidates);
                 
@@ -101,10 +109,12 @@ class GoalAiUploadController extends Controller
                     if ($user && $user->slack_id) {
                         $this->slackService->sendDM(
                             $user->slack_id,
-                            "⚠️ 半期目標の登録に失敗しました。\n\n同姓同名のため、次回から社員番号やメールアドレスも記入してください。\n\n今回の目標は /goal コマンドで登録できます。"
+                            "⚠️ 半期目標の登録に失敗しました。\n\n同姓同名のため、次回から社員番号やメールアドレスも記入してください。\n\n目標登録：" . config('app.url') . "/semester-goals/create"
                         );
                     }
                 }
+
+            }
                 
                 \Log::error('同姓同名エラー検出', [
                     'original_input' => $originalInput,
