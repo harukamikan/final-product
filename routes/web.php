@@ -24,6 +24,8 @@ use App\Http\Controllers\{
     RewardPlayController,
     RewardHistoryController,
     DebugController,
+    RewardSurveyController,
+    AdminRewardSurveyController,
 };
 
 use App\Http\Controllers\Admin\{
@@ -222,17 +224,17 @@ Route::middleware(['auth', 'company'])->group(function () {
     | 報酬履歴
     */
     Route::get('/rewards/history', [RewardHistoryController::class, 'index'])
-    ->name('rewards.history');
+        ->name('rewards.history');
 
     /*
     |--------------------------------------------------------------------------
     | Reward Survey（社員用）
     |--------------------------------------------------------------------------
     */
-    Route::get('/reward-survey', [\App\Http\Controllers\RewardSurveyController::class, 'create'])
+    Route::get('/reward-survey/create', [RewardSurveyController::class, 'create'])
         ->name('reward-survey.create');
 
-    Route::post('/reward-survey', [\App\Http\Controllers\RewardSurveyController::class, 'store'])
+    Route::post('/reward-survey', [RewardSurveyController::class, 'store'])
         ->name('reward-survey.store');
 
     /*
@@ -274,6 +276,19 @@ Route::middleware(['auth', 'company'])->group(function () {
 
         Route::post('/rewards/bulk-decide', [AdminRewardController::class, 'bulkDecide'])
             ->name('rewards.bulk-decide');
+
+        //報酬アンケート管理
+        Route::get('/reward-surveys', [AdminRewardController::class, 'index'])
+            ->name('reward-surveys.index');
+
+        Route::get('/reward-surveys/{rewardSurvey}', [AdminRewardSurveyController::class, 'show'])
+            ->name('reward-surveys.show');
+
+        Route::post('/reward-surveys', [AdminRewardSurveyController::class, 'store'])
+            ->name('reward-surveys.store');
+
+        Route::patch('/reward-surveys/{rewardSurvey}/stop', [AdminRewardSurveyController::class, 'stop'])
+            ->name('reward-surveys.stop');
 
         // Mission management
         Route::resource('missions', MissionCreater::class);

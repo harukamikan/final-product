@@ -85,4 +85,9 @@ class User extends Authenticatable
     {
         return $this->mileHistories()->sum('miles');
     }
+
+    public function rewardSurviveyAnswers()
+    {
+        return $this->hasMany(RewardSurveyAnswer::class);
+    }
 }
