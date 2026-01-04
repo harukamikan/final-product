@@ -107,23 +107,23 @@
     </div>
 
     {{-- ===== マイル統計 ===== --}}
-    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
 
         {{-- 総マイル --}}
-        <div class="bg-white rounded-2xl shadow-md p-6 text-center">
-            <p class="text-sm font-semibold text-slate-500 uppercase mb-2">
+        <div class="bg-white rounded-2xl shadow-md p-8 flex flex-col items-center justify-center min-h-[250px]">
+            <p class="text-base font-semibold text-slate-500 uppercase mb-3">
                 総マイル
             </p>
-            <p class="text-4xl font-bold text-indigo-600 mb-1">
+            <p class="text-5xl font-bold text-indigo-600 mb-2">
                 {{ $totalMiles }}
             </p>
-            <p class="text-sm text-slate-500">
+            <p class="text-base text-slate-500">
                 累計獲得マイル
             </p>
         </div>
 
         {{-- ランク --}}
-        <div class="bg-white rounded-2xl shadow-md p-6 text-center">
+        <div class="bg-white rounded-2xl shadow-md p-6 flex flex-col items-center justify-center">
             <p class="text-sm font-semibold text-slate-500 uppercase mb-2">
                 現在のランク
             </p>
@@ -150,13 +150,13 @@
             @endphp
 
             @if($nextRank)
-            <div class="mt-4">
-                <div class="w-full bg-slate-200 rounded-full h-2 mb-2">
-                    <div class="bg-indigo-600 h-2 rounded-full transition-all duration-300"
+            <div class="mt-4 w-full">
+                <div class="w-full max-w-md bg-slate-200 rounded-full h-3 mb-3">
+                    <div class="bg-indigo-600 h-3 rounded-full transition-all duration-300"
                         style="width: {{ $progress }}%">
                     </div>
                 </div>
-                <p class="text-sm text-slate-600">
+                <p class="text-base text-slate-600 font-medium text-center">
                     {{ $nextRank }}まであと {{ $remaining }} マイル
                 </p>
 
@@ -182,17 +182,14 @@
             @endif
         </div>
 
-        {{-- 今月の活動 --}}
-        <div class="bg-white rounded-2xl shadow-md p-6 text-center">
-            <p class="text-sm font-semibold text-slate-500 uppercase mb-2">
-                今月の活動
+        {{-- 週間活動グラフ --}}
+        <div class="bg-white rounded-2xl shadow-md p-6">
+            <p class="text-sm font-semibold text-slate-500 uppercase mb-4">
+                📊 週間活動
             </p>
-            <p class="text-4xl font-bold text-indigo-600 mb-1">
-                {{ $thisMonthGoals }}
-            </p>
-            <p class="text-sm text-slate-500">
-                件
-            </p>
+            <div style="height: 200px;">
+                <canvas id="weeklyActivityChart"></canvas>
+            </div>
         </div>
     </div>
 
@@ -284,4 +281,41 @@
 
 </div>
 </div>
+
+{{-- Chart.js でグラフ表示 --}}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    const ctx = document.getElementById('weeklyActivityChart').getContext('2d');
+    new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: {!! json_encode($weeklyLabels) !!},
+            datasets: [{
+                label: '活動件数',
+                data: {!! json_encode($weeklyData) !!},
+                backgroundColor: 'rgba(79, 70, 229, 0.8)',
+                borderColor: 'rgba(79, 70, 229, 1)',
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: false
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        stepSize: 1
+                    }
+                }
+            }
+        }
+    });
+</script>
+        
 @endsection

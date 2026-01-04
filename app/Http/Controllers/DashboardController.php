@@ -57,6 +57,24 @@ class DashboardController extends Controller
             ->whereMonth('created_at', now()->month)
             ->sum('miles');
 
+        // 週間活動データ（過去7日間）
+        $weeklyActivity = Goal::where('user_id', $userId)
+            ->whereBetween('created_at', [now()->subDays(6)->startOfDay(), now()->endOfDay()])
+            ->selectRaw('DATE(created_at) as date, COUNT(*) as count')
+            ->groupBy('date')
+            ->orderBy('date')
+            ->get()
+            ->pluck('count', 'date');
+
+        // 7日分のラベルとデータを準備
+        $weeklyLabels = [];
+        $weeklyData = [];
+        for ($i = 6; $i >= 0; $i--) {
+            $date = now()->subDays($i)->format('Y-m-d');
+            $weeklyLabels[] = now()->subDays($i)->format('m/d');
+            $weeklyData[] = $weeklyActivity[$date] ?? 0;
+        }
+
         // 今期の半期目標
         $semesterGoal = SemesterGoal::where('user_id', $userId)
             ->where('is_current', true)
@@ -107,7 +125,9 @@ class DashboardController extends Controller
             'recommendedMission',
             'semesterGoal',
             'showRewardSurveyNotice',
-            'canDrawGacha'
+            'canDrawGacha',
+            'weeklyLabels',
+            'weeklyData'
         ));
     }
 
