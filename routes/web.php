@@ -285,6 +285,11 @@ Route::middleware(['auth', 'company'])->group(function () {
         Route::post('/rewards/bulk-decide', [AdminRewardController::class, 'bulkDecide'])
             ->name('rewards.bulk-decide');
 
+        Route::delete(
+            '/reward-distributions/{distribution}',
+            [RewardDistributionController::class, 'destroy']
+        )->name('reward-distributions.destroy');
+
         // Mission management
         Route::resource('missions', MissionCreater::class);
 

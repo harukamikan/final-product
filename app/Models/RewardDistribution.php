@@ -10,9 +10,14 @@ class RewardDistribution extends Model
         'company_id',
         'reward_id',
         'quantity',
-        'is_active',
         'starts_at',
         'ends_at',
+        'is_active',
+    ];
+
+    protected $casts = [
+        'starts_at' => 'datetime',
+        'ends_at'   => 'datetime',
     ];
 
     public function reward()
