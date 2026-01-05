@@ -52,6 +52,7 @@ class User extends Authenticatable
     {
         return [
             'email_verified_at' => 'datetime',
+            'onboarded_at' => 'datetime',
             'password' => 'hashed',
         ];
     }
@@ -89,5 +90,10 @@ class User extends Authenticatable
     public function rewardSurviveyAnswers()
     {
         return $this->hasMany(RewardSurveyAnswer::class);
+    }
+
+    public function onboardingSurvey()
+    {
+        return $this->hasOne(OnboardingSurvey::class);
     }
 }

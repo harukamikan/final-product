@@ -132,19 +132,7 @@
                         >
                     </div>
 
-                    <div>
-                        <label class="text-sm font-medium text-gray-700">招待コード（任意）</label>
-                        <input
-                            type="text"
-                            name="slug"
-                            value="{{ old('slug') }}"
-                            placeholder="例）fusic-2025（半角英小文字・数字・ハイフン）"
-                            class="mt-2 w-full rounded-2xl border-gray-200 focus:border-indigo-500 focus:ring-indigo-500"
-                        >
-                        <p class="text-xs text-gray-500 mt-2">
-                            未入力の場合は会社名から自動生成します（日本語の場合はランダムになります）。
-                        </p>
-                    </div>
+
 
                     <button
                         type="submit"
@@ -153,11 +141,7 @@
                         会社を作成して招待リンクを発行
                     </button>
 
-                    <div class="text-xs text-gray-500 text-center pt-1">
-                        すでに招待コードを持っている場合は
-                        <a href="{{ route('company.join') }}" class="text-indigo-600 hover:underline">会社に参加</a>
-                        へ
-                    </div>
+
                 </form>
 
             </div>
