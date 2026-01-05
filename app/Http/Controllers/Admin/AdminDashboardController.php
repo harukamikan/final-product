@@ -11,14 +11,18 @@ class AdminDashboardController extends Controller
 {
     public function index()
     {
-        // 全ユーザー数
-        $totalUsers = User::count();
+        $companyId = \Illuminate\Support\Facades\Auth::user()->company_id;
 
-        // 総マイル数
-        $totalMiles = MileHistory::sum('miles');
+        // 全ユーザー数（自社のみ）
+        $totalUsers = User::where('company_id', $companyId)->count();
 
-        // ランク別ユーザー数
-        $users = User::all();
+        // 総マイル数（自社のみ）
+        $totalMiles = MileHistory::whereHas('user', function ($query) use ($companyId) {
+            $query->where('company_id', $companyId);
+        })->sum('miles');
+
+        // ランク別ユーザー数（自社のみ）
+        $users = User::where('company_id', $companyId)->get();
         $rankCounts = [
             'ブロンズ' => 0,
             'シルバー' => 0,
@@ -36,8 +40,9 @@ class AdminDashboardController extends Controller
             }
         }
 
-        // ユーザー一覧（マイル順）
-        $topUsers = User::withSum('mileHistories', 'miles')
+        // ユーザー一覧（マイル順、自社のみ）
+        $topUsers = User::where('company_id', $companyId)
+            ->withSum('mileHistories', 'miles')
             ->orderByDesc('mile_histories_sum_miles')
             ->take(10)
             ->get();

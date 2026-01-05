@@ -37,8 +37,11 @@ class GoalAiUploadController extends Controller
         $file = $request->file('file');
         $content = $this->extractContent($file);
 
-        // ユーザー一覧を取得
-        $availableUsers = \App\Models\User::pluck('name')->toArray();
+        // ユーザー一覧を取得（自社のみ）
+        $companyId = \Illuminate\Support\Facades\Auth::user()->company_id;
+        $availableUsers = \App\Models\User::where('company_id', $companyId)
+            ->pluck('name')
+            ->toArray();
         \Log::info('=== Available Users ===', $availableUsers);
 
         try {
@@ -104,8 +107,11 @@ class GoalAiUploadController extends Controller
                 $this->slackService->notifyDuplicateNameError($originalInput, $candidates);
                 
                 // 該当ユーザー全員にDMを送信
+                $companyId = \Illuminate\Support\Facades\Auth::user()->company_id;
                 foreach ($candidates as $candidateName) {
-                    $user = User::where('name', $candidateName)->first();
+                    $user = User::where('company_id', $companyId)
+                        ->where('name', $candidateName)
+                        ->first();
                     if ($user && $user->slack_id) {
                         $this->slackService->sendDM(
                             $user->slack_id,
@@ -124,16 +130,23 @@ class GoalAiUploadController extends Controller
                 continue;
             }
 
-            // ユーザーを名前で検索（3段階）
-            $user = User::where('name', $name)->first();
+            // ユーザーを名前で検索（3段階、自社のみ）
+            $companyId = \Illuminate\Support\Facades\Auth::user()->company_id;
+            $user = User::where('company_id', $companyId)
+                ->where('name', $name)
+                ->first();
 
             if (!$user) {
                 $normalized = mb_convert_kana($name, 'as', 'UTF-8');
-                $user = User::where('name', $normalized)->first();
+                $user = User::where('company_id', $companyId)
+                    ->where('name', $normalized)
+                    ->first();
             }
 
             if (!$user) {
-                $user = User::where('name', 'like', "%{$name}%")->first();
+                $user = User::where('company_id', $companyId)
+                    ->where('name', 'like', "%{$name}%")
+                    ->first();
             }
 
             if (!$user) {

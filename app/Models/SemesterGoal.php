@@ -3,11 +3,15 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use App\Models\Concerns\BelongsToCompany;
 
 class SemesterGoal extends Model
 {
+    use BelongsToCompany;
+
     protected $fillable = [
         'user_id',
+        'company_id',
         'category',
         'title',
         'description',
