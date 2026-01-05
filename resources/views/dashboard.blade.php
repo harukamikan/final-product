@@ -208,38 +208,53 @@
             📝 最近の記録
         </h3>
 
-        @if($recentGoals->count())
+        @if($recentActivities->count())
         <div class="space-y-4">
-            @foreach($recentGoals as $goal)
+            @foreach($recentActivities as $activity)
             <div class="border border-slate-200 rounded-xl p-5 hover:shadow-md transition">
                 <div class="flex justify-between gap-4">
 
                     {{-- 左側：内容 --}}
                     <div>
-                        <p class="text-sm font-semibold text-indigo-600">
-                            {{ $goal->category }}
-                        </p>
-                        <p class="text-slate-800 font-medium mt-1">
-                            {{ $goal->title }}
-                        </p>
-                        @if($goal->deadline)
-                        <p class="text-sm text-slate-500 mt-1">
-                            期限：{{ $goal->deadline->format('Y-m-d') }}
-                        </p>
+                        @if($activity['type'] === 'goal')
+                            {{-- 活動記録 --}}
+                            <p class="text-sm font-semibold text-indigo-600">
+                                {{ $activity['data']->category }}
+                            </p>
+                            <p class="text-slate-800 font-medium mt-1">
+                                {{ $activity['data']->title }}
+                            </p>
+                            @if($activity['data']->deadline)
+                            <p class="text-sm text-slate-500 mt-1">
+                                期限：{{ $activity['data']->deadline->format('Y-m-d') }}
+                            </p>
+                            @endif
+                        @else
+                            {{-- ミッション達成 --}}
+                            <p class="text-sm font-semibold text-green-600">
+                                🎯 ミッション達成
+                            </p>
+                            <p class="text-slate-800 font-medium mt-1">
+                                {{ $activity['data']->mission->title }}
+                            </p>
+                            <p class="text-sm text-slate-500 mt-1">
+                                +{{ $activity['data']->mission->reward_miles }} マイル獲得
+                            </p>
                         @endif
                     </div>
 
                     {{-- 右側：操作 --}}
+                    @if($activity['type'] === 'goal')
                     <div class="flex items-start gap-3">
 
                         {{-- 編集 --}}
-                        <a href="{{ route('goals.edit', $goal) }}"
+                        <a href="{{ route('goals.edit', $activity['data']) }}"
                             class="text-sm font-semibold text-indigo-600 hover:text-indigo-800">
                             編集
                         </a>
 
                         {{-- 削除 --}}
-                        <form action="{{ route('goals.destroy', $goal) }}"
+                        <form action="{{ route('goals.destroy', $activity['data']) }}"
                             method="POST"
                             onsubmit="return confirm('この活動を削除します。よろしいですか？');">
                             @csrf
@@ -252,6 +267,7 @@
                         </form>
 
                     </div>
+                    @endif
                 </div>
             </div>
             @endforeach

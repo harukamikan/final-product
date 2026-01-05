@@ -42,13 +42,36 @@ class DashboardController extends Controller
 
         /*
         |--------------------------------------------------------------------------
-        | 最近の目標
+        | 最近の活動（Goal + Mission）
         |--------------------------------------------------------------------------
         */
         $recentGoals = Goal::where('user_id', $userId)
             ->latest()
-            ->take(3)
-            ->get();
+            ->get()
+            ->map(function ($goal) {
+                return [
+                    'type' => 'goal',
+                    'data' => $goal,
+                    'created_at' => $goal->created_at,
+                ];
+            });
+
+        $recentMissions = UserMission::where('user_id', $userId)
+            ->with('mission')
+            ->latest()
+            ->get()
+            ->map(function ($userMission) {
+                return [
+                    'type' => 'mission',
+                    'data' => $userMission,
+                    'created_at' => $userMission->created_at,
+                ];
+            });
+
+        // 両方を混ぜて最新3件
+        $recentActivities = $recentGoals->concat($recentMissions)
+            ->sortByDesc('created_at')
+            ->take(3);
 
         $thisMonthGoals = Goal::where('user_id', $userId)
             ->whereMonth('created_at', now()->month)
@@ -152,19 +175,18 @@ class DashboardController extends Controller
             ->first();
 
         return view('dashboard', compact(
-            'recentGoals',
+            'recentActivities',
             'thisMonthGoals',
             'totalMiles',
             'thisMonthMiles',
-            'recentMissions',
             'rank',
             'recommendedMission',
             'semesterGoal',
             'showRewardSurveyNotice',
+            'pendingSurvey',
             'canDrawGacha',
             'weeklyLabels',
-            'weeklyData',
-            'pendingSurvey'
+            'weeklyData'
         ));
     }
 
