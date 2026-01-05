@@ -12,6 +12,7 @@ class RewardSurveyAnswer extends Model
     protected $fillable = [
         'reward_survey_id',
         'user_id',
+        'company_id',
         'first_choice',
         'second_choice',
         'third_choice',
