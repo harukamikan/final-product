@@ -12,50 +12,33 @@ class RewardSurveyController extends Controller
     // 回答フォーム表示
     public function create(RewardSurvey $rewardSurvey)
     {
-        // ★ 受付中でないアンケートは拒否
-        abort_if(
-            ! RewardSurvey::accepting()->where('id', $rewardSurvey->id)->exists(),
-            403
-        );
-
-        // すでに回答済みなら戻す
-        $alreadyAnswered = $rewardSurvey->answers()
-            ->where('user_id', Auth::id())
-            ->exists();
-
-        if ($alreadyAnswered) {
-            return redirect()->route('dashboard')
-                ->with('info', 'このアンケートは既に回答済みです。');
-        }
-
         return view('reward-survey.create', compact('rewardSurvey'));
     }
-
 
     // 回答保存
     public function store(Request $request, RewardSurvey $rewardSurvey)
     {
         $request->validate([
-            'first_choice'  => 'required|string|max:255',
-            'second_choice' => 'required|string|max:255',
-            'third_choice'  => 'nullable|string|max:255',
+            'answer' => 'required|string',
         ]);
 
-        try {
-            RewardSurveyAnswer::create([
-                'reward_survey_id' => $rewardSurvey->id,
-                'user_id'          => Auth::id(),
-                'first_choice'     => $request->first_choice,
-                'second_choice'    => $request->second_choice,
-                'third_choice'     => $request->third_choice,
-            ]);
-        } catch (\Illuminate\Database\QueryException $e) {
-            // 二重送信・リロード対策
-            return redirect()->route('dashboard')
-                ->with('info', 'このアンケートは既に回答済みです。');
+        // 二重回答防止
+        $exists = RewardSurveyAnswer::where('reward_survey_id', $rewardSurvey->id)
+            ->where('user_id', Auth::id())
+            ->exists();
+
+        if ($exists) {
+            return back()->with('error', 'すでに回答済みです');
         }
 
+        RewardSurveyAnswer::create([
+            'reward_survey_id' => $rewardSurvey->id,
+            'user_id'          => Auth::id(),
+            'company_id'       => Auth::user()->company_id,
+            'answer'           => $request->answer,
+        ]);
+
         return redirect()->route('dashboard')
-            ->with('success', 'アンケートに回答しました。ありがとうございます！');
+            ->with('success', 'アンケートに回答しました');
     }
 }
