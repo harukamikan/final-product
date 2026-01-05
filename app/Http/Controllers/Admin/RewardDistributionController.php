@@ -59,4 +59,16 @@ class RewardDistributionController extends Controller
 
         return back();
     }
+
+    //　削除
+    public function destroy(RewardDistribution $distribution)
+    {
+        if ($distribution->company_id !== Auth::user()->company_id) {
+            abort(403);
+        }
+
+        $distribution->delete();
+
+        return back()->with('success', '配布候補を削除しました');
+    }
 }

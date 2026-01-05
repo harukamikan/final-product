@@ -41,26 +41,52 @@
     {{-- 一覧 --}}
     <div class="bg-white rounded-xl shadow divide-y">
         @foreach($distributions as $d)
-        <div class="p-4 flex justify-between items-center">
-            <div>
-                <p class="font-semibold">{{ $d->reward->name }}</p>
-                <p class="text-sm text-gray-500">
-                    数量：{{ $d->quantity ?? '無制限' }}
-                </p>
+            <div class="p-4 flex justify-between items-center">
+                <div>
+                    <p class="font-semibold">{{ $d->reward->name }}</p>
+
+                    <p class="text-sm text-gray-500">
+                        数量：{{ $d->quantity ?? '無制限' }}
+                    </p>
+
+                    {{-- 配布期間 --}}
+                    @if($d->starts_at || $d->ends_at)
+                        <p class="text-xs text-gray-400 mt-1">
+                            配布期間：
+                            {{ $d->starts_at?->format('Y/m/d H:i') ?? '－' }}
+                            〜
+                            {{ $d->ends_at?->format('Y/m/d H:i') ?? '－' }}
+                        </p>
+                    @endif
+                </div>
+
+                <div class="flex items-center gap-2">
+                    {{-- 配布ON/OFF --}}
+                    <form method="POST"
+                          action="{{ route('admin.reward-distributions.toggle', $d) }}">
+                        @csrf
+                        @method('PATCH')
+
+                        <button
+                            class="px-4 py-1 rounded-lg text-white
+                            {{ $d->is_active ? 'bg-green-600' : 'bg-gray-400' }}">
+                            {{ $d->is_active ? '配布中' : '停止中' }}
+                        </button>
+                    </form>
+
+                    {{-- 削除 --}}
+                        <form method="POST"
+                              action="{{ route('admin.reward-distributions.destroy', $d) }}"
+                              onsubmit="return confirm('この配布候補を削除しますか？');">
+                            @csrf
+                            @method('DELETE')
+
+                            <button class="px-3 py-1 text-sm bg-red-500 text-white rounded-lg">
+                                削除
+                            </button>
+                        </form>
+                </div>
             </div>
-
-            <form method="POST"
-                  action="{{ route('admin.reward-distributions.toggle', $d) }}">
-                @csrf
-                @method('PATCH')
-
-                <button
-                    class="px-4 py-1 rounded-lg text-white
-                    {{ $d->is_active ? 'bg-green-600' : 'bg-gray-400' }}">
-                    {{ $d->is_active ? '配布中' : '停止中' }}
-                </button>
-            </form>
-        </div>
         @endforeach
     </div>
 
