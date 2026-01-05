@@ -7,7 +7,10 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Redirect;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Str;
 use Illuminate\View\View;
+use App\Models\InviteToken;
 
 class ProfileController extends Controller
 {
@@ -16,8 +19,24 @@ class ProfileController extends Controller
      */
     public function edit(Request $request): View
     {
+        $user = $request->user();
+        $inviteLink = null;
+
+        // ユーザーが会社に所属している場合、招待リンクを取得
+        if ($user->company_id) {
+            $invite = InviteToken::where('company_id', $user->company_id)
+                ->where('max_uses', 0)
+                ->whereNull('expires_at')
+                ->first();
+
+            if ($invite) {
+                $inviteLink = route('invite.accept', ['token' => $invite->token]);
+            }
+        }
+
         return view('profile.edit', [
-            'user' => $request->user(),
+            'user' => $user,
+            'inviteLink' => $inviteLink,
         ]);
     }
 
@@ -68,5 +87,55 @@ class ProfileController extends Controller
 
         return redirect('/')
             ->with('status', 'account-deleted');
+    }
+
+    /**
+     * 招待リンクを再生成する
+     */
+    public function regenerateInviteLink(Request $request): RedirectResponse
+    {
+        $user = $request->user();
+
+        // 会社に所属していない場合はエラー
+        if (!$user->company_id) {
+            return redirect()
+                ->route('profile.edit')
+                ->withErrors(['invite' => '会社に所属していないため、招待リンクを生成できません。']);
+        }
+
+        // レート制限: 5分以内の再生成を防止
+        $cacheKey = "invite_regenerate_{$user->id}";
+        if (Cache::has($cacheKey)) {
+            return redirect()
+                ->route('profile.edit')
+                ->withErrors(['invite' => '招待リンクの再生成は5分間に1回のみ可能です。しばらく待ってから再度お試しください。']);
+        }
+
+        // 既存の招待トークンを取得または新規作成
+        $invite = InviteToken::where('company_id', $user->company_id)
+            ->where('max_uses', 0)
+            ->whereNull('expires_at')
+            ->first();
+
+        if ($invite) {
+            // 既存のトークンを更新（トークン文字列は変更しない）
+            $invite->touch(); // updated_at を更新
+        } else {
+            // 新規作成
+            $invite = InviteToken::create([
+                'company_id' => $user->company_id,
+                'token' => Str::random(60),
+                'expires_at' => null,
+                'max_uses' => 0,
+                'used_count' => 0,
+            ]);
+        }
+
+        // レート制限を設定（5分間）
+        Cache::put($cacheKey, true, now()->addMinutes(5));
+
+        return redirect()
+            ->route('profile.edit')
+            ->with('invite_regenerated', '招待リンクを更新しました。');
     }
 }

@@ -13,6 +13,11 @@
 
             <p class="text-sm text-gray-600">メールアドレス</p>
             <p class="font-medium mb-4">{{ $user->email }}</p>
+
+            @if($user->company)
+            <p class="text-sm text-gray-600">所属会社</p>
+            <p class="font-medium mb-4">{{ $user->company->name }}</p>
+            @endif
              <!-- Slack ID 編集フォーム -->
             <form action="{{ route('profile.update') }}" method="POST">
                 @csrf
@@ -230,6 +235,140 @@
                 </button>
             </form>
         </div>
+
+        {{-- ================= チーム招待 ================= --}}
+        @if ($inviteLink)
+            <div class="bg-white p-6 rounded-lg shadow space-y-4" x-data="{ regenerateModalOpen: false }">
+                <h3 class="text-lg font-semibold">チーム招待</h3>
+
+                {{-- 成功メッセージ --}}
+                @if (session('invite_regenerated'))
+                    <div
+                        x-data="{ show: true }"
+                        x-init="setTimeout(() => show = false, 3000)"
+                        x-show="show"
+                        x-transition
+                        class="rounded-md bg-green-50 p-4 text-green-700">
+                        {{ session('invite_regenerated') }}
+                    </div>
+                @endif
+
+                {{-- エラーメッセージ --}}
+                @if ($errors->has('invite'))
+                    <div
+                        x-data="{ show: true }"
+                        x-init="setTimeout(() => show = false, 5000)"
+                        x-show="show"
+                        x-transition
+                        class="rounded-md bg-red-50 p-4 text-red-700">
+                        {{ $errors->first('invite') }}
+                    </div>
+                @endif
+
+                <p class="text-sm text-gray-600">
+                    下の招待リンクをコピーしてメンバーに共有してください。
+                    リンクから登録すると自動でこの会社に所属します。
+                </p>
+
+                <div class="space-y-2">
+                    <p class="text-sm font-medium text-gray-700">招待リンク</p>
+
+                    <div class="flex flex-col sm:flex-row gap-3">
+                        <input
+                            id="inviteLink"
+                            type="text"
+                            value="{{ $inviteLink }}"
+                            readonly
+                            class="flex-1 rounded-2xl border-gray-200 bg-gray-50 text-sm"
+                        >
+
+                        <button
+                            type="button"
+                            onclick="copyInviteLink()"
+                            class="shrink-0 rounded-2xl bg-indigo-600 text-white px-5 py-3 font-semibold hover:bg-indigo-700 transition">
+                            コピー
+                        </button>
+                    </div>
+
+                    <p id="copyToast" class="hidden text-sm text-emerald-600 font-medium">
+                        コピーしました！
+                    </p>
+                </div>
+
+                {{-- 再生成ボタン --}}
+                <div class="pt-2">
+                    <button
+                        type="button"
+                        @click="regenerateModalOpen = true"
+                        class="px-4 py-2 text-sm border rounded-md text-gray-600 hover:bg-gray-100">
+                        🔄 招待リンクを更新
+                    </button>
+                    <p class="text-xs text-gray-500 mt-2">
+                        ※ 更新は5分間に1回のみ可能です
+                    </p>
+                </div>
+
+                {{-- 再生成確認モーダル --}}
+                <div
+                    x-show="regenerateModalOpen"
+                    x-transition
+                    class="fixed inset-0 bg-black/50 flex items-center justify-center z-50"
+                    @click="regenerateModalOpen = false">
+                    <div class="bg-white rounded-lg shadow p-6 w-full max-w-md" @click.stop>
+                        <h3 class="text-lg font-semibold text-gray-900 mb-2">
+                            招待リンクを更新しますか？
+                        </h3>
+
+                        <p class="text-sm text-gray-600 mb-4">
+                            招待リンクを更新します。既存のリンクはそのまま有効です。
+                        </p>
+
+                        <div class="flex justify-end gap-3">
+                            <button
+                                @click="regenerateModalOpen = false"
+                                class="px-4 py-2 border rounded-md text-gray-600 hover:bg-gray-100">
+                                キャンセル
+                            </button>
+
+                            <form method="POST" action="{{ route('profile.regenerate-invite') }}" class="inline">
+                                @csrf
+                                <button
+                                    type="submit"
+                                    class="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700">
+                                    更新する
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                <script>
+                    function copyInviteLink() {
+                        const input = document.getElementById('inviteLink');
+                        const text = input.value;
+
+                        // Clipboard API が使える環境
+                        if (navigator.clipboard && window.isSecureContext) {
+                            navigator.clipboard.writeText(text).then(() => {
+                                const toast = document.getElementById('copyToast');
+                                toast.classList.remove('hidden');
+                                setTimeout(() => toast.classList.add('hidden'), 1500);
+                            });
+                            return;
+                        }
+
+                        // フォールバック（http/local など）
+                        input.select();
+                        input.setSelectionRange(0, 99999);
+                        document.execCommand('copy');
+
+                        const toast = document.getElementById('copyToast');
+                        toast.classList.remove('hidden');
+                        setTimeout(() => toast.classList.add('hidden'), 1500);
+                    }
+                </script>
+            </div>
+        @endif
 
         {{-- ================= セキュリティ設定 ================= --}}
         <div class="bg-white p-6 rounded-lg shadow space-y-6">

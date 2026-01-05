@@ -11,12 +11,13 @@ class MissionListController extends Controller
     {
         $user = $request->user();
 
-        // まずこのユーザーに紐づく user_missions を一緒にロード
-        $allMissions = Mission::with(['userMissions' => function ($q) use ($user) {
-            $q->where('user_id', $user->id);
-        }])
-        ->orderBy('id')
-        ->get();
+        // このユーザーが見えるミッション（自分専用 or 共有）
+        $allMissions = Mission::availableForUser($user->id)
+            ->with(['userMissions' => function ($q) use ($user) {
+                $q->where('user_id', $user->id);
+            }])
+            ->orderBy('id')
+            ->get();
 
         // ★ 未完了だけに絞り込む（userMission がない or completed_at が null）
         $missions = $allMissions->filter(function ($mission) {
@@ -49,7 +50,7 @@ class MissionListController extends Controller
         $user = $request->user();
 
         // 個人ミッション（user_id が自分）のみ取得
-        $allMissions = Mission::where('user_id', $user->id)
+        $allMissions = Mission::personalOnly($user->id)
             ->with(['userMissions' => function ($q) use ($user) {
                 $q->where('user_id', $user->id);
             }])
@@ -83,14 +84,15 @@ class MissionListController extends Controller
     {
         $user = $request->user();
 
-        // 完了済みだけ
-        $missions = Mission::with(['userMissions' => function ($q) use ($user) {
-            $q->where('user_id', $user->id)
-              ->whereNotNull('completed_at');
-        }])
-        ->orderBy('id')
-        ->get()
-        ->filter(fn ($mission) => $mission->userMissions->isNotEmpty());
+        // 完了済みだけ（自分が見えるミッションのみ）
+        $missions = Mission::availableForUser($user->id)
+            ->with(['userMissions' => function ($q) use ($user) {
+                $q->where('user_id', $user->id)
+                  ->whereNotNull('completed_at');
+            }])
+            ->orderBy('id')
+            ->get()
+            ->filter(fn ($mission) => $mission->userMissions->isNotEmpty());
 
         $totalMiles = $user->total_miles
             ?? $user->mileHistories()->sum('miles');

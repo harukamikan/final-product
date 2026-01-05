@@ -9,6 +9,13 @@
             ようこそ、{{ auth()->user()->name }}さん
         </h2>
 
+        {{-- ===== 所属会社 ===== --}}
+        @if(auth()->user()->company)
+        <p class="text-sm text-slate-600 mt-1">
+            所属会社：<span class="font-semibold text-indigo-600">{{ auth()->user()->company->name }}</span>
+        </p>
+        @endif
+
         {{-- ===== 報酬アンケート通知 ===== --}}
         @if($showRewardSurveyNotice && $pendingSurvey)
         <div class="bg-indigo-50 border border-indigo-200 rounded-2xl p-5 shadow-sm">
