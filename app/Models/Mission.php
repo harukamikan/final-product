@@ -12,9 +12,15 @@ class Mission extends Model
     use BelongsToCompany;
 
     protected $fillable = [
-        'user_id','key', 'title', 'description',
-        'trigger_type', 'required_count',
-        'reward_miles', 'repeatable',
+        'user_id',
+        'company_id',
+        'key',
+        'title',
+        'description',
+        'trigger_type',
+        'required_count',
+        'reward_miles',
+        'repeatable',
     ];
 
     protected $casts = [
