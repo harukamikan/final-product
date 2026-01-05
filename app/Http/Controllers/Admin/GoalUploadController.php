@@ -24,6 +24,7 @@ class GoalUploadController extends Controller
             'file' => 'required|mimes:xlsx,xls'
         ]);
 
+        $companyId = \Illuminate\Support\Facades\Auth::user()->company_id;
         $file = $request->file('file');
         $data = Excel::toArray([], $file)[0];
 
@@ -51,7 +52,9 @@ class GoalUploadController extends Controller
                 }
             }
 
-            $user = User::where('name', $name)->first();
+            $user = User::where('company_id', $companyId)
+                ->where('name', $name)
+                ->first();
 
             if ($user) {
                 SemesterGoal::create([
