@@ -32,19 +32,19 @@ class RewardDistributionController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'reward_id' => 'required|exists:rewards,id',
-            'quantity'  => 'nullable|integer|min:1',
-            'starts_at' => 'nullable|date',
-            'ends_at'   => 'nullable|date|after_or_equal:starts_at',
+            'starts_at'          => 'nullable|date',
+            'ends_at'            => 'nullable|date|after_or_equal:starts_at',
+            'reward_expires_at'  => 'nullable|date',
         ]);
 
         RewardDistribution::create([
-            'company_id' => Auth::user()->company_id,
-            'reward_id'  => $request->reward_id,
-            'quantity'   => $request->quantity,
-            'starts_at'  => $request->starts_at,
-            'ends_at'    => $request->ends_at,
-            'is_active'  => false,
+            'company_id'         => Auth::user()->company_id,
+            'reward_id'          => $request->reward_id,
+            'quantity'           => $request->quantity,
+            'starts_at'          => $request->starts_at,
+            'ends_at'            => $request->ends_at,
+            'reward_expires_at'  => $request->reward_expires_at,
+            'is_active'          => false,
         ]);
 
         return back()->with('success', '配布候補を追加しました');
