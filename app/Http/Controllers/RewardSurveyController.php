@@ -19,7 +19,9 @@ class RewardSurveyController extends Controller
     public function store(Request $request, RewardSurvey $rewardSurvey)
     {
         $request->validate([
-            'answer' => 'required|string',
+            'first_choice'  => 'required|string|max:255',
+            'second_choice' => 'required|string|max:255',
+            'third_choice'  => 'nullable|string|max:255',
         ]);
 
         // 二重回答防止
@@ -35,10 +37,13 @@ class RewardSurveyController extends Controller
             'reward_survey_id' => $rewardSurvey->id,
             'user_id'          => Auth::id(),
             'company_id'       => Auth::user()->company_id,
-            'answer'           => $request->answer,
+            'first_choice'     => $request->first_choice,
+            'second_choice'    => $request->second_choice,
+            'third_choice'     => $request->third_choice,
         ]);
 
-        return redirect()->route('dashboard')
+        return redirect()
+            ->route('dashboard')
             ->with('success', 'アンケートに回答しました');
     }
 }
