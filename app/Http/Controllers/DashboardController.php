@@ -65,22 +65,30 @@ class DashboardController extends Controller
             ->whereMonth('created_at', now()->month)
             ->sum('miles');
 
-        // 週間活動データ（過去7日間）
-        $weeklyActivity = Goal::where('user_id', $userId)
+        // 週間活動データ（過去7日間：Goal + UserMission）
+        $weeklyGoals = Goal::where('user_id', $userId)
             ->whereBetween('created_at', [now()->subDays(6)->startOfDay(), now()->endOfDay()])
             ->selectRaw('DATE(created_at) as date, COUNT(*) as count')
             ->groupBy('date')
-            ->orderBy('date')
             ->get()
             ->pluck('count', 'date');
 
-        // 7日分のラベルとデータを準備
+        $weeklyMissions = UserMission::where('user_id', $userId)
+            ->whereBetween('created_at', [now()->subDays(6)->startOfDay(), now()->endOfDay()])
+            ->selectRaw('DATE(created_at) as date, COUNT(*) as count')
+            ->groupBy('date')
+            ->get()
+            ->pluck('count', 'date');
+
+       // 7日分のラベルとデータを準備（Goal + Mission）
         $weeklyLabels = [];
         $weeklyData = [];
         for ($i = 6; $i >= 0; $i--) {
             $date = now()->subDays($i)->format('Y-m-d');
             $weeklyLabels[] = now()->subDays($i)->format('m/d');
-            $weeklyData[] = $weeklyActivity[$date] ?? 0;
+            $goalCount = $weeklyGoals[$date] ?? 0;
+            $missionCount = $weeklyMissions[$date] ?? 0;
+            $weeklyData[] = $goalCount + $missionCount;
         }
 
         /*
