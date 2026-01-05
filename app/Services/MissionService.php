@@ -8,6 +8,7 @@ use App\Models\UserMission;
 use App\Models\MileHistory;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
+use App\Helpers\RankHelper;
 
 class MissionService
 {
@@ -18,9 +19,9 @@ class MissionService
      * @param string $triggerType  // 'tech_blog_posted' など
      * @param array  $payload      // ['mission_key' => ..., 'url' => ...] など
      *
-     * @return int 今回新たに獲得したマイル数の合計
+     * @return array 達成データ
      */
-    public function handleTrigger(User $user, string $triggerType, array $payload = []): int
+    public function handleTrigger(User $user, string $triggerType, array $payload = []): array
     {
         $query = Mission::where('trigger_type', $triggerType);
 
@@ -31,21 +32,33 @@ class MissionService
 
         $missions = $query->get();
 
-        $earnedTotal = 0;
+        $achievementData = [
+            'earned_miles' => 0,
+            'mission_completed' => false,
+            'mission_title' => '',
+            'progress' => ['current' => 0, 'required' => 1],
+            'rank_info' => [],
+            'next_action' => null,
+        ];
 
         foreach ($missions as $mission) {
-            $earnedTotal += $this->progressMission($user, $mission, $payload);
+            $result = $this->progressMission($user, $mission, $payload);
+            
+            // 最後に処理したミッションの情報を保持
+            if ($result['earned_miles'] > 0 || $result['progress']['current'] > 0) {
+                $achievementData = $result;
+            }
         }
 
-        return $earnedTotal;
+        return $achievementData;
     }
 
     /**
      * ミッションを1ステップ進めて、条件を満たしたらクリア＋マイル付与
      *
-     * @return int このミッションで今回新たに獲得したマイル数
+     * @return array 達成データ
      */
-    protected function progressMission(User $user, Mission $mission, array $payload = []): int
+    protected function progressMission(User $user, Mission $mission, array $payload = []): array
     {
         // ユーザーのミッション状態レコードを取得 or 作成
         $userMission = UserMission::firstOrCreate(
@@ -58,11 +71,25 @@ class MissionService
             $userMission->proof_url = $payload['url'];
         }
 
+        // 現在のマイル数（ランク計算用）
+        $previousMiles = $user->total_miles ?? MileHistory::where('user_id', $user->id)->sum('miles');
+
         // すでにクリア済みで、repeatable じゃない場合は何もしない
         if ($userMission->isCompleted() && !$mission->repeatable) {
             // ただし proof_url だけは更新される可能性があるので save しておく
             $userMission->save();
-            return 0;
+            
+            return [
+                'earned_miles' => 0,
+                'mission_completed' => false,
+                'mission_title' => $mission->title,
+                'progress' => [
+                    'current' => $userMission->progress_count,
+                    'required' => $mission->required_count,
+                ],
+                'rank_info' => RankHelper::getRankInfo($previousMiles, $previousMiles),
+                'next_action' => $this->getNextAction($user),
+            ];
         }
 
         // 進捗を1進める
@@ -71,7 +98,18 @@ class MissionService
         // まだ達成していない or すでに completed_at が入っている場合 → 進捗だけ保存
         if ($userMission->progress_count < $mission->required_count || $userMission->isCompleted()) {
             $userMission->save();
-            return 0;
+            
+            return [
+                'earned_miles' => 0,
+                'mission_completed' => false,
+                'mission_title' => $mission->title,
+                'progress' => [
+                    'current' => $userMission->progress_count,
+                    'required' => $mission->required_count,
+                ],
+                'rank_info' => RankHelper::getRankInfo($previousMiles, $previousMiles),
+                'next_action' => null,
+            ];
         }
 
         // ここに来たら「今ちょうど達成した」
@@ -89,6 +127,7 @@ class MissionService
             // マイル履歴作成
             MileHistory::create([
                 'user_id'     => $user->id,
+                'company_id'  => $user->company_id,
                 'mission_id'  => $mission->id,
                 'miles'       => $earned,
                 'type'        => 'earn',
@@ -102,10 +141,63 @@ class MissionService
             $user->increment('completed_missions');
         });
 
-        return $earned;
+        // 達成後のマイル数
+        $currentMiles = $previousMiles + $earned;
+        
+        // ランク情報を取得
+        $rankInfo = RankHelper::getRankInfo($currentMiles, $previousMiles);
+        
+        // 次のアクションを取得
+        $nextAction = $this->getNextAction($user);
+
+        return [
+            'earned_miles' => $earned,
+            'mission_completed' => true,
+            'mission_title' => $mission->title,
+            'progress' => [
+                'current' => $userMission->progress_count,
+                'required' => $mission->required_count,
+            ],
+            'rank_info' => $rankInfo,
+            'next_action' => $nextAction,
+        ];
     }
 
-    public function completeManually(User $user, Mission $mission): int
+    /**
+     * 次のおすすめアクションを取得
+     */
+    protected function getNextAction(User $user): ?array
+    {
+        // 未着手のミッションを取得（報酬が高い順）
+        $nextMission = Mission::whereNotIn(
+            'id',
+            UserMission::where('user_id', $user->id)
+                ->whereNotNull('completed_at')
+                ->pluck('mission_id')
+        )
+            ->availableForUser($user->id)
+            ->orderBy('reward_miles', 'desc')
+            ->first();
+
+        if (!$nextMission) {
+            return null;
+        }
+
+        // ミッションタイプに応じたURLを生成
+        $url = match ($nextMission->key) {
+            'write_tech_blog' => route('missions.blog-url.form'),
+            'event_speaker', 'event_organizer', 'acquire_certificate' 
+                => route('missions.form.create', ['mission' => $nextMission->id]),
+            default => route('missions.index'),
+        };
+
+        return [
+            'title' => $nextMission->title,
+            'url' => $url,
+        ];
+    }
+
+    public function completeManually(User $user, Mission $mission): array
     {
         // trigger_type が manual系かどうかを一応チェックしても良い
         if (!str_starts_with($mission->trigger_type, 'manual')) {

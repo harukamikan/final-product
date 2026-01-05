@@ -6,6 +6,7 @@ use App\Models\RewardDistribution;
 use App\Models\RewardHistory;
 use App\Models\MileHistory;
 use App\Models\User;
+use App\Models\UserReward;
 use Illuminate\Support\Facades\DB;
 
 class GachaService
@@ -40,15 +41,15 @@ class GachaService
                 ->where('is_active', true)
                 ->where(function ($q) {
                     $q->whereNull('starts_at')
-                      ->orWhere('starts_at', '<=', now());
+                        ->orWhere('starts_at', '<=', now());
                 })
                 ->where(function ($q) {
                     $q->whereNull('ends_at')
-                      ->orWhere('ends_at', '>=', now());
+                        ->orWhere('ends_at', '>=', now());
                 })
                 ->where(function ($q) {
                     $q->whereNull('quantity')
-                      ->orWhere('quantity', '>', 0);
+                        ->orWhere('quantity', '>', 0);
                 })
                 ->lockForUpdate()
                 ->get();
@@ -74,6 +75,15 @@ class GachaService
                 'user_id'   => $userId,
                 'reward_id' => $selected->reward_id,
                 'via'       => $via,
+            ]);
+
+            // ⑧ ユーザーが所有する報酬を作成（有効期限つき）
+            UserReward::create([
+                'user_id'     => $userId,
+                'reward_id'   => $selected->reward_id,
+                'company_id'  => $companyId,
+                'acquired_at' => now(),
+                'expires_at'  => $selected->reward_expires_at, // ← 重要
             ]);
 
             return $selected->reward;

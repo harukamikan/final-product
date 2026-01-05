@@ -23,39 +23,24 @@ class MissionFormController extends Controller
             'evidence_url'=> 'nullable|url',
         ]);
 
+        $user = auth()->user();
+
         // 1) フォーム提出を保存
         MissionForm::create([
-            'user_id'     => auth()->id(),
+            'user_id'     => $user->id,
             'mission_id'  => $mission->id,
-            'category'    => $mission->key, // missionsテーブルにcategoryが無いのでkeyを使う
+            'category'    => $mission->key,
             'title'       => $request->title,
             'occurred_on' => $request->occurred_on,
             'details'     => $request->details,
             'evidence_url'=> $request->evidence_url,
         ]);
 
-        // 2) ミッション達成処理（statusカラムが無いので completed_at のみ更新）
-        //    user_missions レコードが無い場合もあるので firstOrCreate で安全にする
-        $companyId = auth()->user()->company_id;
-
-        $userMission = UserMission::firstOrCreate(
-            [
-                'user_id'    => auth()->id(),
-                'mission_id' => $mission->id,
-                'company_id' => $companyId,
-            ],
-            [
-                'completed_at' => null,
-            ]
-        );
-
-        $userMission->update([
-            'completed_at' => now(),
-        ]);
-
-        // （任意）マイル付与処理をここに追加
+        // 2) ミッション達成処理（MissionServiceを使ってマイル付与も行う）
+        $missionService = app(\App\Services\MissionService::class);
+        $achievementData = $missionService->completeManually($user, $mission);
 
         return redirect()->route('missions.index')
-            ->with('success', 'ミッションを達成しました！');
+            ->with('achievementData', $achievementData);
     }
 }

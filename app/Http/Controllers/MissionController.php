@@ -74,8 +74,8 @@ class MissionController extends Controller
             ]);
         }
 
-        // 3) ミッション進捗 & マイル付与（※二重実行になっていたので1回に統一）
-        $earned = $missionService->handleTrigger(
+        // 3) ミッション進捗 & マイル付与
+        $achievementData = $missionService->handleTrigger(
             $user,
             'tech_blog_posted',
             [
@@ -108,7 +108,7 @@ class MissionController extends Controller
         return view('missions.blog-preview', [
             'mission' => $mission,
             'qiita'   => $qiita,
-            'earned'  => $earned,
+            'achievementData' => $achievementData,
         ]);
     }
 
