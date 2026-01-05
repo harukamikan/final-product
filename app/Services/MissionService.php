@@ -89,6 +89,7 @@ class MissionService
             // マイル履歴作成
             MileHistory::create([
                 'user_id'     => $user->id,
+                'company_id'  => $user->company_id,
                 'mission_id'  => $mission->id,
                 'miles'       => $earned,
                 'type'        => 'earn',

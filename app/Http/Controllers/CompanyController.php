@@ -41,16 +41,11 @@ class CompanyController extends Controller
 
         $data = $request->validate([
             'name' => ['required', 'string', 'max:255'],
-            // slug は「会社の識別子」として残してOK（招待は token にする）
-            'slug' => ['nullable', 'string', 'max:50', 'regex:/^[a-z0-9-]+$/'],
-        ], [
-            'slug.regex' => '会社slugは半角英小文字・数字・ハイフンのみで入力してください。',
         ]);
 
         $name = trim($data['name']);
-        $slug = isset($data['slug']) && $data['slug'] !== ''
-            ? strtolower(trim($data['slug']))
-            : Str::slug($name);
+        // slug は常に会社名から自動生成
+        $slug = Str::slug($name);
 
         // slugが空になるケース（日本語名など）の保険
         if ($slug === '') {
@@ -59,11 +54,6 @@ class CompanyController extends Controller
 
         // slug 重複チェック
         if (Company::where('slug', $slug)->exists()) {
-            if (!empty($data['slug'])) {
-                return back()->withInput()->withErrors([
-                    'slug' => 'この会社slugは既に使われています。別のslugを入力してください。',
-                ]);
-            }
             $slug = $slug . '-' . Str::lower(Str::random(4));
         }
 

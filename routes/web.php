@@ -84,6 +84,13 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/company/join', [CompanyController::class, 'join'])
         ->name('company.join.submit');
 
+    // Onboarding survey (after company selection, before dashboard)
+    Route::get('/onboarding/survey', [\App\Http\Controllers\OnboardingController::class, 'showSurvey'])
+        ->name('onboarding.survey');
+
+    Route::post('/onboarding/survey', [\App\Http\Controllers\OnboardingController::class, 'submitSurvey'])
+        ->name('onboarding.submit');
+
     // ===== 表示画面（GET）=====
     Route::get('/rewards/gacha', [RewardPlayController::class, 'gachaPage'])
         ->name('rewards.gacha');
@@ -134,6 +141,9 @@ Route::middleware(['auth', 'company'])->group(function () {
 
     Route::delete('/profile/delete', [ProfileController::class, 'destroy'])
         ->name('profile.delete');
+
+    Route::post('/profile/regenerate-invite', [ProfileController::class, 'regenerateInviteLink'])
+        ->name('profile.regenerate-invite');
 
     /*
     | Goals（通常の活動・目標）
