@@ -59,10 +59,22 @@ class SlackController extends Controller
 
     public function commands(Request $request)
     {
+        // デバッグログ追加
+        Log::info('Slack command received', [
+            'all_data' => $request->all(),
+            'headers' => [
+                'timestamp' => $request->header('X-Slack-Request-Timestamp'),
+                'signature' => $request->header('X-Slack-Signature'),
+            ]
+        ]);
+
         // Slack署名検証（必須）
         if (!$this->verifySlackSignature($request)) {
+            Log::error('Slack signature verification failed');
             abort(401, 'Invalid Slack signature');
         }
+
+        Log::info('Slack signature verified successfully');
 
         $text = trim((string) $request->input('text', ''));
         $slackUserId = (string) $request->input('user_id'); // "UXXXX..."
