@@ -182,9 +182,9 @@
                            {{ request()->is('ranking*') ? 'bg-indigo-500 bg-opacity-20' : '' }}">
                     ランキング
                 </a>
-                <a href="{{ route('gacha.index') }}"
+                <a href="{{ route('rewards.gacha') }}"
                     class="block px-3 py-2 rounded-md text-base font-medium @if($brightness > 155) text-white hover:bg-gray-700 @else text-gray-900 hover:bg-gray-100 @endif
-                           {{ request()->is('gacha*') ? 'bg-indigo-500 bg-opacity-20' : '' }}">
+                           {{ request()->is('rewards/gacha*') ? 'bg-indigo-500 bg-opacity-20' : '' }}">
                     ガチャ
                 </a>
             </div>
