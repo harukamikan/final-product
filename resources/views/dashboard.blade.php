@@ -188,13 +188,18 @@
             @endif
         </div>
 
-        {{-- 週間活動グラフ --}}
+        {{-- 今月のマイル獲得推移 --}}
         <div class="bg-white rounded-2xl shadow-md p-6">
-            <p class="text-sm font-semibold text-slate-500 uppercase mb-4">
-                📊 週間活動
-            </p>
+            <div class="flex justify-between items-center mb-2">
+                <p class="text-sm font-semibold text-slate-500 uppercase">
+                    📊 今月のマイル獲得推移
+                </p>
+                <p class="text-lg font-bold text-indigo-600">
+                    {{ $thisMonthMiles }} マイル
+                </p>
+            </div>
             <div style="height: 200px;">
-                <canvas id="weeklyActivityChart"></canvas>
+                <canvas id="monthlyMilesChart"></canvas>
             </div>
         </div>
     </div>
@@ -291,17 +296,20 @@
 {{-- Chart.js でグラフ表示 --}}
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
-    const ctx = document.getElementById('weeklyActivityChart').getContext('2d');
+    const ctx = document.getElementById('monthlyMilesChart').getContext('2d');
     new Chart(ctx, {
-        type: 'bar',
+        type: 'line',
         data: {
-            labels: {!! json_encode($weeklyLabels) !!},
+            labels: {!! json_encode($monthlyMilesLabels) !!},
             datasets: [{
-                label: '活動件数',
-                data: {!! json_encode($weeklyData) !!},
-                backgroundColor: 'rgba(79, 70, 229, 0.8)',
-                borderColor: 'rgba(79, 70, 229, 1)',
-                borderWidth: 1
+                data: {!! json_encode($monthlyMilesData) !!},
+                borderColor: 'rgb(99, 102, 241)',
+                backgroundColor: 'rgba(99, 102, 241, 0.15)',
+                borderWidth: 3,
+                pointRadius: 4,
+                pointBackgroundColor: 'rgb(99, 102, 241)',
+                tension: 0.4,
+                fill: true
             }]
         },
         options: {
@@ -313,11 +321,13 @@
                 }
             },
             scales: {
-                y: {
-                    beginAtZero: true,
-                    ticks: {
-                        stepSize: 1
+                x: {
+                    grid: {
+                        display: false
                     }
+                },
+                y: {
+                    beginAtZero: true
                 }
             }
         }

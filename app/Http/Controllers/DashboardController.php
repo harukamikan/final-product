@@ -83,6 +83,26 @@ class DashboardController extends Controller
             $weeklyData[] = $weeklyActivity[$date] ?? 0;
         }
 
+        // 今月の日別マイル獲得データ
+        $monthlyMilesActivity = MileHistory::where('user_id', $userId)
+            ->whereYear('created_at', now()->year)
+            ->whereMonth('created_at', now()->month)
+            ->selectRaw('DATE(created_at) as date, SUM(miles) as total')
+            ->groupBy('date')
+            ->orderBy('date')
+            ->get()
+            ->pluck('total', 'date');
+
+        // 今月の日数分のラベルとデータを準備
+        $monthlyMilesLabels = [];
+        $monthlyMilesData = [];
+        $daysInMonth = now()->daysInMonth;
+        for ($day = 1; $day <= $daysInMonth; $day++) {
+            $date = now()->startOfMonth()->addDays($day - 1)->format('Y-m-d');
+            $monthlyMilesLabels[] = $day . '日';
+            $monthlyMilesData[] = $monthlyMilesActivity[$date] ?? 0;
+        }
+
         /*
         |--------------------------------------------------------------------------
         | 半期目標
@@ -156,6 +176,8 @@ class DashboardController extends Controller
             'canDrawGacha',
             'weeklyLabels',
             'weeklyData',
+            'monthlyMilesLabels',
+            'monthlyMilesData',
             'pendingSurvey'
         ));
     }

@@ -144,7 +144,7 @@
     new Chart(document.getElementById('categoryChart'), {
         type: 'pie',
         data: {
-            labels: categoryData.map(d => d.type || '未分類'),
+            labels: categoryData.map(d => d.category),
             datasets: [{
                 data: categoryData.map(d => parseInt(d.total)),
                 backgroundColor: [
