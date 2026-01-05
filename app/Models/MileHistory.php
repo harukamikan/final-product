@@ -13,6 +13,7 @@ class MileHistory extends Model
 
     protected $fillable = [
         'user_id',
+        'company_id',
         'mission_id',
         'miles',
         'type',

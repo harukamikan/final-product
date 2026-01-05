@@ -9,6 +9,7 @@ use App\Http\Controllers\{
     MissionController,
     DashboardController,
     SlackAuthController,
+    SlackController,
     UserMissionController,
     MissionListController,
     QiitaArticleController,
@@ -55,6 +56,12 @@ Route::get('/auth/slack/callback', [SlackAuthController::class, 'callback'])
 
 Route::get('/invite/{token}', [InviteController::class, 'accept'])
     ->name('invite.accept');
+
+// Slack mission form routes (public, token-based authentication)
+Route::get('/slack/missions/{type}', [SlackController::class, 'showSlackForm'])
+    ->name('slack.missions.form');
+Route::post('/slack/missions/{type}/submit', [SlackController::class, 'submitSlackForm'])
+    ->name('slack.missions.submit');
 
 /*
 |--------------------------------------------------------------------------
