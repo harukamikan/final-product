@@ -14,6 +14,7 @@ class UserMission extends Model
 
     protected $fillable = [
         'user_id',
+        'company_id',
         'mission_id',
         'proof_url',
         'progress_count',

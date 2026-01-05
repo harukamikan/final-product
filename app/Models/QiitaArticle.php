@@ -11,6 +11,7 @@ class QiitaArticle extends Model
 
     protected $fillable = [
         'user_id',
+        'company_id',
         'mission_id',
         'item_id',
         'title',
