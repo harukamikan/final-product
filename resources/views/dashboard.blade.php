@@ -48,6 +48,25 @@
         </div>
         @endif
 
+        {{-- ⏰ 7日以内に期限が切れる報酬 --}}
+        @if($expiringRewards->isNotEmpty())
+        <div class="bg-yellow-50 border border-yellow-300 rounded-xl p-5 mb-6">
+            <h3 class="font-bold text-yellow-800 mb-2">
+                ⏰ まもなく期限が切れる報酬
+            </h3>
+
+            <ul class="space-y-1 text-sm text-yellow-900">
+                @foreach($expiringRewards as $ur)
+                <li>
+                    🎁 {{ $ur->reward->name }}
+                    <span class="text-xs text-yellow-700">
+                        （{{ $ur->expires_at->diffForHumans() }}）
+                    </span>
+                </li>
+                @endforeach
+            </ul>
+        </div>
+        @endif
 
         {{-- ===== 半期目標 ===== --}}
         <div class="bg-white rounded-2xl shadow-md p-6">
@@ -124,8 +143,8 @@
                 {{ $totalMiles }}
             </p>
             <p class="text-base text-slate-500">
-                    累計獲得マイル
-                </p>
+                累計獲得マイル
+            </p>
         </div>
 
         {{-- ランク --}}
@@ -295,10 +314,14 @@
     new Chart(ctx, {
         type: 'bar',
         data: {
-            labels: {!! json_encode($weeklyLabels) !!},
+            labels: {
+                !!json_encode($weeklyLabels) !!
+            },
             datasets: [{
                 label: '活動件数',
-                data: {!! json_encode($weeklyData) !!},
+                data: {
+                    !!json_encode($weeklyData) !!
+                },
                 backgroundColor: 'rgba(79, 70, 229, 0.8)',
                 borderColor: 'rgba(79, 70, 229, 1)',
                 borderWidth: 1
@@ -323,5 +346,5 @@
         }
     });
 </script>
-        
+
 @endsection

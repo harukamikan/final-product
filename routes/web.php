@@ -26,6 +26,7 @@ use App\Http\Controllers\{
     RewardHistoryController,
     DebugController,
     RewardSurveyController,
+    UserRewardController,
 };
 
 use App\Http\Controllers\Admin\{
@@ -104,6 +105,10 @@ Route::middleware(['auth'])->group(function () {
 
     Route::post('/rewards/play/scratch', [RewardPlayController::class, 'scratch'])
         ->name('rewards.play.scratch');
+
+    // ===== 所有報酬一覧 =====
+    Route::get('/rewards/my', [UserRewardController::class, 'index'])
+        ->name('rewards.my');
 });
 
 

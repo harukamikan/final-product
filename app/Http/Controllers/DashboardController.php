@@ -10,6 +10,7 @@ use App\Models\SemesterGoal;
 use App\Models\RewardSurvey;
 use App\Models\RewardSurveyAnswer;
 use App\Models\RewardDistribution;
+use App\Models\UserReward;
 use Illuminate\Support\Facades\Auth;
 
 class DashboardController extends Controller
@@ -119,17 +120,33 @@ class DashboardController extends Controller
             ->where('is_active', true)
             ->where(function ($q) {
                 $q->whereNull('starts_at')
-                  ->orWhere('starts_at', '<=', now());
+                    ->orWhere('starts_at', '<=', now());
             })
             ->where(function ($q) {
                 $q->whereNull('ends_at')
-                  ->orWhere('ends_at', '>=', now());
+                    ->orWhere('ends_at', '>=', now());
             })
             ->where(function ($q) {
                 $q->whereNull('quantity')
-                  ->orWhere('quantity', '>', 0);
+                    ->orWhere('quantity', '>', 0);
             })
             ->exists();
+
+        /*
+        |--------------------------------------------------------------------------
+        | 期限が7日以内の報酬
+        |--------------------------------------------------------------------------
+        */
+        $expiringRewards = UserReward::with('reward')
+            ->where('user_id', $userId)
+            ->whereNull('used_at')
+            ->whereBetween('expires_at', [
+                now(),
+                now()->addDays(7),
+            ])
+            ->orderBy('expires_at')
+            ->get();
+
 
         /*
         |--------------------------------------------------------------------------
@@ -156,7 +173,8 @@ class DashboardController extends Controller
             'canDrawGacha',
             'weeklyLabels',
             'weeklyData',
-            'pendingSurvey'
+            'pendingSurvey',
+            'expiringRewards'
         ));
     }
 
