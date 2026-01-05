@@ -1,15 +1,27 @@
 @extends('layouts.app')
 
 @section('content')
+{{-- ミッション達成モーダル --}}
+@if(session('achievementData'))
+    @include('components.mission-completion-modal', ['achievementData' => session('achievementData')])
+@endif
+
+{{-- 進捗トースト（未完了の場合） --}}
+@if(session('progressData'))
+    @include('components.mission-progress-toast', ['progressData' => session('progressData')])
+@endif
+
 <div class="max-w-5xl mx-auto px-4 py-8 space-y-8">
 
     {{-- ----- マイル残高カード ----- --}}
-    <div class="bg-gradient-to-r from-indigo-500 to-indigo-600 text-white rounded-3xl p-6 shadow-md flex justify-between items-center">
-        <div>
-            <p class="text-sm opacity-90">現在のマイル残高</p>
-            <p class="text-4xl font-bold">{{ $totalMiles }}<span class="text-xl opacity-70 ml-1">mile</span></p>
-        </div>
-        <div class="text-5xl">🎯</div>
+    <div class="bg-gradient-to-r from-indigo-500 to-indigo-600 text-white rounded-3xl p-6 shadow-md">
+        @include('components.animated-miles-display', [
+            'currentMiles' => $totalMiles,
+            'size' => 'medium',
+            'showIcon' => true,
+            'icon' => '🎯',
+            'label' => '現在のマイル残高'
+        ])
     </div>
 
     {{-- ----- タブ切り替え ----- --}}

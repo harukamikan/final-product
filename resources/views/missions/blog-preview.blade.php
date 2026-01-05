@@ -1,6 +1,9 @@
 @extends('layouts.app')
 
 @section('content')
+{{-- ミッション達成モーダル --}}
+@include('components.mission-completion-modal', ['achievementData' => $achievementData ?? []])
+
 <div class="max-w-3xl mx-auto px-4 py-8 space-y-6">
 
     {{-- 完了メッセージ & マイル --}}
@@ -9,9 +12,9 @@
             <p class="text-sm text-emerald-700 font-medium">
                 技術ブログのURLを登録しました 🎉
             </p>
-            @if ($earned > 0)
+            @if (($achievementData['earned_miles'] ?? 0) > 0)
                 <p class="text-xs text-emerald-700 mt-1">
-                    このミッションで <span class="font-bold">{{ $earned }} mile</span> を獲得しました。
+                    このミッションで <span class="font-bold">{{ $achievementData['earned_miles'] }} mile</span> を獲得しました。
                 </p>
             @endif
         </div>
