@@ -124,8 +124,9 @@
                 {{ $totalMiles }}
             </p>
             <p class="text-base text-slate-500">
-                累計獲得マイル
-            </p>
+                    累計獲得マイル
+                </p>
+            </div>
         </div>
 
         {{-- ランク --}}

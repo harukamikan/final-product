@@ -38,12 +38,9 @@ class MissionFormController extends Controller
 
         // 2) ミッション達成処理（MissionServiceを使ってマイル付与も行う）
         $missionService = app(\App\Services\MissionService::class);
-        $earnedMiles = $missionService->completeManually($user, $mission);
+        $achievementData = $missionService->completeManually($user, $mission);
 
         return redirect()->route('missions.index')
-            ->with('success', sprintf(
-                'ミッションを達成しました！%d マイルを獲得しました🎉',
-                $earnedMiles
-            ));
+            ->with('achievementData', $achievementData);
     }
 }
