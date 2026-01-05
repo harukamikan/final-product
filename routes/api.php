@@ -2,8 +2,12 @@
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\SlackController;
 use App\Models\Activity;
 use App\Models\User;
+
+// Slack bot commands endpoint
+Route::post('/slack/commands', [SlackController::class, 'commands']);
 
 Route::post('/slack/test', function (Request $request) {
     \Log::info('Slack command received:', $request->all());
