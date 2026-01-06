@@ -82,6 +82,13 @@
                         活動履歴
                     </a>
 
+                    {{-- Qiitaタイムライン --}}
+                    <a href="{{ route('qiita.index') }}"
+                        class="inline-flex items-center px-1 pt-1 text-sm font-medium {{ $navText }}
+                       {{ request()->is('qiita*') ? 'border-b-2 border-indigo-500' : $hoverText }}">
+                        タイムライン
+                    </a>
+
                     <a href="/ranking"
                         class="inline-flex items-center px-1 pt-1 text-sm font-medium {{ $navText }}
                        {{ request()->is('ranking*') ? 'border-b-2 border-indigo-500' : $hoverText }}">
@@ -176,6 +183,11 @@
                     class="block px-3 py-2 rounded-md text-base font-medium @if($brightness > 155) text-white hover:bg-gray-700 @else text-gray-900 hover:bg-gray-100 @endif
                            {{ request()->is('activities*') ? 'bg-indigo-500 bg-opacity-20' : '' }}">
                     活動履歴
+                </a>
+                <a href="{{ route('qiita.index') }}"
+                    class="block px-3 py-2 rounded-md text-base font-medium @if($brightness > 155) text-white hover:bg-gray-700 @else text-gray-900 hover:bg-gray-100 @endif
+                           {{ request()->is('qiita*') ? 'bg-indigo-500 bg-opacity-20' : '' }}">
+                    タイムライン
                 </a>
                 <a href="/ranking"
                     class="block px-3 py-2 rounded-md text-base font-medium @if($brightness > 155) text-white hover:bg-gray-700 @else text-gray-900 hover:bg-gray-100 @endif
