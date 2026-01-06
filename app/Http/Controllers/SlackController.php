@@ -59,104 +59,58 @@ class SlackController extends Controller
 
     public function commands(Request $request)
     {
-        // デバッグログ追加
-        Log::info('Slack command received', [
-            'all_data' => $request->all(),
-            'headers' => [
-                'timestamp' => $request->header('X-Slack-Request-Timestamp'),
-                'signature' => $request->header('X-Slack-Signature'),
-            ]
-        ]);
-
         // Slack署名検証（必須）
         if (!$this->verifySlackSignature($request)) {
             Log::error('Slack signature verification failed');
             abort(401, 'Invalid Slack signature');
         }
 
-        Log::info('Slack signature verified successfully');
-
-        $text = trim((string) $request->input('text', ''));
-        $slackUserId = (string) $request->input('user_id'); // "UXXXX..."
-        $appUrl = rtrim(config('app.url'), '/');
-
+        $slackUserId = (string) $request->input('user_id');
+        
         // まずユーザー特定（Slackログイン済み前提）
         $user = User::where('slack_id', $slackUserId)->first();
         if (!$user) {
             return response()->json([
                 "response_type" => "ephemeral",
-                "text" => "ユーザー連携が見つかりませんでした。まずWebアプリでSlackログインしてから再度お試しください。"
+                "text" => "ユーザー連携が見つかりませんでした。まずWebアプリでSlackログインしてから再度お試しください。\n\nログインURL: " . route('slack.login')
             ]);
         }
 
-        // /mission qiita <URL>
-        if (Str::startsWith($text, 'qiita')) {
-            $url = trim(Str::after($text, 'qiita'));
-
-            if (!filter_var($url, FILTER_VALIDATE_URL)) {
-                return response()->json([
-                    "response_type" => "ephemeral",
-                    "text" => "URLが正しくないかもです。例：`/mission qiita https://qiita.com/...`"
-                ]);
-            }
-
-            // MissionServiceを使ってミッション進捗を処理
-            $mission = Mission::where('key', 'write_tech_blog')->first();
-            if (!$mission) {
-                return response()->json([
-                    "response_type" => "ephemeral",
-                    "text" => "❌ Qiitaミッションが見つかりませんでした。"
-                ]);
-            }
-
-            $missionService = app(MissionService::class);
-            $earned = $missionService->handleTrigger(
-                $user,
-                'tech_blog_posted',
-                [
-                    'mission_key' => $mission->key,
-                    'url' => $url,
-                ]
-            );
-
-            $message = "✅ Qiitaミッションを完了しました！（URL受領）";
-            if ($earned > 0) {
-                $message .= "\n🎉 {$earned}マイルを獲得しました！";
-            }
-
-            return response()->json([
-                "response_type" => "ephemeral",
-                "text" => $message
-            ]);
-        }
-
-        // /mission （引数なし）：フォームへ飛ぶボタンを返す
+        // Generate signed URLs for all 4 mission types
         $links = [
+            'qiita'      => $this->signedFormUrl($slackUserId, 'qiita'),
             'event_plan' => $this->signedFormUrl($slackUserId, 'event_plan'),
             'event_talk' => $this->signedFormUrl($slackUserId, 'event_talk'),
             'cert'       => $this->signedFormUrl($slackUserId, 'cert'),
         ];
 
+        // Return Block Kit with 4 buttons
         return response()->json([
             "response_type" => "ephemeral",
             "blocks" => [
                 [
                     "type" => "section",
-                    "text" => ["type" => "mrkdwn", "text" => "*ミッションメニュー*\n下のボタンからフォームを開いて送信するとミッション完了になります。"]
+                    "text" => ["type" => "mrkdwn", "text" => "*📋 ミッションメニュー*\n下のボタンから選んでWebフォームを開いてください。"]
                 ],
                 [
                     "type" => "actions",
                     "elements" => [
-                        ["type" => "button", "text" => ["type" => "plain_text", "text" => "イベント企画・開催"], "url" => $links['event_plan']],
-                        ["type" => "button", "text" => ["type" => "plain_text", "text" => "イベント登壇"],     "url" => $links['event_talk']],
-                        ["type" => "button", "text" => ["type" => "plain_text", "text" => "資格取得"],         "url" => $links['cert']],
+                        ["type" => "button", "text" => ["type" => "plain_text", "text" => "📝 技術ブログ(Qiita)"], "url" => $links['qiita'], "style" => "primary"],
+                        ["type" => "button", "text" => ["type" => "plain_text", "text" => "🎤 イベント登壇"], "url" => $links['event_talk']],
+                    ]
+                ],
+                [
+                    "type" => "actions",
+                    "elements" => [
+                        ["type" => "button", "text" => ["type" => "plain_text", "text" => "🎪 イベント企画・開催"], "url" => $links['event_plan']],
+                        ["type" => "button", "text" => ["type" => "plain_text", "text" => "🎓 資格取得"], "url" => $links['cert']],
                     ]
                 ],
                 [
                     "type" => "context",
                     "elements" => [[
                         "type" => "mrkdwn",
-                        "text" => "Qiitaは `/mission qiita <URL>` で送ると完了します。"
+                        "text" => "💡 フォームURLは30分間有効です"
                     ]]
                 ]
             ]
@@ -217,7 +171,25 @@ class SlackController extends Controller
             abort(404, 'ユーザー連携が見つかりませんでした。まずWebアプリでSlackログインしてください。');
         }
 
-        // ミッション情報を取得
+        // Qiita type: show dedicated URL form
+        if ($type === 'qiita') {
+            $mission = Mission::withoutCompany()
+                ->where('key', 'write_tech_blog')
+                ->where('company_id', $user->company_id)
+                ->first();
+                
+            if (!$mission) {
+                abort(404, 'Qiitaミッションが見つかりませんでした。');
+            }
+
+            return view('missions.slack_qiita_form', [
+                'mission' => $mission,
+                'token' => $token,
+                'user' => $user,
+            ]);
+        }
+
+        // Other types: show existing form
         $missionKey = match ($type) {
             'event_plan' => 'event_organizer',
             'event_talk' => 'event_speaker',
@@ -225,7 +197,11 @@ class SlackController extends Controller
             default => abort(404, '不正なミッションタイプです。'),
         };
 
-        $mission = Mission::where('key', $missionKey)->first();
+        $mission = Mission::withoutCompany()
+            ->where('key', $missionKey)
+            ->where('company_id', $user->company_id)
+            ->first();
+            
         if (!$mission) {
             abort(404, 'ミッションが見つかりませんでした。');
         }
@@ -278,7 +254,11 @@ class SlackController extends Controller
             default => abort(404, '不正なミッションタイプです。'),
         };
 
-        $mission = Mission::where('key', $missionKey)->first();
+        $mission = Mission::withoutCompany()
+            ->where('key', $missionKey)
+            ->where('company_id', $user->company_id)
+            ->first();
+            
         if (!$mission) {
             return back()->withErrors(['mission' => 'ミッションが見つかりませんでした。']);
         }
@@ -309,6 +289,62 @@ class SlackController extends Controller
         'mission' => $mission,
         'earned' => $achievementData['earned_miles'],
     ]);
+    }
+
+    /**
+     * Qiita URL submission from Slack
+     */
+    public function submitSlackQiitaForm(Request $request)
+    {
+        $token = $request->input('token');
+        
+        if (!$token) {
+            return back()->withErrors(['token' => 'トークンが指定されていません。']);
+        }
+
+        $verified = $this->verifySignedToken($token, 'qiita');
+        if (!$verified) {
+            return back()->withErrors(['token' => 'トークンが無効または期限切れです。Slackから再度アクセスしてください。']);
+        }
+
+        [$slackUserId, $type, $expires] = $verified;
+
+        // ユーザー特定
+        $user = User::where('slack_id', $slackUserId)->first();
+        if (!$user) {
+            return back()->withErrors(['user' => 'ユーザー連携が見つかりませんでした。']);
+        }
+
+        // バリデーション
+        $request->validate([
+            'url' => 'required|url',
+        ]);
+
+        $url = $request->input('url');
+        
+        // ミッション情報を取得
+        $mission = Mission::withoutCompany()
+            ->where('key', 'write_tech_blog')
+            ->where('company_id', $user->company_id)
+            ->first();
+            
+        if (!$mission) {
+            return back()->withErrors(['mission' => 'Qiitaミッションが見つかりませんでした。']);
+        }
+
+        // Forward to existing MissionController logic (with all Qiita/Gemini processing)
+        $missionController = app(MissionController::class);
+        
+        // Temporarily authenticate the user for this request
+        Auth::login($user);
+        
+        // Delegate to existing submitBlogUrl method
+        return $missionController->submitBlogUrl(
+            $request,
+            app(MissionService::class),
+            app(\App\Services\QiitaService::class),
+            app(\App\Services\GeminiService::class)
+        );
     }
 
     /**
