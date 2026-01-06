@@ -11,29 +11,38 @@ use Illuminate\Support\Facades\DB;
 
 class GachaService
 {
-    const COST_MILES = 100; // 🎰 ガチャ1回の必要マイル
+    public const COSTS = [
+        'gacha'   => 100,
+        'scratch' => 50,   // ← 将来変更OK
+    ];
+
+    public function cost(string $via): int
+    {
+        return self::COSTS[$via] ?? 0;
+    }
 
     public function draw(int $userId, int $companyId, string $via = 'gacha')
     {
         return DB::transaction(function () use ($userId, $companyId, $via) {
 
-            // ① ユーザー取得
             $user = User::lockForUpdate()->findOrFail($userId);
 
-            // ② 現在のマイル残高を計算
             $currentMiles = $user->mileHistories()->sum('miles');
 
-            if ($currentMiles < self::COST_MILES) {
-                return null; // マイル不足
+            $cost = $this->cost($via);
+
+            // ❗ 二重チェック（超重要）
+            if ($currentMiles < $cost) {
+                return null;
             }
 
-            // ③ マイル消費
+            // マイル消費
             MileHistory::create([
                 'user_id'    => $userId,
                 'company_id' => $companyId,
-                'miles'      => -self::COST_MILES,
+                'miles'      => -$cost,
                 'type'       => $via,
-                'memo'       => 'ガチャ消費',
+                'memo'       => "{$via} 消費",
             ]);
 
             // ④ 配布中の報酬を取得
