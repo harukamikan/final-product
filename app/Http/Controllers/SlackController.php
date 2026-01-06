@@ -295,20 +295,20 @@ class SlackController extends Controller
         ]);
 
         // 2) ミッション達成処理
-        $missionService = app(MissionService::class);
-        $earned = $missionService->handleTrigger(
-            $user,
-            $mission->trigger_type,
-            [
-                'mission_key' => $mission->key,
-                'url' => $request->evidence_url,
-            ]
-        );
+    $missionService = app(MissionService::class);
+    $achievementData = $missionService->handleTrigger(
+        $user,
+        $mission->trigger_type,
+        [
+            'mission_key' => $mission->key,
+            'url' => $request->evidence_url,
+        ]
+    );
 
-        return view('missions.slack_mission_success', [
-            'mission' => $mission,
-            'earned' => $earned,
-        ]);
+    return view('missions.slack_mission_success', [
+        'mission' => $mission,
+        'earned' => $achievementData['earned_miles'],
+    ]);
     }
 
     /**
