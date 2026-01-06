@@ -96,14 +96,17 @@ class SlackController extends Controller
             if (!$mission) continue;
 
             // Check if user has incomplete UserMission for this mission
+            // OR if UserMission doesn't exist yet (first time - should be allowed)
             $userMission = UserMission::withoutCompany()
                 ->where('user_id', $user->id)
                 ->where('mission_id', $mission->id)
                 ->where('company_id', $user->company_id)
-                ->whereNull('completed_at')
                 ->first();
 
-            if ($userMission) {
+            // Include mission if:
+            // 1) No UserMission exists yet (first time) OR
+            // 2) UserMission exists and is incomplete (completed_at is null)
+            if (!$userMission || is_null($userMission->completed_at)) {
                 $availableMissions[$type] = [
                     'url' => $this->signedFormUrl($slackUserId, $type),
                     'mission' => $mission,
@@ -240,19 +243,20 @@ class SlackController extends Controller
                 abort(404, 'Qiitaミッションが見つかりませんでした。');
             }
 
-            // Check if user has incomplete UserMission
+            // Check UserMission status
+            // Allow if: 1) No UserMission (first time) OR 2) UserMission exists and incomplete
             $userMission = UserMission::withoutCompany()
                 ->where('user_id', $user->id)
                 ->where('mission_id', $mission->id)
                 ->where('company_id', $user->company_id)
-                ->whereNull('completed_at')
                 ->first();
 
-            if (!$userMission) {
+            // Block only if UserMission exists AND is completed
+            if ($userMission && !is_null($userMission->completed_at)) {
                 return view('missions.slack_mission_unavailable', [
                     'mission' => $mission,
-                    'message' => '現在、このミッションは実行できません。',
-                    'detail' => 'Webのミッション一覧を確認してください。',
+                    'message' => 'このミッションはすでに完了しています。',
+                    'detail' => 'Webのミッション一覧で他のミッションを確認してください。',
                 ]);
             }
 
@@ -280,19 +284,20 @@ class SlackController extends Controller
             abort(404, 'ミッションが見つかりませんでした。');
         }
 
-        // Check if user has incomplete UserMission
+        // Check UserMission status
+        // Allow if: 1) No UserMission (first time) OR 2) UserMission exists and incomplete
         $userMission = UserMission::withoutCompany()
             ->where('user_id', $user->id)
             ->where('mission_id', $mission->id)
             ->where('company_id', $user->company_id)
-            ->whereNull('completed_at')
             ->first();
 
-        if (!$userMission) {
+        // Block only if UserMission exists AND is completed
+        if ($userMission && !is_null($userMission->completed_at)) {
             return view('missions.slack_mission_unavailable', [
                 'mission' => $mission,
-                'message' => '現在、このミッションは実行できません。',
-                'detail' => 'Webのミッション一覧を確認してください。',
+                'message' => 'このミッションはすでに完了しています。',
+                'detail' => 'Webのミッション一覧で他のミッションを確認してください。',
             ]);
         }
 
@@ -422,16 +427,17 @@ class SlackController extends Controller
             return back()->withErrors(['mission' => 'Qiitaミッションが見つかりませんでした。']);
         }
 
-        // Check if user has incomplete UserMission
+        // Check UserMission status
+        // Allow if: 1) No UserMission (first time) OR 2) UserMission exists and incomplete
         $userMission = UserMission::withoutCompany()
             ->where('user_id', $user->id)
             ->where('mission_id', $mission->id)
             ->where('company_id', $user->company_id)
-            ->whereNull('completed_at')
             ->first();
 
-        if (!$userMission) {
-            return back()->withErrors(['mission' => 'このミッションは現在実行できません。すでに完了しているか、まだ割り当てられていません。']);
+        // Block only if UserMission exists AND is completed
+        if ($userMission && !is_null($userMission->completed_at)) {
+            return back()->withErrors(['mission' => 'このミッションはすでに完了しています。']);
         }
 
         // Forward to existing MissionController logic (with all Qiita/Gemini processing)
