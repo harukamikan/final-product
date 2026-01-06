@@ -99,27 +99,45 @@ class GoalAiUploadController extends Controller
                     // 管理者にSlack通知
                     $this->slackService->notifyUnregisteredUser($originalInput);
                 } else {
-                    // 同姓同名
-                    $errorMessage = '同姓同名のユーザーが存在します: ' . $originalInput;
-                    $duplicateNameErrors[] = $errorMessage;
-                           
+                // 同姓同名
+                $errorMessage = '同姓同名のユーザーが存在します: ' . $originalInput;
+                $duplicateNameErrors[] = $errorMessage;
+                    
                 // 管理者にSlack通知を送信
                 $this->slackService->notifyDuplicateNameError($originalInput, $candidates);
-                
-                // 該当ユーザー全員にDMを送信
-                $companyId = \Illuminate\Support\Facades\Auth::user()->company_id;
-                foreach ($candidates as $candidateName) {
-                    $user = User::where('company_id', $companyId)
-                        ->where('name', $candidateName)
-                        ->first();
-                    if ($user && $user->slack_id) {
-                        $this->slackService->sendDM(
-                            $user->slack_id,
-                            "⚠️ 半期目標の登録に失敗しました。\n\n同姓同名のため、次回から社員番号やメールアドレスも記入してください。\n\n目標登録：" . config('app.url') . "/semester-goals/create"
-                        );
+                $adminSetting = \App\Models\AdminSetting::first();
+                // 管理者にWeb通知も保存（追加）
+                if ($adminSetting && $adminSetting->slack_id) {
+                    $adminUser = User::where('slack_id', $adminSetting->slack_id)->first();
+                    if ($adminUser && $adminSetting->slack_id) {
+                        \App\Models\Notification::create([
+                            'user_id' => $adminUser->id,
+                            'type' => 'admin_duplicate_name',
+                            'message' => "⚠️ 同姓同名を検出しました。入力名: {$originalInput}",
+                        ]);
                     }
                 }
 
+                // 該当ユーザー全員にDMを送信 & Web通知を保存
+                foreach ($candidates as $candidateName) {
+                    $user = User::where('name', $candidateName)->first();
+                    if ($user) {
+                        // Slack DM
+                        if ($user->slack_id) {
+                            $this->slackService->sendDM(
+                                $user->slack_id,
+                                "⚠️ 半期目標の登録に失敗しました。\n\n同姓同名のため、次回から社員番号やメールアドレスも記入してください。\n\n目標登録：" . config('app.url') . "/semester-goals/create"
+                            );
+                        }
+                        
+                        // Web通知を保存
+                        \App\Models\Notification::create([
+                            'user_id' => $user->id,
+                            'type' => 'duplicate_name',
+                            'message' => '⚠️ 半期目標の登録に失敗しました。同姓同名のため、次回から社員番号やメールアドレスも記入してください。',
+                        ]);
+                    }
+                }
             }
                 
                 \Log::error('同姓同名エラー検出', [
@@ -156,6 +174,11 @@ class GoalAiUploadController extends Controller
 
             // 1. semester_goals 登録（定性的な目標）
             if (isset($userData['semester_goal']) && $userData['semester_goal']) {
+                // 既存の is_current をすべて false にする
+                SemesterGoal::where('user_id', $user->id)
+                    ->update(['is_current' => false]);
+                
+                // 新しい目標を登録
                 SemesterGoal::create([
                     'user_id' => $user->id,
                     'category' => '半期目標',

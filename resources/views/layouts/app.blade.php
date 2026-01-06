@@ -101,7 +101,7 @@
                     {{-- 報酬履歴 --}}
                     <a href="{{ route('rewards.history') }}"
                         class="inline-flex items-center px-1 pt-1 text-sm font-medium {{ $navText }}
-   {{ request()->is('rewards/history*') ? 'border-b-2 border-indigo-500' : $hoverText }}">
+                    {{ request()->is('rewards/history*') ? 'border-b-2 border-indigo-500' : $hoverText }}">
                         報酬履歴
                     </a>
 
@@ -110,6 +110,71 @@
                 {{-- 右メニュー（ユーザー） --}}
                 <div class="flex items-center">
                     @auth
+                    {{-- 通知ベル --}}
+                    <div class="relative" x-data="{ open: false }">
+                        <button @click="
+                        open = !open;
+                        if (open) {
+                                fetch('{{ route('notifications.mark-all-read') }}', {
+                                    method: 'POST',
+                                    headers: {
+                                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                                        'Content-Type': 'application/json'
+                                    }
+                                }).then(() => {
+                                    setTimeout(() => location.reload(), 500);
+                                });
+                            }
+                        "
+                            class="relative {{ $navText }} {{ $hoverText }} focus:outline-none">
+                            <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                                    d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
+                            </svg>
+                            
+                            @php
+                            $unreadCount = \App\Models\Notification::where('user_id', auth()->id())
+                                ->where('is_read', false)
+                                ->count();
+                            @endphp
+                            
+                            @if($unreadCount > 0)
+                                <span class="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
+                                    {{ $unreadCount }}
+                                </span>
+                            @endif
+                        </button>
+
+                        {{-- 通知ドロップダウン --}}
+                        <div x-show="open"
+                            @click.away="open = false"
+                            class="absolute right-0 mt-2 w-80 bg-white rounded-md shadow-lg py-1 z-10 max-h-96 overflow-y-auto">
+                            
+                            @php
+                            $notifications = \App\Models\Notification::where('user_id', auth()->id())
+                                ->where('is_read', false)
+                                ->orderBy('created_at', 'desc')
+                                ->get();
+                            @endphp
+                            
+                            @if($notifications->isEmpty())
+                                <p class="px-4 py-3 text-sm text-gray-500 text-center">
+                                    通知はありません
+                                </p>
+                            @else
+                                @foreach($notifications as $notification)
+                                    <div class="px-4 py-3 border-b border-gray-100 hover:bg-gray-50">
+                                        <p class="text-sm text-gray-700">
+                                            {{ $notification->message }}
+                                        </p>
+                                        <p class="text-xs text-gray-500 mt-1">
+                                            {{ $notification->created_at->diffForHumans() }}
+                                        </p>
+                                    </div>
+                                @endforeach
+                            @endif
+                        </div>
+                    </div>
                     <div class="relative" x-data="{ open: false }">
                         <button @click="open = !open"
                             class="flex items-center text-sm font-medium {{ $navText }} {{ $hoverText }} focus:outline-none">
