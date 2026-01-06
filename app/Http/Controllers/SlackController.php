@@ -93,7 +93,19 @@ class SlackController extends Controller
                 ->where('company_id', $user->company_id)
                 ->first();
 
-            if (!$mission) continue;
+            Log::info("Checking mission availability", [
+                'type' => $type,
+                'key' => $key,
+                'user_id' => $user->id,
+                'company_id' => $user->company_id,
+                'mission_found' => $mission ? 'yes' : 'no',
+                'mission_id' => $mission ? $mission->id : null,
+            ]);
+
+            if (!$mission) {
+                Log::warning("Mission not found", ['type' => $type, 'key' => $key, 'company_id' => $user->company_id]);
+                continue;
+            }
 
             // Check if user has incomplete UserMission for this mission
             // OR if UserMission doesn't exist yet (first time - should be allowed)
@@ -102,6 +114,14 @@ class SlackController extends Controller
                 ->where('mission_id', $mission->id)
                 ->where('company_id', $user->company_id)
                 ->first();
+
+            Log::info("UserMission status", [
+                'type' => $type,
+                'user_mission_exists' => $userMission ? 'yes' : 'no',
+                'user_mission_id' => $userMission ? $userMission->id : null,
+                'completed_at' => $userMission ? $userMission->completed_at : null,
+                'is_available' => (!$userMission || is_null($userMission->completed_at)) ? 'yes' : 'no',
+            ]);
 
             // Include mission if:
             // 1) No UserMission exists yet (first time) OR
@@ -113,6 +133,11 @@ class SlackController extends Controller
                 ];
             }
         }
+
+        Log::info("Available missions result", [
+            'count' => count($availableMissions),
+            'types' => array_keys($availableMissions),
+        ]);
 
         // If no missions available
         if (empty($availableMissions)) {
