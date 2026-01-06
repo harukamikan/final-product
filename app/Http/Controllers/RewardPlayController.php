@@ -8,7 +8,9 @@ use App\Models\Reward;
 
 class RewardPlayController extends Controller
 {
-    /*ガチャ実行 */
+    /* =======================
+       ガチャ実行
+    ======================= */
     public function gacha(GachaService $gacha)
     {
         $reward = $gacha->draw(
@@ -22,8 +24,10 @@ class RewardPlayController extends Controller
             'via'    => 'gacha',
         ]);
     }
-    
-    /* スクラッチ実行 */
+
+    /* =======================
+       スクラッチ実行
+    ======================= */
     public function scratch(GachaService $gacha)
     {
         $reward = $gacha->draw(
@@ -44,26 +48,33 @@ class RewardPlayController extends Controller
         ]);
     }
 
-    /*ガチャ・スクラッチ共通トップ画面 */
-    public function gachaPage()
+    /* =======================
+       ガチャトップ画面
+    ======================= */
+    public function gachaPage(GachaService $gacha)
     {
         $user = Auth::user();
 
         $totalMiles = $user->total_miles ?? 0;
 
-        //ガチャ・スクラッチが引けるか
-        $canDraw = $totalMiles > 0;
+        // Service から取得
+        $gachaCost   = $gacha->cost('gacha');
+        $scratchCost = $gacha->cost('scratch');
 
-        //有効な報酬が存在するか
+        $canDrawGacha   = $totalMiles >= $gachaCost;
+        $canDrawScratch = $totalMiles >= $scratchCost;
+
         $hasActiveReward = Reward::where('company_id', $user->company_id)
             ->where('is_active', true)
             ->exists();
-        
-        return view('gacha.index', [
-            'totalMiles'     => $totalMiles,
-            'canDrawGacha'   => $canDraw,
-            'canDrawScratch' => $canDraw,
-            'hasActiveReward'=> $hasActiveReward, 
-        ]);
+
+        return view('gacha.index', compact(
+            'totalMiles',
+            'gachaCost',
+            'scratchCost',
+            'canDrawGacha',
+            'canDrawScratch',
+            'hasActiveReward',
+        ));
     }
 }
