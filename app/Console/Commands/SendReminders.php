@@ -29,16 +29,15 @@ class SendReminders extends Command
     
     protected function checkDeadlineReminders($now)
     {
-        // 期限が近い半期目標を取得
+        // 期限が近い半期目標を取得（ユーザーごと）
         $upcomingGoals = SemesterGoal::where('deadline', '<=', $now->copy()->addDays(3))
             ->where('deadline', '>', $now)
+            ->with('user') // ユーザー情報も取得
             ->get();
         
         foreach ($upcomingGoals as $goal) {
-            $this->sendDeadlineReminder($goal);
+            $this->sendDeadlineReminderToUser($goal);
         }
-        
-        // ミッションには期限がないので、週次リマインドのみ
     }
     
     protected function checkWeeklyReminders($now)
@@ -54,21 +53,27 @@ class SendReminders extends Command
         }
     }
     
-    protected function sendDeadlineReminder($target)
+    protected function sendDeadlineReminderToUser($goal)
     {
+        // ユーザーにSlack IDが設定されていない場合はスキップ
+        if (!$goal->user || !$goal->user->slack_id) {
+            $this->info("Skipped (no Slack ID): {$goal->title}");
+            return;
+        }
+        
         $slackService = app(SlackService::class);
         
-        $deadline = Carbon::parse($target->deadline);
-        $daysLeft = Carbon::now()->diffInDays($deadline);
+        $deadline = Carbon::parse($goal->deadline);
+        $daysLeft = (int) Carbon::now()->diffInDays($deadline);
         
         $message = "⏰ **期限リマインド**\n";
-        $daysLeft = (int) Carbon::now()->diffInDays($deadline);
+        $message .= "目標: {$goal->title}\n";
         $message .= "期限まで: あと{$daysLeft}日\n";
         
-        // Slack通知を送信
-        $slackService->sendMessage($message);
+        // ユーザーのSlackボットにDM送信
+        $slackService->sendDM($goal->user->slack_id, $message);
         
-        $this->info("Sent deadline reminder for: {$target->title}");
+        $this->info("Sent deadline reminder to {$goal->user->name}: {$goal->title}");
     }
     
     protected function sendWeeklyReminder($goal)
