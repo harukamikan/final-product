@@ -59,10 +59,10 @@ class SendReminders extends Command
         $slackService = app(SlackService::class);
         
         $deadline = Carbon::parse($target->deadline);
-        $daysLeft = $deadline->diffInDays(Carbon::now());
+        $daysLeft = Carbon::now()->diffInDays($deadline);
         
         $message = "⏰ **期限リマインド**\n";
-        $message .= "目標: {$target->title}\n";
+        $daysLeft = (int) Carbon::now()->diffInDays($deadline);
         $message .= "期限まで: あと{$daysLeft}日\n";
         
         // Slack通知を送信
