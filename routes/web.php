@@ -61,10 +61,10 @@ Route::get('/invite/{token}', [InviteController::class, 'accept'])
 // Slack mission form routes (public, token-based authentication)
 Route::get('/slack/missions/{type}', [SlackController::class, 'showSlackForm'])
     ->name('slack.missions.form');
-Route::post('/slack/missions/{type}/submit', [SlackController::class, 'submitSlackForm'])
-    ->name('slack.missions.submit');
 Route::post('/slack/missions/qiita/submit', [SlackController::class, 'submitSlackQiitaForm'])
     ->name('slack.missions.qiita.submit');
+Route::post('/slack/missions/{type}/submit', [SlackController::class, 'submitSlackForm'])
+    ->name('slack.missions.submit');
 
 /*
 |--------------------------------------------------------------------------

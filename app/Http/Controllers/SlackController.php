@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\User;
 use App\Models\Mission;
+use App\Models\UserMission;
 use App\Models\MissionForm;
 use App\Services\MissionService;
 use Illuminate\Support\Facades\Auth;
@@ -76,44 +77,101 @@ class SlackController extends Controller
             ]);
         }
 
-        // Generate signed URLs for all 4 mission types
-        $links = [
-            'qiita'      => $this->signedFormUrl($slackUserId, 'qiita'),
-            'event_plan' => $this->signedFormUrl($slackUserId, 'event_plan'),
-            'event_talk' => $this->signedFormUrl($slackUserId, 'event_talk'),
-            'cert'       => $this->signedFormUrl($slackUserId, 'cert'),
+        // Check which missions are available (incomplete UserMissions)
+        $missionKeys = [
+            'qiita' => 'write_tech_blog',
+            'event_plan' => 'event_organizer',
+            'event_talk' => 'event_speaker',
+            'cert' => 'acquire_certificate',
         ];
 
-        // Return Block Kit with 4 buttons
+        $availableMissions = [];
+        foreach ($missionKeys as $type => $key) {
+            // Find mission template
+            $mission = Mission::withoutCompany()
+                ->where('key', $key)
+                ->where('company_id', $user->company_id)
+                ->first();
+
+            if (!$mission) continue;
+
+            // Check if user has incomplete UserMission for this mission
+            $userMission = UserMission::withoutCompany()
+                ->where('user_id', $user->id)
+                ->where('mission_id', $mission->id)
+                ->where('company_id', $user->company_id)
+                ->whereNull('completed_at')
+                ->first();
+
+            if ($userMission) {
+                $availableMissions[$type] = [
+                    'url' => $this->signedFormUrl($slackUserId, $type),
+                    'mission' => $mission,
+                ];
+            }
+        }
+
+        // If no missions available
+        if (empty($availableMissions)) {
+            return response()->json([
+                "response_type" => "ephemeral",
+                "text" => "現在実行可能なミッションはありません。\n\nWebのミッション一覧を確認してください: " . route('missions.index')
+            ]);
+        }
+
+        // Build button elements for available missions
+        $buttonLabels = [
+            'qiita' => '📝 技術ブログ(Qiita)',
+            'event_talk' => '🎤 イベント登壇',
+            'event_plan' => '🎪 イベント企画・開催',
+            'cert' => '🎓 資格取得',
+        ];
+
+        $buttons = [];
+        foreach ($availableMissions as $type => $data) {
+            $label = $buttonLabels[$type] ?? $type;
+            $button = [
+                "type" => "button",
+                "text" => ["type" => "plain_text", "text" => $label],
+                "url" => $data['url']
+            ];
+            if ($type === 'qiita') {
+                $button["style"] = "primary";
+            }
+            $buttons[] = $button;
+        }
+
+        // Split buttons into rows (2 per row)
+        $actionBlocks = [];
+        $buttonChunks = array_chunk($buttons, 2);
+        foreach ($buttonChunks as $chunk) {
+            $actionBlocks[] = [
+                "type" => "actions",
+                "elements" => $chunk
+            ];
+        }
+
+        // Return Block Kit with available buttons
         return response()->json([
             "response_type" => "ephemeral",
-            "blocks" => [
+            "blocks" => array_merge(
                 [
-                    "type" => "section",
-                    "text" => ["type" => "mrkdwn", "text" => "*📋 ミッションメニュー*\n下のボタンから選んでWebフォームを開いてください。"]
-                ],
-                [
-                    "type" => "actions",
-                    "elements" => [
-                        ["type" => "button", "text" => ["type" => "plain_text", "text" => "📝 技術ブログ(Qiita)"], "url" => $links['qiita'], "style" => "primary"],
-                        ["type" => "button", "text" => ["type" => "plain_text", "text" => "🎤 イベント登壇"], "url" => $links['event_talk']],
+                    [
+                        "type" => "section",
+                        "text" => ["type" => "mrkdwn", "text" => "*📋  ミッションメニュー*\n下のボタンから選んでWebフォームを開いてください。"]
                     ]
                 ],
+                $actionBlocks,
                 [
-                    "type" => "actions",
-                    "elements" => [
-                        ["type" => "button", "text" => ["type" => "plain_text", "text" => "🎪 イベント企画・開催"], "url" => $links['event_plan']],
-                        ["type" => "button", "text" => ["type" => "plain_text", "text" => "🎓 資格取得"], "url" => $links['cert']],
+                    [
+                        "type" => "context",
+                        "elements" => [[
+                            "type" => "mrkdwn",
+                            "text" => "💡 フォームURLは30分間有効です"
+                        ]]
                     ]
-                ],
-                [
-                    "type" => "context",
-                    "elements" => [[
-                        "type" => "mrkdwn",
-                        "text" => "💡 フォームURLは30分間有効です"
-                    ]]
                 ]
-            ]
+            )
         ]);
     }
 
@@ -182,6 +240,22 @@ class SlackController extends Controller
                 abort(404, 'Qiitaミッションが見つかりませんでした。');
             }
 
+            // Check if user has incomplete UserMission
+            $userMission = UserMission::withoutCompany()
+                ->where('user_id', $user->id)
+                ->where('mission_id', $mission->id)
+                ->where('company_id', $user->company_id)
+                ->whereNull('completed_at')
+                ->first();
+
+            if (!$userMission) {
+                return view('missions.slack_mission_unavailable', [
+                    'mission' => $mission,
+                    'message' => '現在、このミッションは実行できません。',
+                    'detail' => 'Webのミッション一覧を確認してください。',
+                ]);
+            }
+
             return view('missions.slack_qiita_form', [
                 'mission' => $mission,
                 'token' => $token,
@@ -204,6 +278,22 @@ class SlackController extends Controller
             
         if (!$mission) {
             abort(404, 'ミッションが見つかりませんでした。');
+        }
+
+        // Check if user has incomplete UserMission
+        $userMission = UserMission::withoutCompany()
+            ->where('user_id', $user->id)
+            ->where('mission_id', $mission->id)
+            ->where('company_id', $user->company_id)
+            ->whereNull('completed_at')
+            ->first();
+
+        if (!$userMission) {
+            return view('missions.slack_mission_unavailable', [
+                'mission' => $mission,
+                'message' => '現在、このミッションは実行できません。',
+                'detail' => 'Webのミッション一覧を確認してください。',
+            ]);
         }
 
         return view('missions.slack_mission_form', [
@@ -330,6 +420,18 @@ class SlackController extends Controller
             
         if (!$mission) {
             return back()->withErrors(['mission' => 'Qiitaミッションが見つかりませんでした。']);
+        }
+
+        // Check if user has incomplete UserMission
+        $userMission = UserMission::withoutCompany()
+            ->where('user_id', $user->id)
+            ->where('mission_id', $mission->id)
+            ->where('company_id', $user->company_id)
+            ->whereNull('completed_at')
+            ->first();
+
+        if (!$userMission) {
+            return back()->withErrors(['mission' => 'このミッションは現在実行できません。すでに完了しているか、まだ割り当てられていません。']);
         }
 
         // Forward to existing MissionController logic (with all Qiita/Gemini processing)
