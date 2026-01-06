@@ -12,8 +12,8 @@
                         {{ $history->reward->name }}
                     </p>
                     <p class="text-sm text-gray-500">
-                        {{ $history->source === 'gacha' ? '🎰 ガチャ' : '🪙 スクラッチ' }}
-                        ｜{{ $history->created_at->format('Y/m/d') }}
+                        {{ $history->via === 'gacha' ? '🎰 ガチャ' : '🪙 スクラッチ' }}
+                        ｜{{ $history->created_at->format('Y/m/d H:i') }}
                     </p>
                 </div>
             </div>
