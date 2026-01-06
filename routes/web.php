@@ -127,6 +127,16 @@ Route::middleware(['auth', 'company'])->group(function () {
         ->name('dashboard');
 
     /*
+    | Notifications
+    */
+    Route::post('/notifications/mark-all-read', function() {
+        \App\Models\Notification::where('user_id', auth()->id())
+            ->where('is_read', false)
+            ->update(['is_read' => true]);
+        return response()->json(['success' => true]);
+    })->name('notifications.mark-all-read');
+
+    /*
     | Semester Goals（半期目標）
     */
     Route::resource('semester-goals', SemesterGoalController::class)
