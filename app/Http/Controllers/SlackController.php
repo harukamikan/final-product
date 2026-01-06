@@ -69,40 +69,68 @@ class SlackController extends Controller
         ]);
 
         // Slack署名検証（必須）
-        // NOTE: 署名検証失敗でも200を返す（Slackの要件）
         if (!$this->verifySlackSignature($request)) {
-            Log::error('Slack signature verification failed', [
-                'timestamp' => $request->header('X-Slack-Request-Timestamp'),
-                'signature' => $request->header('X-Slack-Signature'),
-            ]);
-            
-            // Slackには200を返し、エラーメッセージを表示
-            return response()->json([
-                "response_type" => "ephemeral",
-                "text" => "❌ リクエストの検証に失敗しました。しばらくしてから再度お試しください。"
-            ], 200);
+            Log::error('Slack signature verification failed');
+            abort(401, 'Invalid Slack signature');
         }
 
         Log::info('Slack signature verified successfully');
 
         $text = trim((string) $request->input('text', ''));
         $slackUserId = (string) $request->input('user_id'); // "UXXXX..."
-        $responseUrl = (string) $request->input('response_url'); // Slack response URL
         $appUrl = rtrim(config('app.url'), '/');
 
-        // /mission qiita <URL> → 重い処理なのでジョブに投げる
-        if (Str::startsWith($text, 'qiita')) {
-            // 即座に処理中メッセージを返す（3秒ルール対応）
-            \App\Jobs\ProcessSlackMissionCommand::dispatch($slackUserId, $text, $responseUrl);
-            
+        // まずユーザー特定（Slackログイン済み前提）
+        $user = User::where('slack_id', $slackUserId)->first();
+        if (!$user) {
             return response()->json([
                 "response_type" => "ephemeral",
-                "text" => "🔄 Qiitaミッションを処理中です...\n（完了通知は数秒後に表示されます）"
-            ], 200);
+                "text" => "ユーザー連携が見つかりませんでした。まずWebアプリでSlackログインしてから再度お試しください。"
+            ]);
+        }
+
+        // /mission qiita <URL>
+        if (Str::startsWith($text, 'qiita')) {
+            $url = trim(Str::after($text, 'qiita'));
+
+            if (!filter_var($url, FILTER_VALIDATE_URL)) {
+                return response()->json([
+                    "response_type" => "ephemeral",
+                    "text" => "URLが正しくないかもです。例：`/mission qiita https://qiita.com/...`"
+                ]);
+            }
+
+            // MissionServiceを使ってミッション進捗を処理
+            $mission = Mission::where('key', 'write_tech_blog')->first();
+            if (!$mission) {
+                return response()->json([
+                    "response_type" => "ephemeral",
+                    "text" => "❌ Qiitaミッションが見つかりませんでした。"
+                ]);
+            }
+
+            $missionService = app(MissionService::class);
+            $earned = $missionService->handleTrigger(
+                $user,
+                'tech_blog_posted',
+                [
+                    'mission_key' => $mission->key,
+                    'url' => $url,
+                ]
+            );
+
+            $message = "✅ Qiitaミッションを完了しました！（URL受領）";
+            if ($earned > 0) {
+                $message .= "\n🎉 {$earned}マイルを獲得しました！";
+            }
+
+            return response()->json([
+                "response_type" => "ephemeral",
+                "text" => $message
+            ]);
         }
 
         // /mission （引数なし）：フォームへ飛ぶボタンを返す
-        // NOTE: この処理は軽いので同期実行でOK
         $links = [
             'event_plan' => $this->signedFormUrl($slackUserId, 'event_plan'),
             'event_talk' => $this->signedFormUrl($slackUserId, 'event_talk'),
@@ -132,7 +160,7 @@ class SlackController extends Controller
                     ]]
                 ]
             ]
-        ], 200);
+        ]);
     }
 
     private function verifySlackSignature(Request $request): bool
