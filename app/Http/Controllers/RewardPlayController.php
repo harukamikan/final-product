@@ -57,16 +57,14 @@ class RewardPlayController extends Controller
 
         $totalMiles = $user->total_miles ?? 0;
 
-        // Service から取得
         $gachaCost   = $gacha->cost('gacha');
         $scratchCost = $gacha->cost('scratch');
 
         $canDrawGacha   = $totalMiles >= $gachaCost;
         $canDrawScratch = $totalMiles >= $scratchCost;
 
-        $hasActiveReward = Reward::where('company_id', $user->company_id)
-            ->where('is_active', true)
-            ->exists();
+        // ★ Service に聞くだけ
+        $hasActiveReward = $gacha->hasActiveDistribution($user->company_id);
 
         return view('gacha.index', compact(
             'totalMiles',
