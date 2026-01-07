@@ -12,7 +12,10 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('reward_histories', function (Blueprint $table) {
-            $table->timestamp('expires_at')->nullable()->after('created_at');
+            // ユーザーが保有する報酬の有効期限
+            $table->timestamp('expires_at')
+                ->nullable()
+                ->after('created_at');
         });
     }
 
@@ -22,7 +25,7 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('reward_histories', function (Blueprint $table) {
-            //
+            $table->dropColumn('expires_at');
         });
     }
 };

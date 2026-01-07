@@ -22,7 +22,7 @@
 
                 {{-- ===== 右側：有効期限 ===== --}}
                 <div class="text-right">
-                    @if($history->expired_at)
+                    @if($history->expires_at)
                         <p class="text-sm text-gray-400">
                             有効期限
                         </p>

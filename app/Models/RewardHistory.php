@@ -10,6 +10,11 @@ class RewardHistory extends Model
         'user_id',
         'reward_id',
         'via',
+        'expires_at',
+    ];
+
+    protected $casts = [
+        'expires_at' => 'datetime',
     ];
 
     public function reward()
@@ -22,4 +27,3 @@ class RewardHistory extends Model
         return $this->belongsTo(User::class);
     }
 }
-
