@@ -87,10 +87,14 @@ class SlackController extends Controller
 
         $availableMissions = [];
         foreach ($missionKeys as $type => $key) {
-            // Find mission template
+            // Find mission template (shared OR personal for this user)
             $mission = Mission::withoutCompany()
                 ->where('key', $key)
                 ->where('company_id', $user->company_id)
+                ->where(function ($q) use ($user) {
+                    $q->whereNull('user_id')          // Shared missions (available to all)
+                      ->orWhere('user_id', $user->id); // Personal missions for this user
+                })
                 ->first();
 
             Log::info("Checking mission availability", [
@@ -262,6 +266,10 @@ class SlackController extends Controller
             $mission = Mission::withoutCompany()
                 ->where('key', 'write_tech_blog')
                 ->where('company_id', $user->company_id)
+                ->where(function ($q) use ($user) {
+                    $q->whereNull('user_id')
+                      ->orWhere('user_id', $user->id);
+                })
                 ->first();
                 
             if (!$mission) {
@@ -303,6 +311,10 @@ class SlackController extends Controller
         $mission = Mission::withoutCompany()
             ->where('key', $missionKey)
             ->where('company_id', $user->company_id)
+            ->where(function ($q) use ($user) {
+                $q->whereNull('user_id')
+                  ->orWhere('user_id', $user->id);
+            })
             ->first();
             
         if (!$mission) {
@@ -377,6 +389,10 @@ class SlackController extends Controller
         $mission = Mission::withoutCompany()
             ->where('key', $missionKey)
             ->where('company_id', $user->company_id)
+            ->where(function ($q) use ($user) {
+                $q->whereNull('user_id')
+                  ->orWhere('user_id', $user->id);
+            })
             ->first();
             
         if (!$mission) {
@@ -446,6 +462,10 @@ class SlackController extends Controller
         $mission = Mission::withoutCompany()
             ->where('key', 'write_tech_blog')
             ->where('company_id', $user->company_id)
+            ->where(function ($q) use ($user) {
+                $q->whereNull('user_id')
+                  ->orWhere('user_id', $user->id);
+            })
             ->first();
             
         if (!$mission) {
