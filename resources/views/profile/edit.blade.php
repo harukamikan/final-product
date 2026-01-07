@@ -101,6 +101,36 @@
                 </div>
             </div>
         </div>
+
+        {{-- ================= 通知設定 ================= --}}
+        <div class="bg-white p-6 rounded-lg shadow">
+            <h3 class="text-lg font-semibold mb-4">通知設定</h3>
+            
+            <form action="{{ route('profile.update') }}" method="POST">
+                @csrf
+                @method('PATCH')
+                
+                <label class="flex items-center gap-3">
+                    <input 
+                        type="checkbox" 
+                        name="reminder_enabled" 
+                        value="1"
+                        {{ old('reminder_enabled', $user->reminder_enabled) ? 'checked' : '' }}
+                        class="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500">
+                    <span class="text-sm font-medium text-gray-700">
+                        リマインド通知を受け取る
+                    </span>
+                </label>
+                <p class="mt-1 ml-8 text-xs text-gray-500">
+                    半期目標の期限が近づいたときに通知を受け取ります
+                </p>
+                
+                <button type="submit" class="mt-3 px-4 py-2 bg-blue-500 hover:bg-blue-700 text-white font-bold rounded">
+                    保存
+                </button>
+            </form>
+        </div>
+
         {{-- ================= 表示設定 ================= --}}
         <div class="bg-white p-6 rounded-lg shadow">
             <h3 class="text-lg font-semibold mb-4">表示設定</h3>
