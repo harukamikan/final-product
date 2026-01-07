@@ -114,6 +114,7 @@ class GachaService
                 'user_id'   => $userId,
                 'reward_id' => $selected->reward_id,
                 'via'       => $via,
+                'expires_at' => $selected->reward_expires_at,
             ]);
 
             // ユーザー報酬（有効期限付き）

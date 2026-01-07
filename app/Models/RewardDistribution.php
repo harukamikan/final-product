@@ -12,12 +12,14 @@ class RewardDistribution extends Model
         'quantity',
         'starts_at',
         'ends_at',
+        'reward_expires_at',
         'is_active',
     ];
 
     protected $casts = [
-        'starts_at' => 'datetime',
-        'ends_at'   => 'datetime',
+        'starts_at'         => 'datetime',
+        'ends_at'           => 'datetime',
+        'reward_expires_at' => 'datetime',
     ];
 
     public function reward()
