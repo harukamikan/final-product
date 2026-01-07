@@ -21,7 +21,7 @@ jobs:
           extensions: mbstring, xml, ctype, json, bcmath, pdo, pdo_mysql
       
       - name: Install dependencies
-        run: composer install --no-dev --prefer-dist --no-interaction
+        run: composer install --prefer-dist --no-interaction --optimize-autoloader
       
       - name: Run reminder command
         env:
@@ -34,4 +34,3 @@ jobs:
           SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
           SLACK_CHANNEL: ${{ secrets.SLACK_CHANNEL }}
         run: php artisan reminders:send
-        
