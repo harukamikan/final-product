@@ -147,7 +147,7 @@ class SlackController extends Controller
             $button = [
                 "type" => "button",
                 "text" => ["type" => "plain_text", "text" => $buttonLabel],
-                "url" => $this->signedFormUrl($slackUserId, $type)
+                "url" => $this->signedFormUrl($slackUserId, $type, $mission->id)
             ];
             
             // Highlight tech blog missions
@@ -213,16 +213,16 @@ class SlackController extends Controller
         return hash_equals($mySignature, $signature);
     }
 
-    private function signedFormUrl(string $slackUserId, string $type): string
+    private function signedFormUrl(string $slackUserId, string $type, int $missionId): string
     {
-        $token = $this->makeSignedToken($slackUserId, $type);
+        $token = $this->makeSignedToken($slackUserId, $type, $missionId);
         return rtrim(config('app.url'), '/') . "/slack/missions/{$type}?token={$token}";
     }
 
-    private function makeSignedToken(string $slackUserId, string $type): string
+    private function makeSignedToken(string $slackUserId, string $type, int $missionId): string
     {
         $expires = now()->addMinutes(30)->timestamp;
-        $payload = "{$slackUserId}|{$type}|{$expires}";
+        $payload = "{$slackUserId}|{$type}|{$missionId}|{$expires}";
         $sig = hash_hmac('sha256', $payload, (string) config('app.key'));
         return base64_encode($payload . '|' . $sig);
     }
@@ -243,7 +243,7 @@ class SlackController extends Controller
             abort(403, 'トークンが無効または期限切れです。Slackから再度アクセスしてください。');
         }
 
-        [$slackUserId, $type, $expires] = $verified;
+        [$slackUserId, $type, $missionId, $expires] = $verified;
 
         // ユーザー特定
         $user = User::where('slack_id', $slackUserId)->first();
@@ -251,65 +251,16 @@ class SlackController extends Controller
             abort(404, 'ユーザー連携が見つかりませんでした。まずWebアプリでSlackログインしてください。');
         }
 
-        // Qiita type: show dedicated URL form
-        if ($type === 'qiita') {
-            $mission = Mission::withoutCompany()
-                ->where('key', 'write_tech_blog')
-                ->where(function ($q) use ($user) {
-                    // Include global missions (company_id = null) OR company-specific
-                    $q->whereNull('company_id')
-                      ->orWhere('company_id', $user->company_id);
-                })
-                ->where(function ($q) use ($user) {
-                    $q->whereNull('user_id')
-                      ->orWhere('user_id', $user->id);
-                })
-                ->first();
-                
-            if (!$mission) {
-                abort(404, 'Qiitaミッションが見つかりませんでした。');
-            }
-
-            // Check UserMission status
-            // Allow if: 1) No UserMission (first time) OR 2) UserMission exists and incomplete
-            $userMission = UserMission::withoutCompany()
-                ->where('user_id', $user->id)
-                ->where('mission_id', $mission->id)
-                ->where('company_id', $user->company_id)
-                ->first();
-
-            // Block only if UserMission exists AND is completed
-            if ($userMission && !is_null($userMission->completed_at)) {
-                return view('missions.slack_mission_unavailable', [
-                    'mission' => $mission,
-                    'message' => 'このミッションはすでに完了しています。',
-                    'detail' => 'Webのミッション一覧で他のミッションを確認してください。',
-                ]);
-            }
-
-            return view('missions.slack_qiita_form', [
-                'mission' => $mission,
-                'token' => $token,
-                'user' => $user,
-            ]);
-        }
-
-        // Other types: show existing form
-        $missionKey = match ($type) {
-            'event_plan' => 'event_organizer',
-            'event_talk' => 'event_speaker',
-            'cert' => 'acquire_certificate',
-            default => abort(404, '不正なミッションタイプです。'),
-        };
-
+        // Get mission by ID (no need to search by key anymore)
         $mission = Mission::withoutCompany()
-            ->where('key', $missionKey)
+            ->where('id', $missionId)
             ->where(function ($q) use ($user) {
-                // Include global missions (company_id = null) OR company-specific
+                // Verify mission belongs to this company or is global
                 $q->whereNull('company_id')
                   ->orWhere('company_id', $user->company_id);
             })
             ->where(function ($q) use ($user) {
+                // Verify mission is accessible to this user
                 $q->whereNull('user_id')
                   ->orWhere('user_id', $user->id);
             })
@@ -336,6 +287,16 @@ class SlackController extends Controller
             ]);
         }
 
+        // Determine which form to show based on trigger_type
+        if ($mission->trigger_type === 'tech_blog_posted') {
+            return view('missions.slack_qiita_form', [
+                'mission' => $mission,
+                'token' => $token,
+                'user' => $user,
+            ]);
+        }
+
+        // Default: show generic mission form
         return view('missions.slack_mission_form', [
             'mission' => $mission,
             'type' => $type,
@@ -360,7 +321,7 @@ class SlackController extends Controller
             return back()->withErrors(['token' => 'トークンが無効または期限切れです。Slackから再度アクセスしてください。']);
         }
 
-        [$slackUserId, $type, $expires] = $verified;
+        [$slackUserId, $type, $missionId, $expires] = $verified;
 
         // ユーザー特定
         $user = User::where('slack_id', $slackUserId)->first();
@@ -376,18 +337,10 @@ class SlackController extends Controller
             'evidence_url' => 'nullable|url',
         ]);
 
-        // ミッション情報を取得
-        $missionKey = match ($type) {
-            'event_plan' => 'event_organizer',
-            'event_talk' => 'event_speaker',
-            'cert' => 'acquire_certificate',
-            default => abort(404, '不正なミッションタイプです。'),
-        };
-
+        // Get mission by ID
         $mission = Mission::withoutCompany()
-            ->where('key', $missionKey)
+            ->where('id', $missionId)
             ->where(function ($q) use ($user) {
-                // Include global missions (company_id = null) OR company-specific
                 $q->whereNull('company_id')
                   ->orWhere('company_id', $user->company_id);
             })
@@ -445,7 +398,7 @@ class SlackController extends Controller
             return back()->withErrors(['token' => 'トークンが無効または期限切れです。Slackから再度アクセスしてください。']);
         }
 
-        [$slackUserId, $type, $expires] = $verified;
+        [$slackUserId, $type, $missionId, $expires] = $verified;
 
         // ユーザー特定
         $user = User::where('slack_id', $slackUserId)->first();
@@ -460,11 +413,10 @@ class SlackController extends Controller
 
         $url = $request->input('url');
         
-        // ミッション情報を取得
+        // Get mission by ID
         $mission = Mission::withoutCompany()
-            ->where('key', 'write_tech_blog')
+            ->where('id', $missionId)
             ->where(function ($q) use ($user) {
-                // Include global missions (company_id = null) OR company-specific
                 $q->whereNull('company_id')
                   ->orWhere('company_id', $user->company_id);
             })
@@ -508,7 +460,7 @@ class SlackController extends Controller
 
     /**
      * 署名付きトークンを検証
-     * @return array|false [slackUserId, type, expires] or false
+     * @return array|false [slackUserId, type, missionId, expires] or false
      */
     private function verifySignedToken(string $token, string $expectedType)
     {
@@ -519,11 +471,11 @@ class SlackController extends Controller
             }
 
             $parts = explode('|', $decoded);
-            if (count($parts) !== 4) {
+            if (count($parts) !== 5) {
                 return false;
             }
 
-            [$slackUserId, $type, $expires, $sig] = $parts;
+            [$slackUserId, $type, $missionId, $expires, $sig] = $parts;
 
             // タイプチェック
             if ($type !== $expectedType) {
@@ -536,14 +488,14 @@ class SlackController extends Controller
             }
 
             // 署名チェック
-            $payload = "{$slackUserId}|{$type}|{$expires}";
+            $payload = "{$slackUserId}|{$type}|{$missionId}|{$expires}";
             $expectedSig = hash_hmac('sha256', $payload, (string) config('app.key'));
             
             if (!hash_equals($expectedSig, $sig)) {
                 return false;
             }
 
-            return [$slackUserId, $type, $expires];
+            return [$slackUserId, $type, $missionId, $expires];
         } catch (\Exception $e) {
             Log::warning('Token verification failed', ['error' => $e->getMessage()]);
             return false;
