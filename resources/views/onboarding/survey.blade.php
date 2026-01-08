@@ -58,43 +58,55 @@
                   @submit="isSubmitting = true">
                 @csrf
 
-                {{-- Q1: Role --}}
+                {{-- Q1: Engineer Job Type --}}
                 <div class="space-y-5" x-data="{ show: false }" x-init="setTimeout(() => show = true, 400)" 
                      x-show="show" x-transition:enter="transition ease-out duration-500"
                      x-transition:enter-start="opacity-0 translate-x-4" x-transition:enter-end="opacity-100 translate-x-0">
                     <div class="flex items-center gap-3">
                         <span class="flex items-center justify-center w-10 h-10 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 text-white text-sm font-bold shadow-lg">1</span>
                         <label class="text-xl font-bold text-white drop-shadow">
-                            あなたのロールを教えてください
+                            普段どのような業務を行っていますか？
                         </label>
                     </div>
                     
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <label class="group relative flex items-center gap-3 p-5 rounded-2xl border-2 border-white/30 bg-white/10 backdrop-blur-sm cursor-pointer hover:border-white/60 hover:bg-white/20 transition-all duration-300 hover:scale-105 hover:shadow-2xl">
-                            <input type="radio" name="role" value="IC" {{ old('role') === 'IC' ? 'checked' : '' }} 
+                            <input type="radio" name="role" value="dev" {{ old('role') === 'dev' ? 'checked' : '' }} 
                                    class="w-5 h-5 text-purple-600 focus:ring-purple-500 focus:ring-2">
-                            <span class="text-white font-semibold drop-shadow">IC (Individual Contributor)</span>
+                            <span class="flex items-center gap-2">
+                                <span class="text-2xl drop-shadow">💻</span>
+                                <span class="text-white font-semibold drop-shadow">開発系</span>
+                            </span>
                             <div class="absolute inset-0 rounded-2xl bg-gradient-to-br from-white/0 to-white/0 group-hover:from-white/5 group-hover:to-white/10 transition-all duration-300"></div>
                         </label>
                         
                         <label class="group relative flex items-center gap-3 p-5 rounded-2xl border-2 border-white/30 bg-white/10 backdrop-blur-sm cursor-pointer hover:border-white/60 hover:bg-white/20 transition-all duration-300 hover:scale-105 hover:shadow-2xl">
-                            <input type="radio" name="role" value="TechLead" {{ old('role') === 'TechLead' ? 'checked' : '' }}
+                            <input type="radio" name="role" value="infra" {{ old('role') === 'infra' ? 'checked' : '' }}
                                    class="w-5 h-5 text-purple-600 focus:ring-purple-500 focus:ring-2">
-                            <span class="text-white font-semibold drop-shadow">Tech Lead / Architect</span>
+                            <span class="flex items-center gap-2">
+                                <span class="text-2xl drop-shadow">⚙️</span>
+                                <span class="text-white font-semibold drop-shadow">インフラ系</span>
+                            </span>
                             <div class="absolute inset-0 rounded-2xl bg-gradient-to-br from-white/0 to-white/0 group-hover:from-white/5 group-hover:to-white/10 transition-all duration-300"></div>
                         </label>
                         
                         <label class="group relative flex items-center gap-3 p-5 rounded-2xl border-2 border-white/30 bg-white/10 backdrop-blur-sm cursor-pointer hover:border-white/60 hover:bg-white/20 transition-all duration-300 hover:scale-105 hover:shadow-2xl">
-                            <input type="radio" name="role" value="EM" {{ old('role') === 'EM' ? 'checked' : '' }}
+                            <input type="radio" name="role" value="mgmt" {{ old('role') === 'mgmt' ? 'checked' : '' }}
                                    class="w-5 h-5 text-purple-600 focus:ring-purple-500 focus:ring-2">
-                            <span class="text-white font-semibold drop-shadow">EM / Manager</span>
+                            <span class="flex items-center gap-2">
+                                <span class="text-2xl drop-shadow">📊</span>
+                                <span class="text-white font-semibold drop-shadow">マネジメント系</span>
+                            </span>
                             <div class="absolute inset-0 rounded-2xl bg-gradient-to-br from-white/0 to-white/0 group-hover:from-white/5 group-hover:to-white/10 transition-all duration-300"></div>
                         </label>
                         
                         <label class="group relative flex items-center gap-3 p-5 rounded-2xl border-2 border-white/30 bg-white/10 backdrop-blur-sm cursor-pointer hover:border-white/60 hover:bg-white/20 transition-all duration-300 hover:scale-105 hover:shadow-2xl">
-                            <input type="radio" name="role" value="PdM" {{ old('role') === 'PdM' ? 'checked' : '' }}
+                            <input type="radio" name="role" value="all" {{ old('role') === 'all' ? 'checked' : '' }}
                                    class="w-5 h-5 text-purple-600 focus:ring-purple-500 focus:ring-2">
-                            <span class="text-white font-semibold drop-shadow">PdM / Biz / Other</span>
+                            <span class="flex items-center gap-2">
+                                <span class="text-2xl drop-shadow">🌟</span>
+                                <span class="text-white font-semibold drop-shadow">全て行っている</span>
+                            </span>
                             <div class="absolute inset-0 rounded-2xl bg-gradient-to-br from-white/0 to-white/0 group-hover:from-white/5 group-hover:to-white/10 transition-all duration-300"></div>
                         </label>
                     </div>
