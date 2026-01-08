@@ -395,4 +395,52 @@ Route::middleware(['auth', 'company'])
         // 🧪 テスト用マイル付与
         Route::post('/add-miles', [DebugController::class, 'addMiles'])
             ->name('debug.add-miles');
+        
+        // 🔍 ミッション診断
+        Route::get('/missions-debug', function () {
+            $user = auth()->user();
+            
+            $missionKeys = [
+                'qiita' => 'write_tech_blog',
+                'event_plan' => 'event_organizer',
+                'event_talk' => 'event_speaker',
+                'cert' => 'acquire_certificate',
+            ];
+            
+            $result = [
+                'user' => [
+                    'id' => $user->id,
+                    'name' => $user->name,
+                    'company_id' => $user->company_id,
+                    'slack_id' => $user->slack_id,
+                ],
+                'all_missions' => \App\Models\Mission::withoutCompany()->get(['id', 'key', 'title', 'company_id', 'user_id'])->toArray(),
+                'found_missions' => [],
+            ];
+            
+            foreach ($missionKeys as $type => $key) {
+                $mission = \App\Models\Mission::withoutCompany()
+                    ->where('key', $key)
+                    ->where(function ($q) use ($user) {
+                        $q->whereNull('company_id')
+                          ->orWhere('company_id', $user->company_id);
+                    })
+                    ->where(function ($q) use ($user) {
+                        $q->whereNull('user_id')
+                          ->orWhere('user_id', $user->id);
+                    })
+                    ->first();
+                    
+                $result['found_missions'][$type] = $mission ? [
+                    'id' => $mission->id,
+                    'key' => $mission->key,
+                    'title' => $mission->title,
+                    'company_id' => $mission->company_id,
+                    'user_id' => $mission->user_id,
+                ] : null;
+            }
+            
+            return response()->json($result, 200, [], JSON_PRETTY_PRINT);
+        });
     });
+

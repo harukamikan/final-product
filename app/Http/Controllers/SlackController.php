@@ -87,13 +87,22 @@ class SlackController extends Controller
 
         $availableMissions = [];
         foreach ($missionKeys as $type => $key) {
-            // Find mission template (shared OR personal for this user)
+            // Find mission template (global OR company-specific OR personal)
             $mission = Mission::withoutCompany()
                 ->where('key', $key)
-                ->where('company_id', $user->company_id)
                 ->where(function ($q) use ($user) {
-                    $q->whereNull('user_id')          // Shared missions (available to all)
-                      ->orWhere('user_id', $user->id); // Personal missions for this user
+                    // Include:
+                    // 1) Global missions (company_id is null - created by Seeder)
+                    // 2) Company-specific missions (company_id matches user's company)
+                    $q->whereNull('company_id')
+                      ->orWhere('company_id', $user->company_id);
+                })
+                ->where(function ($q) use ($user) {
+                    // Include:
+                    // 1) Shared missions (user_id is null)
+                    // 2) Personal missions (user_id matches current user)
+                    $q->whereNull('user_id')
+                      ->orWhere('user_id', $user->id);
                 })
                 ->first();
 
