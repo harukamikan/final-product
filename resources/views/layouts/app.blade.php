@@ -103,15 +103,6 @@
         : $hoverText }}">
                         ガチャ
                     </a>
-
-
-                    {{-- 報酬履歴 --}}
-                    <a href="{{ route('rewards.history') }}"
-                        class="inline-flex items-center px-1 pt-1 text-sm font-medium {{ $navText }}
-                    {{ request()->is('rewards/history*') ? 'border-b-2 border-indigo-500' : $hoverText }}">
-                        報酬履歴
-                    </a>
-
                 </div>
 
                 {{-- 右メニュー（ユーザー） --}}
