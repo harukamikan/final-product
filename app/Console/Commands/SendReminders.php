@@ -47,8 +47,12 @@ class SendReminders extends Command
     {
         // 月曜日の9時かチェック
         if ($now->isMonday() && $now->hour == 9) {
-            // 全ユーザーの進行中の半期目標を取得
-            $activeGoals = SemesterGoal::where('is_current', true)->get();
+            // リマインド通知ONのユーザーの進行中の半期目標を取得
+            $activeGoals = SemesterGoal::where('is_current', true)
+                ->whereHas('user', function($query) {
+                    $query->where('reminder_enabled', true);
+                })
+                ->get();
             
             foreach ($activeGoals as $goal) {
                 $this->sendWeeklyReminder($goal);
