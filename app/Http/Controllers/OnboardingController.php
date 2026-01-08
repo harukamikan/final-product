@@ -50,13 +50,13 @@ class OnboardingController extends Controller
 
         // Validate survey data
         $validated = $request->validate([
-            'role' => ['required', 'in:IC,TechLead,EM,PdM'],
+            'role' => ['required', 'in:dev,infra,mgmt,all'],
             'preferred_output' => ['required', 'in:blog,event,speaker,cert'],
             'current_situation' => ['required', 'in:new,normal,busy'],
             'experience_level' => ['required', 'in:junior,mid,senior'],
         ], [
-            'role.required' => 'ロールを選択してください',
-            'role.in' => '有効なロールを選択してください',
+            'role.required' => '職種を選択してください',
+            'role.in' => '有効な職種を選択してください',
             'preferred_output.required' => '最もやりたいアウトプットを選択してください',
             'preferred_output.in' => '有効な選択肢を選んでください',
             'current_situation.required' => '現在の状況を選択してください',

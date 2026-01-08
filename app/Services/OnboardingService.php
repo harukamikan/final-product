@@ -10,16 +10,16 @@ use Illuminate\Support\Facades\DB;
 class OnboardingService
 {
     /**
-     * Determine user segment based on Q2 (preferred_output)
+     * Determine user segment based on Q1 (role - engineer job type)
      */
     public function determineSegment(array $surveyData): string
     {
-        return match ($surveyData['preferred_output']) {
-            'blog' => 'output_blog',
-            'event' => 'community_event',
-            'speaker' => 'speaker',
-            'cert' => 'skillup_cert',
-            default => 'output_blog', // fallback
+        return match ($surveyData['role']) {
+            'dev' => 'engineer_dev',
+            'infra' => 'engineer_infra',
+            'mgmt' => 'engineer_mgmt',
+            'all' => 'engineer_fullstack',
+            default => 'engineer_dev', // fallback
         };
     }
 
@@ -70,6 +70,13 @@ class OnboardingService
             'community_event' => 'event_organizer',
             'speaker' => 'event_speaker',
             'skillup_cert' => 'acquire_certificate',
+            
+            // Engineer job type segments
+            'engineer_dev' => 'write_tech_blog',
+            'engineer_infra' => 'acquire_certificate',
+            'engineer_mgmt' => 'event_organizer',
+            'engineer_fullstack' => 'write_tech_blog',
+            
             default => 'write_tech_blog',
         };
     }

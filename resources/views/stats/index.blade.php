@@ -141,10 +141,16 @@
 
     // カテゴリ別
     const categoryData = @json($categoryMiles);
+    const missionLabels = {
+        'write_tech_blog': '技術系ブログ',
+        'event_speaker': 'イベント登壇',
+        'event_organizer': 'イベント企画・開催',
+        'acquire_certificate': '資格取得'
+    };
     new Chart(document.getElementById('categoryChart'), {
         type: 'pie',
         data: {
-            labels: categoryData.map(d => d.type || '未分類'),
+            labels: categoryData.map(d => missionLabels[d.key] || d.key || '未分類'),
             datasets: [{
                 data: categoryData.map(d => parseInt(d.total)),
                 backgroundColor: [

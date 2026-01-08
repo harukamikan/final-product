@@ -396,3 +396,5 @@ Route::middleware(['auth', 'company'])
         Route::post('/add-miles', [DebugController::class, 'addMiles'])
             ->name('debug.add-miles');
     });
+
+

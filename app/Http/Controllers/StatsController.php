@@ -60,10 +60,11 @@ class StatsController extends Controller
             ];
         }
 
-        // カテゴリ別マイル獲得
-        $categoryMiles = MileHistory::where('user_id', $userId)
-            ->select('type', DB::raw('SUM(miles) as total'))
-            ->groupBy('type')
+        // カテゴリ別マイル獲得（ミッションキーベース）
+        $categoryMiles = MileHistory::where('mile_histories.user_id', $userId)
+            ->join('missions', 'mile_histories.mission_id', '=', 'missions.id')
+            ->select('missions.key', DB::raw('SUM(mile_histories.miles) as total'))
+            ->groupBy('missions.key')
             ->get();
 
         // 総統計

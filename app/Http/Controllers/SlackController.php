@@ -77,124 +77,113 @@ class SlackController extends Controller
             ]);
         }
 
-        // Check which missions are available (incomplete UserMissions)
-        $missionKeys = [
-            'qiita' => 'write_tech_blog',
-            'event_plan' => 'event_organizer',
-            'event_talk' => 'event_speaker',
-            'cert' => 'acquire_certificate',
-        ];
 
-        $availableMissions = [];
-        foreach ($missionKeys as $type => $key) {
-            // Find mission template (shared OR personal for this user)
-            $mission = Mission::withoutCompany()
-                ->where('key', $key)
-                ->where('company_id', $user->company_id)
-                ->where(function ($q) use ($user) {
-                    $q->whereNull('user_id')          // Shared missions (available to all)
-                      ->orWhere('user_id', $user->id); // Personal missions for this user
-                })
-                ->first();
+        // Get all missions available to this user (same logic as Web)
+        $allMissions = Mission::withoutCompany()
+            ->where(function ($q) use ($user) {
+                // Include:
+                // 1) Global missions (company_id is null - created by Seeder)
+                // 2) Company-specific missions (company_id matches user's company)
+                $q->whereNull('company_id')
+                  ->orWhere('company_id', $user->company_id);
+            })
+            ->where(function ($q) use ($user) {
+                // Include:
+                // 1) Shared missions (user_id is null)
+                // 2) Personal missions (user_id matches current user)
+                $q->whereNull('user_id')
+                  ->orWhere('user_id', $user->id);
+            })
+            ->with(['userMissions' => function ($q) use ($user) {
+                $q->where('user_id', $user->id);
+            }])
+            ->orderBy('id')
+            ->get();
 
-            Log::info("Checking mission availability", [
-                'type' => $type,
-                'key' => $key,
-                'user_id' => $user->id,
-                'company_id' => $user->company_id,
-                'mission_found' => $mission ? 'yes' : 'no',
-                'mission_id' => $mission ? $mission->id : null,
-            ]);
-
-            if (!$mission) {
-                Log::warning("Mission not found", ['type' => $type, 'key' => $key, 'company_id' => $user->company_id]);
-                continue;
-            }
-
-            // Check if user has incomplete UserMission for this mission
-            // OR if UserMission doesn't exist yet (first time - should be allowed)
-            $userMission = UserMission::withoutCompany()
-                ->where('user_id', $user->id)
-                ->where('mission_id', $mission->id)
-                ->where('company_id', $user->company_id)
-                ->first();
-
-            Log::info("UserMission status", [
-                'type' => $type,
-                'user_mission_exists' => $userMission ? 'yes' : 'no',
-                'user_mission_id' => $userMission ? $userMission->id : null,
-                'completed_at' => $userMission ? $userMission->completed_at : null,
-                'is_available' => (!$userMission || is_null($userMission->completed_at)) ? 'yes' : 'no',
-            ]);
-
-            // Include mission if:
-            // 1) No UserMission exists yet (first time) OR
-            // 2) UserMission exists and is incomplete (completed_at is null)
-            if (!$userMission || is_null($userMission->completed_at)) {
-                $availableMissions[$type] = [
-                    'url' => $this->signedFormUrl($slackUserId, $type),
-                    'mission' => $mission,
-                ];
-            }
-        }
-
-        Log::info("Available missions result", [
-            'count' => count($availableMissions),
-            'types' => array_keys($availableMissions),
+        Log::info("Fetched missions for Slack", [
+            'user_id' => $user->id,
+            'company_id' => $user->company_id,
+            'total_missions' => $allMissions->count(),
         ]);
 
+        // Filter to incomplete missions only
+        $incompleteMissions = $allMissions->filter(function ($mission) {
+            $userMission = $mission->userMissions->first();
+            
+            // Include if:
+            // 1) No UserMission exists yet (first time) OR
+            // 2) UserMission exists and is incomplete (completed_at is null)
+            return !$userMission || is_null($userMission->completed_at);
+        });
+
+        Log::info("Incomplete missions for Slack", [
+            'incomplete_count' => $incompleteMissions->count(),
+            'mission_ids' => $incompleteMissions->pluck('id')->toArray(),
+        ]);
+
+
         // If no missions available
-        if (empty($availableMissions)) {
+        if ($incompleteMissions->isEmpty()) {
             return response()->json([
                 "response_type" => "ephemeral",
                 "text" => "現在実行可能なミッションはありません。\n\nWebのミッション一覧を確認してください: " . route('missions.index')
             ]);
         }
 
-        // Build button elements for available missions
-        $buttonLabels = [
-            'qiita' => '📝 技術ブログ(Qiita)',
-            'event_talk' => '🎤 イベント登壇',
-            'event_plan' => '🎪 イベント企画・開催',
-            'cert' => '🎓 資格取得',
-        ];
-
-        $buttons = [];
-        foreach ($availableMissions as $type => $data) {
-            $label = $buttonLabels[$type] ?? $type;
+        // Build rich section blocks for each mission with details
+        $missionBlocks = [];
+        foreach ($incompleteMissions as $mission) {
+            // Determine mission type and form URL based on trigger_type and key
+            $type = $this->getMissionType($mission);
+            $buttonLabel = $this->getButtonLabel($mission);
+            $emoji = $this->getMissionEmoji($mission);
+            
+            // Build mission detail text
+            $missionText = "*{$emoji} {$mission->title}*\n";
+            $missionText .= "{$mission->description}\n";
+            $missionText .= "💰 *報酬:* {$mission->reward_miles} mile";
+            
+            // Create section with button as accessory
             $button = [
                 "type" => "button",
-                "text" => ["type" => "plain_text", "text" => $label],
-                "url" => $data['url']
+                "text" => ["type" => "plain_text", "text" => $buttonLabel],
+                "url" => $this->signedFormUrl($slackUserId, $type, $mission->id)
             ];
-            if ($type === 'qiita') {
+            
+            // Highlight tech blog missions
+            if ($type === 'qiita' || $mission->trigger_type === 'tech_blog_posted') {
                 $button["style"] = "primary";
             }
-            $buttons[] = $button;
-        }
-
-        // Split buttons into rows (2 per row)
-        $actionBlocks = [];
-        $buttonChunks = array_chunk($buttons, 2);
-        foreach ($buttonChunks as $chunk) {
-            $actionBlocks[] = [
-                "type" => "actions",
-                "elements" => $chunk
+            
+            $missionBlocks[] = [
+                "type" => "section",
+                "text" => [
+                    "type" => "mrkdwn",
+                    "text" => $missionText
+                ],
+                "accessory" => $button
             ];
+            
+            // Add divider between missions (except after last one)
+            if ($mission !== $incompleteMissions->last()) {
+                $missionBlocks[] = ["type" => "divider"];
+            }
         }
 
-        // Return Block Kit with available buttons
+        // Return Block Kit with rich mission details
         return response()->json([
             "response_type" => "ephemeral",
             "blocks" => array_merge(
                 [
                     [
                         "type" => "section",
-                        "text" => ["type" => "mrkdwn", "text" => "*📋  ミッションメニュー*\n下のボタンから選んでWebフォームを開いてください。"]
-                    ]
+                        "text" => ["type" => "mrkdwn", "text" => "*📋 進行中のミッション一覧*\n各ミッションの詳細を確認して、ボタンからWebフォームを開いてください。"]
+                    ],
+                    ["type" => "divider"]
                 ],
-                $actionBlocks,
+                $missionBlocks,
                 [
+                    ["type" => "divider"],
                     [
                         "type" => "context",
                         "elements" => [[
@@ -205,6 +194,7 @@ class SlackController extends Controller
                 ]
             )
         ]);
+
     }
 
     private function verifySlackSignature(Request $request): bool
@@ -223,16 +213,16 @@ class SlackController extends Controller
         return hash_equals($mySignature, $signature);
     }
 
-    private function signedFormUrl(string $slackUserId, string $type): string
+    private function signedFormUrl(string $slackUserId, string $type, int $missionId): string
     {
-        $token = $this->makeSignedToken($slackUserId, $type);
+        $token = $this->makeSignedToken($slackUserId, $type, $missionId);
         return rtrim(config('app.url'), '/') . "/slack/missions/{$type}?token={$token}";
     }
 
-    private function makeSignedToken(string $slackUserId, string $type): string
+    private function makeSignedToken(string $slackUserId, string $type, int $missionId): string
     {
         $expires = now()->addMinutes(30)->timestamp;
-        $payload = "{$slackUserId}|{$type}|{$expires}";
+        $payload = "{$slackUserId}|{$type}|{$missionId}|{$expires}";
         $sig = hash_hmac('sha256', $payload, (string) config('app.key'));
         return base64_encode($payload . '|' . $sig);
     }
@@ -253,7 +243,7 @@ class SlackController extends Controller
             abort(403, 'トークンが無効または期限切れです。Slackから再度アクセスしてください。');
         }
 
-        [$slackUserId, $type, $expires] = $verified;
+        [$slackUserId, $type, $missionId, $expires] = $verified;
 
         // ユーザー特定
         $user = User::where('slack_id', $slackUserId)->first();
@@ -261,57 +251,16 @@ class SlackController extends Controller
             abort(404, 'ユーザー連携が見つかりませんでした。まずWebアプリでSlackログインしてください。');
         }
 
-        // Qiita type: show dedicated URL form
-        if ($type === 'qiita') {
-            $mission = Mission::withoutCompany()
-                ->where('key', 'write_tech_blog')
-                ->where('company_id', $user->company_id)
-                ->where(function ($q) use ($user) {
-                    $q->whereNull('user_id')
-                      ->orWhere('user_id', $user->id);
-                })
-                ->first();
-                
-            if (!$mission) {
-                abort(404, 'Qiitaミッションが見つかりませんでした。');
-            }
-
-            // Check UserMission status
-            // Allow if: 1) No UserMission (first time) OR 2) UserMission exists and incomplete
-            $userMission = UserMission::withoutCompany()
-                ->where('user_id', $user->id)
-                ->where('mission_id', $mission->id)
-                ->where('company_id', $user->company_id)
-                ->first();
-
-            // Block only if UserMission exists AND is completed
-            if ($userMission && !is_null($userMission->completed_at)) {
-                return view('missions.slack_mission_unavailable', [
-                    'mission' => $mission,
-                    'message' => 'このミッションはすでに完了しています。',
-                    'detail' => 'Webのミッション一覧で他のミッションを確認してください。',
-                ]);
-            }
-
-            return view('missions.slack_qiita_form', [
-                'mission' => $mission,
-                'token' => $token,
-                'user' => $user,
-            ]);
-        }
-
-        // Other types: show existing form
-        $missionKey = match ($type) {
-            'event_plan' => 'event_organizer',
-            'event_talk' => 'event_speaker',
-            'cert' => 'acquire_certificate',
-            default => abort(404, '不正なミッションタイプです。'),
-        };
-
+        // Get mission by ID (no need to search by key anymore)
         $mission = Mission::withoutCompany()
-            ->where('key', $missionKey)
-            ->where('company_id', $user->company_id)
+            ->where('id', $missionId)
             ->where(function ($q) use ($user) {
+                // Verify mission belongs to this company or is global
+                $q->whereNull('company_id')
+                  ->orWhere('company_id', $user->company_id);
+            })
+            ->where(function ($q) use ($user) {
+                // Verify mission is accessible to this user
                 $q->whereNull('user_id')
                   ->orWhere('user_id', $user->id);
             })
@@ -338,6 +287,16 @@ class SlackController extends Controller
             ]);
         }
 
+        // Determine which form to show based on trigger_type
+        if ($mission->trigger_type === 'tech_blog_posted') {
+            return view('missions.slack_qiita_form', [
+                'mission' => $mission,
+                'token' => $token,
+                'user' => $user,
+            ]);
+        }
+
+        // Default: show generic mission form
         return view('missions.slack_mission_form', [
             'mission' => $mission,
             'type' => $type,
@@ -362,7 +321,7 @@ class SlackController extends Controller
             return back()->withErrors(['token' => 'トークンが無効または期限切れです。Slackから再度アクセスしてください。']);
         }
 
-        [$slackUserId, $type, $expires] = $verified;
+        [$slackUserId, $type, $missionId, $expires] = $verified;
 
         // ユーザー特定
         $user = User::where('slack_id', $slackUserId)->first();
@@ -378,17 +337,13 @@ class SlackController extends Controller
             'evidence_url' => 'nullable|url',
         ]);
 
-        // ミッション情報を取得
-        $missionKey = match ($type) {
-            'event_plan' => 'event_organizer',
-            'event_talk' => 'event_speaker',
-            'cert' => 'acquire_certificate',
-            default => abort(404, '不正なミッションタイプです。'),
-        };
-
+        // Get mission by ID
         $mission = Mission::withoutCompany()
-            ->where('key', $missionKey)
-            ->where('company_id', $user->company_id)
+            ->where('id', $missionId)
+            ->where(function ($q) use ($user) {
+                $q->whereNull('company_id')
+                  ->orWhere('company_id', $user->company_id);
+            })
             ->where(function ($q) use ($user) {
                 $q->whereNull('user_id')
                   ->orWhere('user_id', $user->id);
@@ -416,7 +371,7 @@ class SlackController extends Controller
         $user,
         $mission->trigger_type,
         [
-            'mission_key' => $mission->key,
+            'mission_id' => $mission->id,  // Use mission_id instead of mission_key
             'url' => $request->evidence_url,
         ]
     );
@@ -443,7 +398,7 @@ class SlackController extends Controller
             return back()->withErrors(['token' => 'トークンが無効または期限切れです。Slackから再度アクセスしてください。']);
         }
 
-        [$slackUserId, $type, $expires] = $verified;
+        [$slackUserId, $type, $missionId, $expires] = $verified;
 
         // ユーザー特定
         $user = User::where('slack_id', $slackUserId)->first();
@@ -458,10 +413,13 @@ class SlackController extends Controller
 
         $url = $request->input('url');
         
-        // ミッション情報を取得
+        // Get mission by ID
         $mission = Mission::withoutCompany()
-            ->where('key', 'write_tech_blog')
-            ->where('company_id', $user->company_id)
+            ->where('id', $missionId)
+            ->where(function ($q) use ($user) {
+                $q->whereNull('company_id')
+                  ->orWhere('company_id', $user->company_id);
+            })
             ->where(function ($q) use ($user) {
                 $q->whereNull('user_id')
                   ->orWhere('user_id', $user->id);
@@ -502,7 +460,7 @@ class SlackController extends Controller
 
     /**
      * 署名付きトークンを検証
-     * @return array|false [slackUserId, type, expires] or false
+     * @return array|false [slackUserId, type, missionId, expires] or false
      */
     private function verifySignedToken(string $token, string $expectedType)
     {
@@ -513,11 +471,11 @@ class SlackController extends Controller
             }
 
             $parts = explode('|', $decoded);
-            if (count($parts) !== 4) {
+            if (count($parts) !== 5) {
                 return false;
             }
 
-            [$slackUserId, $type, $expires, $sig] = $parts;
+            [$slackUserId, $type, $missionId, $expires, $sig] = $parts;
 
             // タイプチェック
             if ($type !== $expectedType) {
@@ -530,18 +488,76 @@ class SlackController extends Controller
             }
 
             // 署名チェック
-            $payload = "{$slackUserId}|{$type}|{$expires}";
+            $payload = "{$slackUserId}|{$type}|{$missionId}|{$expires}";
             $expectedSig = hash_hmac('sha256', $payload, (string) config('app.key'));
             
             if (!hash_equals($expectedSig, $sig)) {
                 return false;
             }
 
-            return [$slackUserId, $type, $expires];
+            return [$slackUserId, $type, $missionId, $expires];
         } catch (\Exception $e) {
             Log::warning('Token verification failed', ['error' => $e->getMessage()]);
             return false;
         }
+    }
+
+    /**
+     * Determine mission type for URL generation based on mission properties
+     */
+    private function getMissionType(Mission $mission): string
+    {
+        // Match by key first (for known mission types)
+        return match ($mission->key) {
+            'write_tech_blog' => 'qiita',
+            'event_organizer' => 'event_plan',
+            'event_speaker' => 'event_talk',
+            'acquire_certificate' => 'cert',
+            // Default: use trigger_type to determine form type
+            default => match ($mission->trigger_type) {
+                'tech_blog_posted' => 'qiita',
+                'google_form_submitted' => 'event_plan', // generic form
+                default => 'event_plan', // fallback to generic form
+            },
+        };
+    }
+
+    /**
+     * Get button label based on mission type
+     */
+    private function getButtonLabel(Mission $mission): string
+    {
+        return match ($mission->trigger_type) {
+            'tech_blog_posted' => '📝 URLを送信',
+            'google_form_submitted' => '📝 入力する',
+            default => '✅ 詳細を入力',
+        };
+    }
+
+    /**
+     * Get emoji based on mission key or type
+     */
+    private function getMissionEmoji(Mission $mission): string
+    {
+        // Match by key first
+        $emojiByKey = match ($mission->key) {
+            'write_tech_blog' => '📝',
+            'event_organizer' => '🎪',
+            'event_speaker' => '🎤',
+            'acquire_certificate' => '🎓',
+            default => null,
+        };
+
+        if ($emojiByKey) {
+            return $emojiByKey;
+        }
+
+        // Fallback to trigger_type
+        return match ($mission->trigger_type) {
+            'tech_blog_posted' => '📝',
+            'google_form_submitted' => '📋',
+            default => '✨',
+        };
     }
 
 }
