@@ -79,7 +79,7 @@ class MissionController extends Controller
             $user,
             'tech_blog_posted',
             [
-                'mission_key' => $mission->key,
+                'mission_id' => $mission->id,  // Use mission_id for precise targeting
                 'url'         => $qiita['url'] ?? $url,
             ]
         );

@@ -25,8 +25,12 @@ class MissionService
     {
         $query = Mission::where('trigger_type', $triggerType);
 
+        // mission_id が指定されていたら、その特定のミッションだけ対象にする（最優先）
+        if (!empty($payload['mission_id'])) {
+            $query->where('id', $payload['mission_id']);
+        }
         // mission_key が指定されていたら、特定のミッションだけ対象にする
-        if (!empty($payload['mission_key'])) {
+        elseif (!empty($payload['mission_key'])) {
             $query->where('key', $payload['mission_key']);
         }
 

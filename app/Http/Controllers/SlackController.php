@@ -371,7 +371,7 @@ class SlackController extends Controller
         $user,
         $mission->trigger_type,
         [
-            'mission_key' => $mission->key,
+            'mission_id' => $mission->id,  // Use mission_id instead of mission_key
             'url' => $request->evidence_url,
         ]
     );
