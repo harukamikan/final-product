@@ -143,6 +143,7 @@ class SlackController extends Controller
             'types' => array_keys($availableMissions),
         ]);
 
+
         // If no missions available
         if (empty($availableMissions)) {
             return response()->json([
@@ -151,50 +152,72 @@ class SlackController extends Controller
             ]);
         }
 
-        // Build button elements for available missions
+        // Build rich section blocks for each mission with details
         $buttonLabels = [
-            'qiita' => '📝 技術ブログ(Qiita)',
-            'event_talk' => '🎤 イベント登壇',
-            'event_plan' => '🎪 イベント企画・開催',
-            'cert' => '🎓 資格取得',
+            'qiita' => '📝 URLを送信',
+            'event_talk' => '🎤 登壇情報を入力',
+            'event_plan' => '🎪 企画情報を入力',
+            'cert' => '🎓 資格情報を入力',
         ];
 
-        $buttons = [];
+        $missionEmojis = [
+            'qiita' => '📝',
+            'event_talk' => '🎤',
+            'event_plan' => '🎪',
+            'cert' => '🎓',
+        ];
+
+        $missionBlocks = [];
         foreach ($availableMissions as $type => $data) {
-            $label = $buttonLabels[$type] ?? $type;
+            $mission = $data['mission'];
+            $emoji = $missionEmojis[$type] ?? '✨';
+            $buttonLabel = $buttonLabels[$type] ?? '入力画面を開く';
+            
+            // Build mission detail text
+            $missionText = "*{$emoji} {$mission->title}*\n";
+            $missionText .= "{$mission->description}\n";
+            $missionText .= "💰 *報酬:* {$mission->reward_miles} mile";
+            
+            // Create section with button as accessory
             $button = [
                 "type" => "button",
-                "text" => ["type" => "plain_text", "text" => $label],
+                "text" => ["type" => "plain_text", "text" => $buttonLabel],
                 "url" => $data['url']
             ];
+            
             if ($type === 'qiita') {
                 $button["style"] = "primary";
             }
-            $buttons[] = $button;
-        }
-
-        // Split buttons into rows (2 per row)
-        $actionBlocks = [];
-        $buttonChunks = array_chunk($buttons, 2);
-        foreach ($buttonChunks as $chunk) {
-            $actionBlocks[] = [
-                "type" => "actions",
-                "elements" => $chunk
+            
+            $missionBlocks[] = [
+                "type" => "section",
+                "text" => [
+                    "type" => "mrkdwn",
+                    "text" => $missionText
+                ],
+                "accessory" => $button
             ];
+            
+            // Add divider between missions (except after last one)
+            if ($type !== array_key_last($availableMissions)) {
+                $missionBlocks[] = ["type" => "divider"];
+            }
         }
 
-        // Return Block Kit with available buttons
+        // Return Block Kit with rich mission details
         return response()->json([
             "response_type" => "ephemeral",
             "blocks" => array_merge(
                 [
                     [
                         "type" => "section",
-                        "text" => ["type" => "mrkdwn", "text" => "*📋  ミッションメニュー*\n下のボタンから選んでWebフォームを開いてください。"]
-                    ]
+                        "text" => ["type" => "mrkdwn", "text" => "*📋 進行中のミッション一覧*\n各ミッションの詳細を確認して、ボタンからWebフォームを開いてください。"]
+                    ],
+                    ["type" => "divider"]
                 ],
-                $actionBlocks,
+                $missionBlocks,
                 [
+                    ["type" => "divider"],
                     [
                         "type" => "context",
                         "elements" => [[
@@ -205,6 +228,7 @@ class SlackController extends Controller
                 ]
             )
         ]);
+
     }
 
     private function verifySlackSignature(Request $request): bool
