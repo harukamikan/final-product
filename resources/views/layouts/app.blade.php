@@ -49,10 +49,10 @@
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between items-center h-16">
 
-                  {{-- ハンバーガーボタン（スマホのみ表示） --}}
+                {{-- ハンバーガーボタン（スマホのみ表示） --}}
                 <button @click="mobileMenuOpen = !mobileMenuOpen" class="md:hidden {{ $navText }} focus:outline-none">
                     <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
                     </svg>
                 </button>
 
@@ -103,6 +103,13 @@
         : $hoverText }}">
                         ガチャ
                     </a>
+
+                    {{-- 🎁 有効報酬 --}}
+                    <a href="{{ route('rewards.my') }}"
+                        class="inline-flex items-center px-1 pt-1 text-sm font-medium {{ $navText }}
+   {{ request()->is('rewards/my*') ? 'border-b-2 border-indigo-500' : $hoverText }}">
+                        有効報酬
+                    </a>
                 </div>
 
                 {{-- 右メニュー（ユーザー） --}}
@@ -126,20 +133,20 @@
                         "
                             class="relative {{ $navText }} {{ $hoverText }} focus:outline-none">
                             <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
-                                    d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
                             </svg>
-                            
+
                             @php
                             $unreadCount = \App\Models\Notification::where('user_id', auth()->id())
-                                ->where('is_read', false)
-                                ->count();
+                            ->where('is_read', false)
+                            ->count();
                             @endphp
-                            
+
                             @if($unreadCount > 0)
-                                <span class="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
-                                    {{ $unreadCount }}
-                                </span>
+                            <span class="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
+                                {{ $unreadCount }}
+                            </span>
                             @endif
                         </button>
 
@@ -147,29 +154,29 @@
                         <div x-show="open"
                             @click.away="open = false"
                             class="absolute right-0 mt-2 w-80 bg-white rounded-md shadow-lg py-1 z-10 max-h-96 overflow-y-auto">
-                            
+
                             @php
                             $notifications = \App\Models\Notification::where('user_id', auth()->id())
-                                ->where('is_read', false)
-                                ->orderBy('created_at', 'desc')
-                                ->get();
+                            ->where('is_read', false)
+                            ->orderBy('created_at', 'desc')
+                            ->get();
                             @endphp
-                            
+
                             @if($notifications->isEmpty())
-                                <p class="px-4 py-3 text-sm text-gray-500 text-center">
-                                    通知はありません
-                                </p>
+                            <p class="px-4 py-3 text-sm text-gray-500 text-center">
+                                通知はありません
+                            </p>
                             @else
-                                @foreach($notifications as $notification)
-                                    <div class="px-4 py-3 border-b border-gray-100 hover:bg-gray-50">
-                                        <p class="text-sm text-gray-700">
-                                            {{ $notification->message }}
-                                        </p>
-                                        <p class="text-xs text-gray-500 mt-1">
-                                            {{ $notification->created_at->diffForHumans() }}
-                                        </p>
-                                    </div>
-                                @endforeach
+                            @foreach($notifications as $notification)
+                            <div class="px-4 py-3 border-b border-gray-100 hover:bg-gray-50">
+                                <p class="text-sm text-gray-700">
+                                    {{ $notification->message }}
+                                </p>
+                                <p class="text-xs text-gray-500 mt-1">
+                                    {{ $notification->created_at->diffForHumans() }}
+                                </p>
+                            </div>
+                            @endforeach
                             @endif
                         </div>
                     </div>
@@ -210,15 +217,15 @@
         </div>
 
         {{-- モバイルメニュー --}}
-         <div x-show="mobileMenuOpen"
-             x-transition:enter="transition ease-out duration-200"
-             x-transition:enter-start="-translate-x-full"
-             x-transition:enter-end="translate-x-0"
-             x-transition:leave="transition ease-in duration-150"
-             x-transition:leave-start="translate-x-0"
-             x-transition:leave-end="-translate-x-full"
-             @click.away="mobileMenuOpen = false"
-             class="md:hidden fixed top-0 left-0 h-screen w-64 @if($brightness > 155) bg-gray-800 @else bg-white @endif border-r {{ $navBorder }} shadow-xl z-50 overflow-y-auto">
+        <div x-show="mobileMenuOpen"
+            x-transition:enter="transition ease-out duration-200"
+            x-transition:enter-start="-translate-x-full"
+            x-transition:enter-end="translate-x-0"
+            x-transition:leave="transition ease-in duration-150"
+            x-transition:leave-start="translate-x-0"
+            x-transition:leave-end="-translate-x-full"
+            @click.away="mobileMenuOpen = false"
+            class="md:hidden fixed top-0 left-0 h-screen w-64 @if($brightness > 155) bg-gray-800 @else bg-white @endif border-r {{ $navBorder }} shadow-xl z-50 overflow-y-auto">
             <div class="h-full px-2 pt-2 pb-3 space-y-1 @if($brightness > 155) bg-gray-800 @else bg-white @endif">
                 <a href="/dashboard"
                     class="block px-3 py-2 rounded-md text-base font-medium {{ $navText }} {{ $hoverText }}
@@ -255,6 +262,17 @@
                            {{ request()->is('rewards/gacha*') ? 'bg-indigo-500 bg-opacity-20' : '' }}">
                     ガチャ
                 </a>
+                <a href="{{ route('rewards.my') }}"
+                    class="block px-3 py-2 rounded-md text-base font-medium
+   @if($brightness > 155)
+       text-white hover:bg-gray-700
+   @else
+       text-gray-900 hover:bg-gray-100
+   @endif
+   {{ request()->is('rewards/my*') ? 'bg-indigo-500 bg-opacity-20' : '' }}">
+                    有効報酬
+                </a>
+
             </div>
         </div>
     </nav>
