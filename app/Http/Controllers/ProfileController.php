@@ -54,6 +54,9 @@ class ProfileController extends Controller
             $user->background_value = $request->background_value;
         }
 
+        // リマインド通知のON/OFF
+        $user->reminder_enabled = $request->has('reminder_enabled');
+
         $user->save();
 
         return redirect()

@@ -29,10 +29,13 @@ class SendReminders extends Command
     
     protected function checkDeadlineReminders($now)
     {
-        // 期限が近い半期目標を取得（ユーザーごと）
+        // 期限が近い半期目標を取得（リマインド通知ONのユーザーのみ）
         $upcomingGoals = SemesterGoal::where('deadline', '<=', $now->copy()->addDays(3))
             ->where('deadline', '>', $now)
             ->with('user') // ユーザー情報も取得
+            ->whereHas('user', function($query) {
+                $query->where('reminder_enabled', true);
+            })
             ->get();
         
         foreach ($upcomingGoals as $goal) {
