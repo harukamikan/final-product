@@ -29,33 +29,40 @@ class SendReminders extends Command
     
     protected function checkDeadlineReminders($now)
     {
-        // 期限が近い半期目標を取得（リマインド通知ONのユーザーのみ）
-        $upcomingGoals = SemesterGoal::where('deadline', '<=', $now->copy()->addDays(3))
-            ->where('deadline', '>', $now)
-            ->with('user') // ユーザー情報も取得
-            ->whereHas('user', function($query) {
-                $query->where('reminder_enabled', true);
-            })
-            ->get();
+        // リマインド通知ONのユーザーを取得
+        $users = \App\Models\User::where('reminder_enabled', true)->get();
         
-        foreach ($upcomingGoals as $goal) {
-            $this->sendDeadlineReminderToUser($goal);
+        foreach ($users as $user) {
+            // ユーザーごとのリマインド日数を使用
+            $reminderDate = $now->copy()->addDays($user->reminder_days_before);
+            
+            // 該当する期限の半期目標を取得
+            $upcomingGoals = SemesterGoal::where('user_id', $user->id)
+                ->whereDate('deadline', '=', $reminderDate->toDateString())
+                ->get();
+            
+            foreach ($upcomingGoals as $goal) {
+                $this->sendDeadlineReminderToUser($goal);
+            }
         }
     }
     
     protected function checkWeeklyReminders($now)
     {
-        // 月曜日の9時かチェック
-        if ($now->isMonday() && $now->hour == 9) {
-            // リマインド通知ONのユーザーの進行中の半期目標を取得
-            $activeGoals = SemesterGoal::where('is_current', true)
-                ->whereHas('user', function($query) {
-                    $query->where('reminder_enabled', true);
-                })
-                ->get();
-            
-            foreach ($activeGoals as $goal) {
-                $this->sendWeeklyReminder($goal);
+        // リマインド通知ONのユーザーを取得
+        $users = \App\Models\User::where('reminder_enabled', true)->get();
+        
+        foreach ($users as $user) {
+            // ユーザーごとの設定曜日・時間をチェック
+            if ($now->dayOfWeek == $user->reminder_day_of_week && $now->hour == $user->reminder_hour) {
+                // ユーザーの進行中の半期目標を取得
+                $activeGoals = SemesterGoal::where('user_id', $user->id)
+                    ->where('is_current', true)
+                    ->get();
+                
+                foreach ($activeGoals as $goal) {
+                    $this->sendWeeklyReminder($goal);
+                }
             }
         }
     }

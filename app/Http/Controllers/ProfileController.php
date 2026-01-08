@@ -57,6 +57,17 @@ class ProfileController extends Controller
         // リマインド通知のON/OFF
         $user->reminder_enabled = $request->has('reminder_enabled');
 
+        // リマインド設定
+        if ($request->filled('reminder_days_before')) {
+            $user->reminder_days_before = $request->reminder_days_before;
+        }
+        if ($request->filled('reminder_day_of_week')) {
+            $user->reminder_day_of_week = $request->reminder_day_of_week;
+        }
+        if ($request->filled('reminder_hour')) {
+            $user->reminder_hour = $request->reminder_hour;
+        }
+
         $user->save();
 
         return redirect()

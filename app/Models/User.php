@@ -32,6 +32,9 @@ class User extends Authenticatable
         'background_type',
         'background_value',
         'nickname',
+        'reminder_days_before',
+        'reminder_day_of_week',
+        'reminder_hour',
     ];
 
     /**

@@ -106,26 +106,93 @@
         <div class="bg-white p-6 rounded-lg shadow">
             <h3 class="text-lg font-semibold mb-4">通知設定</h3>
             
-            <form action="{{ route('profile.update') }}" method="POST">
+            <form action="{{ route('profile.update') }}" method="POST" class="space-y-6">
                 @csrf
                 @method('PATCH')
                 
-                <label class="flex items-center gap-3">
-                    <input 
-                        type="checkbox" 
-                        name="reminder_enabled" 
-                        value="1"
-                        {{ old('reminder_enabled', $user->reminder_enabled) ? 'checked' : '' }}
-                        class="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500">
-                    <span class="text-sm font-medium text-gray-700">
-                        リマインド通知を受け取る
-                    </span>
-                </label>
-                <p class="mt-1 ml-8 text-xs text-gray-500">
-                    半期目標の期限が近づいたときに通知を受け取ります
-                </p>
+                <!-- リマインド通知ON/OFF -->
+                <div>
+                    <label class="flex items-center gap-3">
+                        <input 
+                            type="checkbox" 
+                            name="reminder_enabled" 
+                            value="1"
+                            {{ old('reminder_enabled', $user->reminder_enabled) ? 'checked' : '' }}
+                            class="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500">
+                        <span class="text-sm font-medium text-gray-700">
+                            リマインド通知を受け取る
+                        </span>
+                    </label>
+                    <p class="mt-1 ml-8 text-xs text-gray-500">
+                        半期目標の期限が近づいたときに通知を受け取ります
+                    </p>
+                </div>
+
+                <!-- 期限リマインドのタイミング -->
+                <div class="pt-4 border-t">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                        期限リマインドのタイミング
+                    </label>
+                    <select 
+                        name="reminder_days_before" 
+                        class="rounded-md border-gray-300 text-sm">
+                        <option value="1" {{ old('reminder_days_before', $user->reminder_days_before) == 1 ? 'selected' : '' }}>
+                            1日前
+                        </option>
+                        <option value="3" {{ old('reminder_days_before', $user->reminder_days_before) == 3 ? 'selected' : '' }}>
+                            3日前
+                        </option>
+                        <option value="7" {{ old('reminder_days_before', $user->reminder_days_before) == 7 ? 'selected' : '' }}>
+                            7日前
+                        </option>
+                    </select>
+                    <p class="mt-1 text-xs text-gray-500">
+                        半期目標の期限から何日前に通知を受け取るか選択できます
+                    </p>
+                </div>
+
+                <!-- 週次リマインドの設定 -->
+                <div class="pt-4 border-t">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                        週次リマインド
+                    </label>
+                    
+                    <div class="flex gap-4 items-center">
+                        <div>
+                            <label class="block text-xs text-gray-500 mb-1">曜日</label>
+                            <select 
+                                name="reminder_day_of_week" 
+                                class="rounded-md border-gray-300 text-sm">
+                                <option value="0" {{ old('reminder_day_of_week', $user->reminder_day_of_week) == 0 ? 'selected' : '' }}>日曜日</option>
+                                <option value="1" {{ old('reminder_day_of_week', $user->reminder_day_of_week) == 1 ? 'selected' : '' }}>月曜日</option>
+                                <option value="2" {{ old('reminder_day_of_week', $user->reminder_day_of_week) == 2 ? 'selected' : '' }}>火曜日</option>
+                                <option value="3" {{ old('reminder_day_of_week', $user->reminder_day_of_week) == 3 ? 'selected' : '' }}>水曜日</option>
+                                <option value="4" {{ old('reminder_day_of_week', $user->reminder_day_of_week) == 4 ? 'selected' : '' }}>木曜日</option>
+                                <option value="5" {{ old('reminder_day_of_week', $user->reminder_day_of_week) == 5 ? 'selected' : '' }}>金曜日</option>
+                                <option value="6" {{ old('reminder_day_of_week', $user->reminder_day_of_week) == 6 ? 'selected' : '' }}>土曜日</option>
+                            </select>
+                        </div>
+
+                        <div>
+                            <label class="block text-xs text-gray-500 mb-1">時間</label>
+                            <select 
+                                name="reminder_hour" 
+                                class="rounded-md border-gray-300 text-sm">
+                                @for($i = 0; $i < 24; $i++)
+                                    <option value="{{ $i }}" {{ old('reminder_hour', $user->reminder_hour) == $i ? 'selected' : '' }}>
+                                        {{ sprintf('%02d:00', $i) }}
+                                    </option>
+                                @endfor
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <p class="mt-2 text-xs text-gray-500">
+                        毎週指定した曜日・時間に進捗確認の通知を受け取ります
+                    </p>
+                </div>
                 
-                <button type="submit" class="mt-3 px-4 py-2 bg-blue-500 hover:bg-blue-700 text-white font-bold rounded">
+                <button type="submit" class="mt-4 px-4 py-2 bg-blue-500 hover:bg-blue-700 text-white font-bold rounded">
                     保存
                 </button>
             </form>
