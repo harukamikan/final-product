@@ -56,6 +56,8 @@ class ProfileController extends Controller
 
         // リマインド通知のON/OFF
         $user->reminder_enabled = $request->has('reminder_enabled');
+        $user->reminder_deadline_enabled = $request->has('reminder_deadline_enabled');
+        $user->reminder_weekly_enabled = $request->has('reminder_weekly_enabled');
 
         // リマインド設定
         if ($request->filled('reminder_days_before')) {

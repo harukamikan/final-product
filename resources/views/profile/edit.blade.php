@@ -111,21 +111,60 @@
                 @method('PATCH')
                 
                 <!-- リマインド通知ON/OFF -->
-                <div>
-                    <label class="flex items-center gap-3">
-                        <input 
-                            type="checkbox" 
-                            name="reminder_enabled" 
-                            value="1"
-                            {{ old('reminder_enabled', $user->reminder_enabled) ? 'checked' : '' }}
-                            class="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500">
-                        <span class="text-sm font-medium text-gray-700">
-                            リマインド通知を受け取る
-                        </span>
-                    </label>
-                    <p class="mt-1 ml-8 text-xs text-gray-500">
-                        半期目標の期限が近づいたときに通知を受け取ります
-                    </p>
+                <div class="space-y-3">
+                    <!-- 全体のON/OFF -->
+                    <div>
+                        <label class="flex items-center gap-3">
+                            <input 
+                                type="checkbox" 
+                                name="reminder_enabled" 
+                                value="1"
+                                {{ old('reminder_enabled', $user->reminder_enabled) ? 'checked' : '' }}
+                                class="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500">
+                            <span class="text-sm font-medium text-gray-700">
+                                リマインド通知を受け取る
+                            </span>
+                        </label>
+                        <p class="mt-1 ml-8 text-xs text-gray-500">
+                            すべてのリマインド通知を受け取るかどうかの設定です
+                        </p>
+                    </div>
+
+                    <!-- 期限リマインド -->
+                    <div class="ml-8">
+                        <label class="flex items-center gap-3">
+                            <input 
+                                type="checkbox" 
+                                name="reminder_deadline_enabled" 
+                                value="1"
+                                {{ old('reminder_deadline_enabled', $user->reminder_deadline_enabled) ? 'checked' : '' }}
+                                class="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500">
+                            <span class="text-sm font-medium text-gray-700">
+                                期限リマインドを受け取る
+                            </span>
+                        </label>
+                        <p class="mt-1 ml-8 text-xs text-gray-500">
+                            半期目標の期限が近づいたときの通知
+                        </p>
+                    </div>
+
+                    <!-- 週次リマインド -->
+                    <div class="ml-8">
+                        <label class="flex items-center gap-3">
+                            <input 
+                                type="checkbox" 
+                                name="reminder_weekly_enabled" 
+                                value="1"
+                                {{ old('reminder_weekly_enabled', $user->reminder_weekly_enabled) ? 'checked' : '' }}
+                                class="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500">
+                            <span class="text-sm font-medium text-gray-700">
+                                週次リマインドを受け取る
+                            </span>
+                        </label>
+                        <p class="mt-1 ml-8 text-xs text-gray-500">
+                            毎週の進捗確認の通知
+                        </p>
+                    </div>
                 </div>
 
                 <!-- 期限リマインドのタイミング -->

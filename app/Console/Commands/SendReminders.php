@@ -29,8 +29,10 @@ class SendReminders extends Command
     
     protected function checkDeadlineReminders($now)
     {
-        // リマインド通知ONのユーザーを取得
-        $users = \App\Models\User::where('reminder_enabled', true)->get();
+        // 期限リマインドONのユーザーを取得
+        $users = \App\Models\User::where('reminder_enabled', true)
+            ->where('reminder_deadline_enabled', true)
+            ->get();
         
         foreach ($users as $user) {
             // ユーザーごとのリマインド日数を使用
@@ -49,8 +51,10 @@ class SendReminders extends Command
     
     protected function checkWeeklyReminders($now)
     {
-        // リマインド通知ONのユーザーを取得
-        $users = \App\Models\User::where('reminder_enabled', true)->get();
+        // 週次リマインドONのユーザーを取得
+        $users = \App\Models\User::where('reminder_enabled', true)
+            ->where('reminder_weekly_enabled', true)
+            ->get();
         
         foreach ($users as $user) {
             // ユーザーごとの設定曜日・時間をチェック

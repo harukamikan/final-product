@@ -35,6 +35,8 @@ class User extends Authenticatable
         'reminder_days_before',
         'reminder_day_of_week',
         'reminder_hour',
+        'reminder_deadline_enabled',
+        'reminder_weekly_enabled',
     ];
 
     /**
