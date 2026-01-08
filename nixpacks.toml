@@ -1,3 +1,5 @@
+# Force cache clear - 2026-01-09
+
 [phases.setup]
 nixPkgs = ["php83", "php83Extensions.mbstring", "php83Extensions.pdo", "php83Extensions.pdo_mysql", "php83Extensions.gd", "php83Packages.composer", "nodejs"]
 
