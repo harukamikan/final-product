@@ -47,7 +47,7 @@
         </div>
 
         <button class="px-4 py-2 bg-indigo-600 text-white rounded-lg">
-            配布候補に追加
+            報酬を決定する
         </button>
     </form>
 
@@ -71,7 +71,16 @@
                     {{ $d->ends_at?->format('Y/m/d H:i') ?? '－' }}
                 </p>
                 @endif
+
+                {{-- 報酬の有効期限 --}}
+                @if($d->reward_expires_at)
+                <p class="text-xs text-gray-400 mt-1">
+                    有効期限（取得後）：
+                    {{ $d->reward_expires_at->format('Y/m/d H:i') }}
+                </p>
+                @endif
             </div>
+
 
             <div class="flex items-center gap-2">
                 {{-- 配布ON/OFF --}}
