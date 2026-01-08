@@ -255,7 +255,11 @@ class SlackController extends Controller
         if ($type === 'qiita') {
             $mission = Mission::withoutCompany()
                 ->where('key', 'write_tech_blog')
-                ->where('company_id', $user->company_id)
+                ->where(function ($q) use ($user) {
+                    // Include global missions (company_id = null) OR company-specific
+                    $q->whereNull('company_id')
+                      ->orWhere('company_id', $user->company_id);
+                })
                 ->where(function ($q) use ($user) {
                     $q->whereNull('user_id')
                       ->orWhere('user_id', $user->id);
@@ -300,7 +304,11 @@ class SlackController extends Controller
 
         $mission = Mission::withoutCompany()
             ->where('key', $missionKey)
-            ->where('company_id', $user->company_id)
+            ->where(function ($q) use ($user) {
+                // Include global missions (company_id = null) OR company-specific
+                $q->whereNull('company_id')
+                  ->orWhere('company_id', $user->company_id);
+            })
             ->where(function ($q) use ($user) {
                 $q->whereNull('user_id')
                   ->orWhere('user_id', $user->id);
@@ -378,7 +386,11 @@ class SlackController extends Controller
 
         $mission = Mission::withoutCompany()
             ->where('key', $missionKey)
-            ->where('company_id', $user->company_id)
+            ->where(function ($q) use ($user) {
+                // Include global missions (company_id = null) OR company-specific
+                $q->whereNull('company_id')
+                  ->orWhere('company_id', $user->company_id);
+            })
             ->where(function ($q) use ($user) {
                 $q->whereNull('user_id')
                   ->orWhere('user_id', $user->id);
@@ -451,7 +463,11 @@ class SlackController extends Controller
         // ミッション情報を取得
         $mission = Mission::withoutCompany()
             ->where('key', 'write_tech_blog')
-            ->where('company_id', $user->company_id)
+            ->where(function ($q) use ($user) {
+                // Include global missions (company_id = null) OR company-specific
+                $q->whereNull('company_id')
+                  ->orWhere('company_id', $user->company_id);
+            })
             ->where(function ($q) use ($user) {
                 $q->whereNull('user_id')
                   ->orWhere('user_id', $user->id);
