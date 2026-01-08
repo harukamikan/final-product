@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Carbon;
 
 class RewardDistribution extends Model
 {
@@ -25,5 +26,25 @@ class RewardDistribution extends Model
     public function reward()
     {
         return $this->belongsTo(Reward::class);
+    }
+
+    /**
+     * 配布として期限切れかどうか
+     */
+    public function getIsExpiredAttribute(): bool
+    {
+        $now = now();
+
+        // 配布終了日時が過ぎている
+        if ($this->ends_at && $this->ends_at->isPast()) {
+            return true;
+        }
+
+        // 報酬の有効期限（取得後）が過ぎている
+        if ($this->reward_expires_at && $this->reward_expires_at->isPast()) {
+            return true;
+        }
+
+        return false;
     }
 }

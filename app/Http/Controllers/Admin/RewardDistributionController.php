@@ -56,6 +56,10 @@ class RewardDistributionController extends Controller
     // ON / OFF 切り替え
     public function toggle(RewardDistribution $distribution)
     {
+        if ($distribution->is_expired) {
+            return back()->with('error', '期限切れの報酬は変更できません');
+        }
+
         $distribution->update([
             'is_active' => ! $distribution->is_active,
         ]);
@@ -63,6 +67,7 @@ class RewardDistributionController extends Controller
         return back();
     }
 
+    
     //　削除
     public function destroy(RewardDistribution $distribution)
     {
