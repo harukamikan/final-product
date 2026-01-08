@@ -67,7 +67,7 @@ class RewardDistributionController extends Controller
         return back();
     }
 
-
+    
     //　削除
     public function destroy(RewardDistribution $distribution)
     {

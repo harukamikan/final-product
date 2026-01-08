@@ -28,9 +28,23 @@ class RewardDistribution extends Model
         return $this->belongsTo(Reward::class);
     }
 
+    /**
+     * 配布として期限切れかどうか
+     */
     public function getIsExpiredAttribute(): bool
     {
-        return $this->ends_at !== null
-            && $this->ends_at->isPast();
+        $now = now();
+
+        // 配布終了日時が過ぎている
+        if ($this->ends_at && $this->ends_at->isPast()) {
+            return true;
+        }
+
+        // 報酬の有効期限（取得後）が過ぎている
+        if ($this->reward_expires_at && $this->reward_expires_at->isPast()) {
+            return true;
+        }
+
+        return false;
     }
 }
