@@ -59,14 +59,7 @@ class SendReminders extends Command
         foreach ($users as $user) {
             // ユーザーごとの設定曜日・時間をチェック
             if ($now->dayOfWeek == $user->reminder_day_of_week && $now->hour == $user->reminder_hour) {
-                // ユーザーの進行中の半期目標を取得
-                $activeGoals = SemesterGoal::where('user_id', $user->id)
-                    ->where('is_current', true)
-                    ->get();
-                
-                foreach ($activeGoals as $goal) {
-                    $this->sendWeeklyReminder($goal);
-                }
+                $this->sendWeeklyReminder($user);
             }
         }
     }
@@ -84,9 +77,10 @@ class SendReminders extends Command
         $deadline = Carbon::parse($goal->deadline);
         $daysLeft = (int) Carbon::now()->diffInDays($deadline);
         
-        $message = "⏰ **期限リマインド**\n";
+        $message = "⏰ 期限リマインド\n\n";
         $message .= "目標: {$goal->title}\n";
-        $message .= "期限まで: あと{$daysLeft}日\n";
+        $message .= "期限まで: あと{$daysLeft}日\n\n";
+        $message .= "頑張りましょう！💪";
         
         // ユーザーのSlackボットにDM送信
         $slackService->sendDM($goal->user->slack_id, $message);
@@ -94,17 +88,66 @@ class SendReminders extends Command
         $this->info("Sent deadline reminder to {$goal->user->name}: {$goal->title}");
     }
     
-    protected function sendWeeklyReminder($goal)
+    protected function sendWeeklyReminder($user)
     {
         $slackService = app(SlackService::class);
         
-        $message = "📅 **週次リマインド**\n";
-        $message .= "今週の目標を確認しましょう！\n";
-        $message .= "目標: {$goal->title}\n";
+        // 進行中のミッション取得
+        $activeMissions = \App\Models\UserMission::where('user_id', $user->id)
+            ->where('is_completed', false)
+            ->with('mission')
+            ->get();
         
-        // Slack通知を送信
-        $slackService->sendMessage($message);
+        // ランク情報取得
+        $totalMiles = \App\Models\MileHistory::where('user_id', $user->id)->sum('miles');
+        $rank = $totalMiles >= 500 ? 'ゴールド' : ($totalMiles >= 200 ? 'シルバー' : 'ブロンズ');
+        $nextRank = $rank == 'ブロンズ' ? 'シルバー' : ($rank == 'シルバー' ? 'ゴールド' : '最高ランク');
+        $nextMiles = $rank == 'ブロンズ' ? 200 : ($rank == 'シルバー' ? 500 : 500);
+        $remaining = max(0, $nextMiles - $totalMiles);
         
-        $this->info("Sent weekly reminder for: {$goal->title}");
+        // 最もマイルが高い未完了ミッション取得
+        $topMission = \App\Models\Mission::whereNotIn('id', function($query) use ($user) {
+            $query->select('mission_id')
+                ->from('user_missions')
+                ->where('user_id', $user->id)
+                ->where('is_completed', true);
+        })->orderBy('reward_miles', 'desc')->first();
+        
+        // メッセージ作成
+        $message = "📊 今週の進捗レポート\n\n";
+        
+        if ($activeMissions->isNotEmpty()) {
+            $message .= "▼ 進行中のミッション\n";
+            foreach ($activeMissions as $userMission) {
+                $progress = $userMission->progress_count;
+                $required = $userMission->mission->required_count;
+                $remaining = $required - $progress;
+                $message .= "・{$userMission->mission->title} → {$progress}/{$required}件完了（残り{$remaining}件）\n";
+            }
+            $message .= "\n";
+        }
+        
+        $message .= "▼ あなたのランク\n";
+        $rankEmoji = $rank == 'ゴールド' ? '🥇' : ($rank == 'シルバー' ? '🥈' : '🥉');
+        $message .= "現在: {$rankEmoji} {$rank}（{$totalMiles}マイル）\n";
+        
+        if ($rank != 'ゴールド') {
+            $message .= "{$nextRank}まであと {$remaining} マイル\n\n";
+        } else {
+            $message .= "最高ランク達成です！\n\n";
+        }
+        
+        if ($topMission) {
+            $message .= "💡 次のおすすめミッション\n";
+            $message .= "{$topMission->title}\n";
+            $message .= "+{$topMission->reward_miles} マイル獲得\n\n";
+        }
+        
+        $message .= "頑張りましょう！💪";
+        
+        // Slack DM送信
+        $slackService->sendDM($user->slack_id, $message);
+        
+        $this->info("Sent weekly progress report to {$user->name}");
     }
 }

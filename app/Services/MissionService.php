@@ -147,6 +147,11 @@ class MissionService
         // ランク情報を取得
         $rankInfo = RankHelper::getRankInfo($currentMiles, $previousMiles);
         
+        // ランクアップしたら Slack 通知
+        if ($rankInfo['rank_changed'] && $user->slack_id) {
+            $this->sendRankUpNotification($user, $rankInfo);
+        }
+        
         // 次のアクションを取得
         $nextAction = $this->getNextAction($user);
 
@@ -206,5 +211,38 @@ class MissionService
         }
 
         return $this->progressMission($user, $mission);
+    }
+
+    /**
+     * ランクアップ通知を送信
+     */
+    protected function sendRankUpNotification(User $user, array $rankInfo): void
+    {
+        $slackService = app(SlackService::class);
+        
+        $oldRank = $rankInfo['old_rank'];
+        $newRank = $rankInfo['new_rank'];
+        $currentMiles = $rankInfo['current_miles'];
+        
+        $oldEmoji = $oldRank == 'ゴールド' ? '🥇' : ($oldRank == 'シルバー' ? '🥈' : '🥉');
+        $newEmoji = $newRank == 'ゴールド' ? '🥇' : ($newRank == 'シルバー' ? '🥈' : '🥉');
+        
+        $message = "🎉 ランクアップ！\n\n";
+        $message .= "おめでとうございます！\n";
+        $message .= "{$oldEmoji} {$oldRank} → {$newEmoji} {$newRank}\n\n";
+        $message .= "現在のマイル: {$currentMiles}マイル\n";
+        
+        if ($newRank == 'ゴールド') {
+            $message .= "最高ランク達成です！";
+        } else {
+            $nextRank = $newRank == 'シルバー' ? 'ゴールド' : 'シルバー';
+            $nextMiles = $newRank == 'シルバー' ? 500 : 200;
+            $remaining = $nextMiles - $currentMiles;
+            $message .= "\n次は {$nextRank} を目指そう！\n";
+            $message .= "あと {$remaining} マイル";
+        }
+        
+        // Slack DM送信
+        $slackService->sendDM($user->slack_id, $message);
     }
 }
