@@ -2,7 +2,7 @@
 
 @section('content')
 <div class="max-w-5xl mx-auto py-8">
-    <h1 class="text-2xl font-bold mb-6">🎁 取得履歴</h1>
+    <h1 class="text-2xl font-bold mb-6">🎁 報酬履歴</h1>
 
     <div class="space-y-4">
         @forelse($histories as $history)
