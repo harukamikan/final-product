@@ -20,12 +20,11 @@ COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 # 作業ディレクトリを設定
 WORKDIR /app
 
-# Composerの依存関係をインストール
-COPY composer.json composer.lock ./
-RUN composer install --optimize-autoloader --no-dev --no-interaction
-
-# アプリケーションファイルをコピー
+# アプリケーションファイルを先にコピー（★ここを変更）
 COPY . .
+
+# Composerの依存関係をインストール
+RUN composer install --optimize-autoloader --no-dev --no-interaction
 
 # npmパッケージをインストールしてビルド
 RUN npm install && npm run build
