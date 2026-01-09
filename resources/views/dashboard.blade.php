@@ -237,90 +237,51 @@
         @if($recentActivities->count())
         <div class="space-y-4">
             @foreach($recentActivities as $activity)
-            <div class="border border-slate-200 rounded-xl p-5 hover:shadow-md transition">
-                <div class="flex justify-between gap-4">
+            <div class="border border-slate-200 rounded-xl p-5">
+                <div class="flex justify-between">
 
-                    {{-- 左側：内容 --}}
                     <div>
-                        @if($activity['type'] === 'goal')
-                            {{-- 活動記録 --}}
-                            <p class="text-sm font-semibold text-indigo-600">
-                                {{ $activity['data']->category }}
-                            </p>
-                            <p class="text-slate-800 font-medium mt-1">
-                                {{ $activity['data']->title }}
-                            </p>
-                            @if($activity['data']->deadline)
-                            <p class="text-sm text-slate-500 mt-1">
-                                期限：{{ $activity['data']->deadline->format('Y-m-d') }}
-                            </p>
-                            @endif
-                        @else
-                            {{-- ミッション達成 --}}
-                            <p class="text-sm font-semibold text-green-600">
-                                🎯 ミッション達成
-                            </p>
-                            <p class="text-slate-800 font-medium mt-1">
-                                {{ $activity['data']->mission->title }}
-                            </p>
-                            <p class="text-sm text-slate-500 mt-1">
-                                +{{ $activity['data']->mission->reward_miles }} マイル獲得
-                            </p>
+                        @if($activity->type === 'goal')
+                        <p class="text-sm font-semibold text-indigo-600">🎯 活動記録</p>
+                        @elseif($activity->type === 'mission')
+                        <p class="text-sm font-semibold text-green-600">🎉 ミッション達成</p>
                         @endif
+
+                        <p class="text-slate-800 font-medium mt-1">
+                            {{ $activity->title }}
+                        </p>
                     </div>
 
-                    {{-- 右側：操作 --}}
-                    @if($activity['type'] === 'goal')
-                    <div class="flex items-start gap-3">
-
-                        {{-- 編集 --}}
-                        <a href="{{ route('goals.edit', $activity['data']) }}"
-                            class="text-sm font-semibold text-indigo-600 hover:text-indigo-800">
-                            編集
-                        </a>
-
-                        {{-- 削除 --}}
-                        <form action="{{ route('goals.destroy', $activity['data']) }}"
-                            method="POST"
-                            onsubmit="return confirm('この活動を削除します。よろしいですか？');">
-                            @csrf
-                            @method('DELETE')
-                            <button
-                                type="submit"
-                                class="text-sm font-semibold text-red-500 hover:text-red-700">
-                                削除
-                            </button>
-                        </form>
-
-                    </div>
+                    @if($activity->type === 'goal' && $activity->url)
+                    <a href="{{ $activity->url }}"
+                        class="text-sm font-semibold text-indigo-600 hover:text-indigo-800">
+                        編集
+                    </a>
                     @endif
                 </div>
             </div>
             @endforeach
-
-        </div>
-
-        <div class="mt-6 text-center">
-            <a href="{{ route('activities.index') }}"
-                class="inline-block px-4 py-2 rounded-lg
-                              border border-indigo-600 text-indigo-600
-                              font-semibold text-sm
-                              hover:bg-indigo-600 hover:text-white transition">
-                すべての活動を見る
-            </a>
-        </div>
-        @else
-        <div class="text-center py-10 text-slate-500">
-            <p class="mb-4">まだ目標が登録されていません</p>
-            <a href="{{ route('goals.create') }}"
-                class="font-semibold text-indigo-600 hover:text-indigo-800">
-                最初の目標を作成
-            </a>
         </div>
         @endif
     </div>
 
-</div>
+    <div class="mt-6 text-center">
+        <a href="{{ route('activities.index') }}"
+            class="inline-block px-4 py-2 rounded-lg
+                              border border-indigo-600 text-indigo-600
+                              font-semibold text-sm
+                              hover:bg-indigo-600 hover:text-white transition">
+            すべての活動を見る
+        </a>
+    </div>
+
+    <div class="text-center py-10 text-slate-500">
+        <p class="mb-4">まだ目標が登録されていません</p>
+        <a href="{{ route('goals.create') }}"
+            class="font-semibold text-indigo-600 hover:text-indigo-800">
+            最初の目標を作成
+        </a>
+    </div>
 </div>
 
 {{-- Chart.js でグラフ表示 --}}

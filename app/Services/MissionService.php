@@ -8,6 +8,7 @@ use App\Models\UserMission;
 use App\Models\MileHistory;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
+use App\Models\Activity;
 use App\Helpers\RankHelper;
 
 class MissionService
@@ -47,7 +48,7 @@ class MissionService
 
         foreach ($missions as $mission) {
             $result = $this->progressMission($user, $mission, $payload);
-            
+
             // 最後に処理したミッションの情報を保持
             if ($result['earned_miles'] > 0 || $result['progress']['current'] > 0) {
                 $achievementData = $result;
@@ -82,7 +83,7 @@ class MissionService
         if ($userMission->isCompleted() && !$mission->repeatable) {
             // ただし proof_url だけは更新される可能性があるので save しておく
             $userMission->save();
-            
+
             return [
                 'earned_miles' => 0,
                 'mission_completed' => false,
@@ -102,7 +103,7 @@ class MissionService
         // まだ達成していない or すでに completed_at が入っている場合 → 進捗だけ保存
         if ($userMission->progress_count < $mission->required_count || $userMission->isCompleted()) {
             $userMission->save();
-            
+
             return [
                 'earned_miles' => 0,
                 'mission_completed' => false,
@@ -145,17 +146,27 @@ class MissionService
             $user->increment('completed_missions');
         });
 
+        // Activity を記録する
+        Activity::create([
+            'user_id'    => $user->id,
+            'company_id' => $user->company_id,
+            'type'       => 'mission',
+            'title'      => 'ミッション達成：' . $mission->title,
+            'date'       => now(),
+            'url'        => $payload['url'] ?? null,
+        ]);
+
         // 達成後のマイル数
         $currentMiles = $previousMiles + $earned;
-        
+
         // ランク情報を取得
         $rankInfo = RankHelper::getRankInfo($currentMiles, $previousMiles);
-        
+
         // ランクアップしたら Slack 通知
         if ($rankInfo['rank_up'] && $user->slack_id) {
             $this->sendRankUpNotification($user, $rankInfo);
         }
-        
+
         // 次のアクションを取得
         $nextAction = $this->getNextAction($user);
 
@@ -195,8 +206,8 @@ class MissionService
         // ミッションタイプに応じたURLを生成
         $url = match ($nextMission->key) {
             'write_tech_blog' => route('missions.blog-url.form'),
-            'event_speaker', 'event_organizer', 'acquire_certificate' 
-                => route('missions.form.create', ['mission' => $nextMission->id]),
+            'event_speaker', 'event_organizer', 'acquire_certificate'
+            => route('missions.form.create', ['mission' => $nextMission->id]),
             default => route('missions.index'),
         };
 
@@ -223,19 +234,19 @@ class MissionService
     protected function sendRankUpNotification(User $user, array $rankInfo): void
     {
         $slackService = app(SlackService::class);
-        
+
         $oldRank = $rankInfo['old_rank'];
         $newRank = $rankInfo['new_rank'];
         $currentMiles = $rankInfo['current_miles'];
-        
+
         $oldEmoji = $oldRank == 'ゴールド' ? '🥇' : ($oldRank == 'シルバー' ? '🥈' : '🥉');
         $newEmoji = $newRank == 'ゴールド' ? '🥇' : ($newRank == 'シルバー' ? '🥈' : '🥉');
-        
+
         $message = "🎉 ランクアップ！\n\n";
         $message .= "おめでとうございます！\n";
         $message .= "{$oldEmoji} {$oldRank} → {$newEmoji} {$newRank}\n\n";
         $message .= "現在のマイル: {$currentMiles}マイル\n";
-        
+
         if ($newRank == 'ゴールド') {
             $message .= "最高ランク達成です！";
         } else {
@@ -245,7 +256,7 @@ class MissionService
             $message .= "\n次は {$nextRank} を目指そう！\n";
             $message .= "あと {$remaining} マイル";
         }
-        
+
         // Slack DM送信
         $slackService->sendDM($user->slack_id, $message);
     }
