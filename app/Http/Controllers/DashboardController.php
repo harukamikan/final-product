@@ -11,6 +11,7 @@ use App\Models\RewardSurvey;
 use App\Models\RewardSurveyAnswer;
 use App\Models\RewardDistribution;
 use App\Models\UserReward;
+use App\Models\Activity;
 use Illuminate\Support\Facades\Auth;
 
 class DashboardController extends Controller
@@ -46,33 +47,11 @@ class DashboardController extends Controller
         | 最近の活動（Goal + Mission）
         |--------------------------------------------------------------------------
         */
-        $recentGoals = Goal::where('user_id', $userId)
+        //最新3件
+        $recentActivities = Activity::where('user_id', $userId)
             ->latest()
-            ->get()
-            ->map(function ($goal) {
-                return [
-                    'type' => 'goal',
-                    'data' => $goal,
-                    'created_at' => $goal->created_at,
-                ];
-            });
-
-        $recentMissions = UserMission::where('user_id', $userId)
-            ->with('mission')
-            ->latest()
-            ->get()
-            ->map(function ($userMission) {
-                return [
-                    'type' => 'mission',
-                    'data' => $userMission,
-                    'created_at' => $userMission->created_at,
-                ];
-            });
-
-        // 両方を混ぜて最新3件
-        $recentActivities = $recentGoals->concat($recentMissions)
-            ->sortByDesc('created_at')
-            ->take(3);
+            ->take(3)
+            ->get();
 
         $thisMonthGoals = Goal::where('user_id', $userId)
             ->whereMonth('created_at', now()->month)
@@ -104,7 +83,7 @@ class DashboardController extends Controller
             ->get()
             ->pluck('count', 'date');
 
-       // 7日分のラベルとデータを準備（Goal + Mission）
+        // 7日分のラベルとデータを準備（Goal + Mission）
         $weeklyLabels = [];
         $weeklyData = [];
         for ($i = 6; $i >= 0; $i--) {

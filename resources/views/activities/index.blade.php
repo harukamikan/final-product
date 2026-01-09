@@ -11,54 +11,52 @@
 
         @if($activities->count())
         <div class="space-y-4">
-            @foreach($activities as $goal)
-            <div class="bg-white border border-slate-200 rounded-xl p-5 hover:shadow-md transition">
-                <div class="flex justify-between gap-4">
+            @foreach($activities as $activity)
+<div class="bg-white border border-slate-200 rounded-xl p-5">
+    <div class="flex justify-between gap-4">
 
-                    {{-- 左：内容 --}}
-                    <div>
-                        <p class="text-sm font-semibold text-indigo-600">
-                            {{ $goal->category }}
-                        </p>
+        {{-- 左：内容 --}}
+        <div>
+            @if($activity['type'] === 'mission')
+                <p class="text-sm font-semibold text-green-600">
+                    🎯 ミッション達成：{{ $activity['data']->mission->title }}
+                </p>
+            @else
+                <p class="text-sm font-semibold text-indigo-600">
+                    目標を追加しました：{{ $activity['data']->title }}
+                </p>
+            @endif
 
-                        <p class="text-slate-800 font-medium mt-1">
-                            {{ $goal->title }}
-                        </p>
+            <p class="text-xs text-slate-400 mt-1">
+                作成日：{{ $activity['created_at']->format('Y-m-d') }}
+            </p>
+        </div>
 
-                        @if($goal->deadline)
-                        <p class="text-sm text-slate-500 mt-1">
-                            期限：{{ $goal->deadline->format('Y-m-d') }}
-                        </p>
-                        @endif
+        {{-- 右：操作（goal のみ） --}}
+        @if($activity['type'] === 'goal')
+        <div class="flex items-center gap-3">
+            <a href="{{ route('goals.edit', $activity['data']->id) }}"
+               class="text-sm font-semibold text-indigo-600 hover:text-indigo-800">
+                編集
+            </a>
 
-                        <p class="text-xs text-slate-400 mt-2">
-                            作成日：{{ $goal->created_at->format('Y-m-d') }}
-                        </p>
-                    </div>
+            <form action="{{ route('goals.destroy', $activity['data']->id) }}"
+                  method="POST"
+                  onsubmit="return confirm('この活動を削除しますか？');">
+                @csrf
+                @method('DELETE')
+                <button type="submit"
+                        class="text-sm font-semibold text-red-500 hover:text-red-700">
+                    削除
+                </button>
+            </form>
+        </div>
+        @endif
 
-                    {{-- 右：操作 --}}
-                    <div class="flex items-start gap-3">
-                        <a href="{{ route('goals.edit', $goal) }}"
-                            class="text-sm font-semibold text-indigo-600 hover:text-indigo-800">
-                            編集
-                        </a>
+    </div>
+</div>
+@endforeach
 
-                        <form action="{{ route('goals.destroy', $goal) }}"
-                            method="POST"
-                            onsubmit="return confirm('この活動を削除します。よろしいですか？');">
-                            @csrf
-                            @method('DELETE')
-                            <button
-                                type="submit"
-                                class="text-sm font-semibold text-red-500 hover:text-red-700">
-                                削除
-                            </button>
-                        </form>
-                    </div>
-
-                </div>
-            </div>
-            @endforeach
         </div>
 
         <div class="mt-6">
