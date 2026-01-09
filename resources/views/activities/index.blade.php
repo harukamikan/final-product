@@ -12,50 +12,41 @@
         @if($activities->count())
         <div class="space-y-4">
             @foreach($activities as $activity)
-<div class="bg-white border border-slate-200 rounded-xl p-5">
-    <div class="flex justify-between gap-4">
+            <div class="bg-white rounded-2xl shadow-md p-6">
+                <div class="flex justify-between items-start gap-4">
 
-        {{-- 左：内容 --}}
-        <div>
-            @if($activity['type'] === 'mission')
-                <p class="text-sm font-semibold text-green-600">
-                    🎯 ミッション達成：{{ $activity['data']->mission->title }}
-                </p>
-            @else
-                <p class="text-sm font-semibold text-indigo-600">
-                    目標を追加しました：{{ $activity['data']->title }}
-                </p>
-            @endif
+                    {{-- 左：内容 --}}
+                    <div>
+                        @if($activity->type === 'goal')
+                        <p class="text-sm font-semibold text-indigo-600">
+                            🎯 活動記録
+                        </p>
+                        @else
+                        <p class="text-sm font-semibold text-green-600">
+                            🎉 ミッション達成
+                        </p>
+                        @endif
 
-            <p class="text-xs text-slate-400 mt-1">
-                作成日：{{ $activity['created_at']->format('Y-m-d') }}
-            </p>
-        </div>
+                        <p class="text-slate-800 font-medium mt-1">
+                            {{ $activity->title }}
+                        </p>
 
-        {{-- 右：操作（goal のみ） --}}
-        @if($activity['type'] === 'goal')
-        <div class="flex items-center gap-3">
-            <a href="{{ route('goals.edit', $activity['data']->id) }}"
-               class="text-sm font-semibold text-indigo-600 hover:text-indigo-800">
-                編集
-            </a>
+                        <p class="text-xs text-slate-400 mt-2">
+                            作成日時：{{ $activity->created_at->format('Y-m-d H:i') }}
+                        </p>
+                    </div>
 
-            <form action="{{ route('goals.destroy', $activity['data']->id) }}"
-                  method="POST"
-                  onsubmit="return confirm('この活動を削除しますか？');">
-                @csrf
-                @method('DELETE')
-                <button type="submit"
-                        class="text-sm font-semibold text-red-500 hover:text-red-700">
-                    削除
-                </button>
-            </form>
-        </div>
-        @endif
+                    {{-- 右：操作（goal のみ） --}}
+                    @if($activity->type === 'goal' && $activity->url)
+                    <a href="{{ $activity->url }}"
+                        class="text-sm font-semibold text-indigo-600 hover:text-indigo-800">
+                        編集
+                    </a>
+                    @endif
 
-    </div>
-</div>
-@endforeach
+                </div>
+            </div>
+            @endforeach
 
         </div>
 

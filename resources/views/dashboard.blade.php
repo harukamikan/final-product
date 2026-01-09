@@ -250,6 +250,10 @@
                         <p class="text-slate-800 font-medium mt-1">
                             {{ $activity->title }}
                         </p>
+
+                        <p class="text-xs text-slate-400 mt-1">
+                            作成日時：{{ $activity->created_at->format('Y-m-d H:i') }}
+                        </p>
                     </div>
 
                     @if($activity->type === 'goal' && $activity->url)
@@ -291,10 +295,14 @@
     new Chart(ctx, {
         type: 'bar',
         data: {
-            labels: {!!json_encode($weeklyLabels) !!},
+            labels: {
+                !!json_encode($weeklyLabels) !!
+            },
             datasets: [{
                 label: '活動件数',
-                data: {!!json_encode($weeklyData) !!},
+                data: {
+                    !!json_encode($weeklyData) !!
+                },
                 backgroundColor: 'rgba(79, 70, 229, 0.8)',
                 borderColor: 'rgba(79, 70, 229, 1)',
                 borderWidth: 1
