@@ -20,7 +20,7 @@ COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 # 作業ディレクトリを設定
 WORKDIR /app
 
-# アプリケーションファイルを先にコピー（★ここを変更）
+# アプリケーションファイルを先にコピー
 COPY . .
 
 # Composerの依存関係をインストール
@@ -29,11 +29,8 @@ RUN composer install --optimize-autoloader --no-dev --no-interaction
 # npmパッケージをインストールしてビルド
 RUN npm install && npm run build
 
-# 設定をキャッシュ
-RUN php artisan config:cache
-
 # ポートを公開
 EXPOSE 8080
 
-# アプリケーションを起動
-CMD php artisan serve --host=0.0.0.0 --port=${PORT:-8080}
+# アプリケーションを起動（config:cache を起動時に実行）
+CMD php artisan config:cache && php artisan serve --host=0.0.0.0 --port=${PORT:-8080}
