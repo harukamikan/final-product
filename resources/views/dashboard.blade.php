@@ -278,14 +278,6 @@
             すべての活動を見る
         </a>
     </div>
-
-    <div class="text-center py-10 text-slate-500">
-        <p class="mb-4">まだ目標が登録されていません</p>
-        <a href="{{ route('goals.create') }}"
-            class="font-semibold text-indigo-600 hover:text-indigo-800">
-            最初の目標を作成
-        </a>
-    </div>
 </div>
 
 {{-- Chart.js でグラフ表示 --}}
