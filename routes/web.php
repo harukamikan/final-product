@@ -27,6 +27,10 @@ use App\Http\Controllers\{
     DebugController,
     RewardSurveyController,
     UserRewardController,
+    TimelineController,
+    EventHostingController,
+    EventSpeakingController,
+    CertificationController,
 };
 
 use App\Http\Controllers\Admin\{
@@ -247,11 +251,35 @@ Route::middleware(['auth', 'company'])->group(function () {
     Route::post('/missions/{mission}/complete', [UserMissionController::class, 'complete'])
         ->name('missions.complete');
 
+
     /*
-    | Qiita
+    | Timeline (統合タイムライン)
     */
-    Route::get('/qiita', [QiitaArticleController::class, 'index'])
-        ->name('qiita.index');
+    Route::get('/timeline', [TimelineController::class, 'index'])
+        ->name('timeline.index');
+
+    // イベント企画・開催
+    Route::get('/events/hosting/create', [EventHostingController::class, 'create'])
+        ->name('events.hosting.create');
+    Route::post('/events/hosting', [EventHostingController::class, 'store'])
+        ->name('events.hosting.store');
+
+    // イベント登壇
+    Route::get('/events/speaking/create', [EventSpeakingController::class, 'create'])
+        ->name('events.speaking.create');
+    Route::post('/events/speaking', [EventSpeakingController::class, 'store'])
+        ->name('events.speaking.store');
+
+    // 資格取得
+    Route::get('/certifications/create', [CertificationController::class, 'create'])
+        ->name('certifications.create');
+    Route::post('/certifications', [CertificationController::class, 'store'])
+        ->name('certifications.store');
+
+    /*
+    | Qiita（後方互換性のためリダイレクト）
+    */
+    Route::redirect('/qiita', '/timeline?type=qiita');
 
     /*
     | 報酬履歴

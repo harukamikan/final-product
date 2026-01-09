@@ -37,7 +37,17 @@ class MissionController extends Controller
 
         $user    = $request->user();
         $url     = $request->input('url');
-        $mission = Mission::where('key', 'write_tech_blog')->firstOrFail();
+        $mission = Mission::where('key', 'write_tech_blog')->first();
+        
+        // ミッションが存在しない場合のエラーハンドリング
+        if (!$mission) {
+            \Log::error('Mission not found', ['key' => 'write_tech_blog', 'user_id' => $user->id]);
+            return back()
+                ->withInput()
+                ->withErrors([
+                    'url' => '技術ブログミッションが見つかりません。管理者に連絡してください。',
+                ]);
+        }
 
         // 1) Qiita API から記事情報を取得
         try {
@@ -104,7 +114,33 @@ class MissionController extends Controller
             ]
         );
 
-        // 5) プレビュー表示
+        // 5) 統合タイムラインにも保存（timeline_eventsテーブル）
+        \App\Models\TimelineEvent::updateOrCreate(
+            [
+                'user_id' => $user->id,
+                'event_type' => 'qiita',
+                'payload->item_id' => $qiita['item_id'], // JSONカラム内のitem_idで一意性を確保
+            ],
+            [
+                'company_id' => $user->company_id,
+                'mission_id' => $mission->id,
+                'occurred_at' => !empty($qiita['created_at'])
+                    ? Carbon::parse($qiita['created_at'])
+                    : now(),
+                'payload' => [
+                    'item_id' => $qiita['item_id'],
+                    'title' => $qiita['title'] ?? '',
+                    'body' => $qiita['body'] ?? '',
+                    'summary' => $summary,
+                    'tags' => $qiita['tags'] ?? [],
+                    'likes_count' => $qiita['likes_count'] ?? 0,
+                    'created_at' => $qiita['created_at'] ?? null,
+                    'url' => $qiita['url'] ?? $url,
+                ],
+            ]
+        );
+
+        // 6) プレビュー表示
         return view('missions.blog-preview', [
             'mission' => $mission,
             'qiita'   => $qiita,

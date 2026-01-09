@@ -21,14 +21,17 @@ class RankHelper
     {
         $currentRank = self::calculateRank($currentMiles);
         $previousRank = self::calculateRank($previousMiles);
-        $rankUp = $currentRank !== $previousRank;
+        $rankChanged = $currentRank !== $previousRank;
 
         $nextRankInfo = self::getNextRankInfo($currentRank, $currentMiles);
 
         return [
             'current_rank' => $currentRank,
             'previous_rank' => $previousRank,
-            'rank_up' => $rankUp,
+            'rank_up' => $rankChanged,
+            'rank_changed' => $rankChanged, // MissionService用
+            'old_rank' => $previousRank,    // MissionService通知用
+            'new_rank' => $currentRank,     // MissionService通知用
             'next_rank' => $nextRankInfo['next_rank'],
             'miles_to_next' => $nextRankInfo['miles_to_next'],
             'current_miles' => $currentMiles,

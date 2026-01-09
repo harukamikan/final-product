@@ -6,7 +6,7 @@
 
 <div class="max-w-3xl mx-auto px-4 py-8 space-y-6">
 
-    {{-- 完了メッセージ & マイル --}}
+{{-- 完了メッセージ & マイル --}}
     <div class="rounded-3xl bg-emerald-50 border border-emerald-100 px-5 py-4 flex justify-between items-center">
         <div>
             <p class="text-sm text-emerald-700 font-medium">
@@ -16,6 +16,14 @@
                 <p class="text-xs text-emerald-700 mt-1">
                     このミッションで <span class="font-bold">{{ $achievementData['earned_miles'] }} mile</span> を獲得しました。
                 </p>
+            @endif
+            
+            {{-- デバッグ情報（開発時のみ） --}}
+            @if(config('app.debug'))
+                <details class="mt-2 text-xs text-gray-600">
+                    <summary class="cursor-pointer hover:text-indigo-600">デバッグ情報を表示</summary>
+                    <pre class="mt-1 p-2 bg-gray-100 rounded overflow-auto">{{ json_encode($achievementData, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE) }}</pre>
+                </details>
             @endif
         </div>
         <div class="text-3xl">📝</div>
