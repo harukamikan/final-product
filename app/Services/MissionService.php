@@ -152,7 +152,7 @@ class MissionService
         $rankInfo = RankHelper::getRankInfo($currentMiles, $previousMiles);
         
         // ランクアップしたら Slack 通知
-        if ($rankInfo['rank_changed'] && $user->slack_id) {
+        if ($rankInfo['rank_up'] && $user->slack_id) {
             $this->sendRankUpNotification($user, $rankInfo);
         }
         
