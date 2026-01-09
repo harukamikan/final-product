@@ -73,7 +73,7 @@ class MissionListController extends Controller
 
         $earnedThisTime = (int) session('earned_miles', 0);
 
-        return view('missions.user_index', [
+        return view('missions.personal', [
             'missions'       => $missions,
             'totalMiles'     => $totalMiles,
             'earnedThisTime' => $earnedThisTime,
