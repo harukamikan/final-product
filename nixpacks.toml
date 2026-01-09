@@ -1,0 +1,17 @@
+[phases.setup]
+nixPkgs = ["php83", "php83Extensions.mbstring", "php83Extensions.pdo", "php83Extensions.pdo_mysql", "php83Packages.composer", "nodejs"]
+
+[phases.install]
+cmds = [
+    "composer install --no-dev --optimize-autoloader --no-scripts --ignore-platform-reqs",
+    "npm ci"
+]
+
+[phases.build]
+cmds = [
+    "npm run build",
+    "php artisan config:cache"
+]
+
+[start]
+cmd = "php artisan migrate --force && php artisan serve --host=0.0.0.0 --port=${PORT:-8080}"
