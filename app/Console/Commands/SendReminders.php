@@ -94,7 +94,7 @@ class SendReminders extends Command
         
         // 進行中のミッション取得
         $activeMissions = \App\Models\UserMission::where('user_id', $user->id)
-            ->where('is_completed', false)
+            ->where('completed_at')
             ->with('mission')
             ->get();
         
