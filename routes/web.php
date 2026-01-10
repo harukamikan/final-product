@@ -265,6 +265,9 @@ Route::middleware(['auth', 'company'])->group(function () {
     Route::get('/qiita', [QiitaArticleController::class, 'index'])
         ->name('qiita.index');
 
+    // 統合タイムライン
+    Route::get('/timeline', [App\Http\Controllers\TimelineController::class, 'index'])->name('timeline.index');
+
     /*
     | 報酬履歴
     */

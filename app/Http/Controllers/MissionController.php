@@ -85,12 +85,13 @@ class MissionController extends Controller
         );
 
         // 4) タイムライン用に Qiita 記事情報を保存
-        QiitaArticle::updateOrCreate(
+        $qiitaArticle = QiitaArticle::updateOrCreate(
             [
                 'user_id' => $user->id,
                 'item_id' => $qiita['item_id'],   // QiitaServiceで返している item_id
             ],
             [
+                'company_id'  => $user->company_id,
                 'mission_id'  => $mission->id,
                 'title'       => $qiita['title'] ?? '',
                 'body'        => $qiita['body'] ?? '',
@@ -104,7 +105,11 @@ class MissionController extends Controller
             ]
         );
 
-        // 5) プレビュー表示
+        // 5) タイムラインイベントを作成
+        $timelineService = app(\App\Services\TimelineService::class);
+        $timelineService->createQiitaEvent($user, $qiitaArticle);
+
+        // 6) プレビュー表示
         return view('missions.blog-preview', [
             'mission' => $mission,
             'qiita'   => $qiita,
