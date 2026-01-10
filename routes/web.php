@@ -132,7 +132,7 @@ Route::middleware(['auth', 'company'])->group(function () {
     /*
     | Notifications
     */
-    Route::post('/notifications/mark-all-read', function() {
+    Route::post('/notifications/mark-all-read', function () {
         \App\Models\Notification::where('user_id', auth()->id())
             ->where('is_read', false)
             ->update(['is_read' => true]);
@@ -407,6 +407,7 @@ Route::middleware(['auth', 'company'])
         // 🧪 テスト用マイル付与
         Route::post('/add-miles', [DebugController::class, 'addMiles'])
             ->name('debug.add-miles');
+
+        Route::post('/add-scratch-points', [DebugController::class, 'addScratchPoints'])
+            ->name('debug.add-scratch-points');
     });
-
-
