@@ -57,8 +57,18 @@ class SendReminders extends Command
             ->get();
         
         foreach ($users as $user) {
-            // ユーザーごとの設定曜日・時間をチェック
-            if ($now->dayOfWeek == $user->reminder_day_of_week && $now->hour == $user->reminder_hour) {
+            $shouldSend = false;
+            
+            if ($user->reminder_frequency === 'daily') {
+                // 毎日、設定した時間に送る
+                $shouldSend = ($now->hour == $user->reminder_hour);
+            } else {
+                // 選択した曜日だけ
+                $reminderDays = json_decode($user->reminder_days, true) ?? [];
+                $shouldSend = in_array($now->dayOfWeek, $reminderDays) && ($now->hour == $user->reminder_hour);
+            }
+            
+            if ($shouldSend) {
                 $this->sendWeeklyReminder($user);
             }
         }

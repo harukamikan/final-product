@@ -63,11 +63,17 @@ class ProfileController extends Controller
         if ($request->filled('reminder_days_before')) {
             $user->reminder_days_before = $request->reminder_days_before;
         }
-        if ($request->filled('reminder_day_of_week')) {
-            $user->reminder_day_of_week = $request->reminder_day_of_week;
-        }
         if ($request->filled('reminder_hour')) {
             $user->reminder_hour = $request->reminder_hour;
+        }
+        // 週次リマインドの頻度と曜日
+        if ($request->filled('reminder_frequency')) {
+            $user->reminder_frequency = $request->reminder_frequency;
+        }
+        if ($request->has('reminder_days')) {
+            $user->reminder_days = json_encode($request->reminder_days);
+        } else {
+            $user->reminder_days = null;
         }
 
         $user->save();

@@ -191,43 +191,79 @@
                 </div>
 
                 <!-- 週次リマインドの設定 -->
-                <div class="pt-4 border-t">
-                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                <div class="pt-4 border-t" x-data="{ 
+                    frequency: '{{ old('reminder_frequency', $user->reminder_frequency ?? 'weekly') }}',
+                    selectedDays: {{ json_encode(old('reminder_days', json_decode($user->reminder_days ?? '[]', true))) }}
+                }">
+                    <label class="block text-sm font-medium text-gray-700 mb-3">
                         週次リマインド
                     </label>
                     
-                    <div class="flex gap-4 items-center">
-                        <div>
-                            <label class="block text-xs text-gray-500 mb-1">曜日</label>
-                            <select 
-                                name="reminder_day_of_week" 
-                                class="rounded-md border-gray-300 text-sm">
-                                <option value="0" {{ old('reminder_day_of_week', $user->reminder_day_of_week) == 0 ? 'selected' : '' }}>日曜日</option>
-                                <option value="1" {{ old('reminder_day_of_week', $user->reminder_day_of_week) == 1 ? 'selected' : '' }}>月曜日</option>
-                                <option value="2" {{ old('reminder_day_of_week', $user->reminder_day_of_week) == 2 ? 'selected' : '' }}>火曜日</option>
-                                <option value="3" {{ old('reminder_day_of_week', $user->reminder_day_of_week) == 3 ? 'selected' : '' }}>水曜日</option>
-                                <option value="4" {{ old('reminder_day_of_week', $user->reminder_day_of_week) == 4 ? 'selected' : '' }}>木曜日</option>
-                                <option value="5" {{ old('reminder_day_of_week', $user->reminder_day_of_week) == 5 ? 'selected' : '' }}>金曜日</option>
-                                <option value="6" {{ old('reminder_day_of_week', $user->reminder_day_of_week) == 6 ? 'selected' : '' }}>土曜日</option>
-                            </select>
-                        </div>
-
-                        <div>
-                            <label class="block text-xs text-gray-500 mb-1">時間</label>
-                            <select 
-                                name="reminder_hour" 
-                                class="rounded-md border-gray-300 text-sm">
-                                @for($i = 0; $i < 24; $i++)
-                                    <option value="{{ $i }}" {{ old('reminder_hour', $user->reminder_hour) == $i ? 'selected' : '' }}>
-                                        {{ sprintf('%02d:00', $i) }}
-                                    </option>
-                                @endfor
-                            </select>
+                    <!-- 頻度選択 -->
+                    <div class="mb-4">
+                        <label class="block text-xs text-gray-500 mb-2">頻度</label>
+                        <div class="flex gap-4">
+                            <label class="flex items-center gap-2">
+                                <input 
+                                    type="radio" 
+                                    name="reminder_frequency" 
+                                    value="daily"
+                                    x-model="frequency"
+                                    class="text-indigo-600">
+                                <span class="text-sm">毎日</span>
+                            </label>
+                            <label class="flex items-center gap-2">
+                                <input 
+                                    type="radio" 
+                                    name="reminder_frequency" 
+                                    value="weekly"
+                                    x-model="frequency"
+                                    class="text-indigo-600">
+                                <span class="text-sm">特定の曜日</span>
+                            </label>
                         </div>
                     </div>
                     
-                    <p class="mt-2 text-xs text-gray-500">
-                        毎週指定した曜日・時間に進捗確認の通知を受け取ります
+                    <!-- 曜日選択（weekly の時だけ表示） -->
+                    <div x-show="frequency === 'weekly'" class="mb-4">
+                        <label class="block text-xs text-gray-500 mb-2">曜日を選択</label>
+                        <div class="flex flex-wrap gap-2">
+                            @php
+                                $days = ['日', '月', '火', '水', '木', '金', '土'];
+                            @endphp
+                            @foreach($days as $index => $day)
+                                <label class="flex items-center gap-1">
+                                    <input 
+                                        type="checkbox" 
+                                        name="reminder_days[]" 
+                                        value="{{ $index }}"
+                                        x-model="selectedDays"
+                                        class="rounded text-indigo-600">
+                                    <span class="text-sm">{{ $day }}</span>
+                                </label>
+                            @endforeach
+                        </div>
+                    </div>
+                    
+                    <!-- 時間選択 -->
+                    <div>
+                        <label class="block text-xs text-gray-500 mb-1">時間</label>
+                        <select 
+                            name="reminder_hour" 
+                            class="rounded-md border-gray-300 text-sm">
+                            @for($i = 0; $i < 24; $i++)
+                                <option value="{{ $i }}" {{ old('reminder_hour', $user->reminder_hour) == $i ? 'selected' : '' }}>
+                                    {{ sprintf('%02d:00', $i) }}
+                                </option>
+                            @endfor
+                        </select>
+                    </div>
+                    
+                    <p class="mt-2 text-xs text-gray-500" x-show="frequency === 'daily'">
+                        毎日指定した時間に進捗確認の通知を受け取ります
+                    </p>
+                    <p class="mt-2 text-xs text-gray-500" x-show="frequency === 'weekly'">
+                        選択した曜日の指定した時間に進捗確認の通知を受け取ります
                     </p>
                 </div>
                 
