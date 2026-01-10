@@ -219,14 +219,43 @@
     </div>
 
     {{-- ===== 最近の活動 ===== --}}
-    <div class="bg-white rounded-2xl shadow-md p-6 relative">
+    <div
+        class="bg-white rounded-2xl shadow-md p-6 relative"
+        x-data="{ open: false }">
+
+        {{-- ツールチップ --}}
+        <div
+            x-show="open"
+            x-transition.opacity.scale.95
+            @click.outside="open = false"
+            class="absolute bottom-full right-4 mb-3
+                   px-4 py-2
+                   text-xs text-slate-700
+                   bg-indigo-50
+                   rouded-xl
+                   shadow-lg
+                   border birder-slate-200
+                   whitespace-nowrap
+                   flex items-center gap-1">
+            日々の活動を記録しましょう
+            {{-- 吹き出しの三角 --}}
+            <div
+                class="absolute top-full right-4
+                       w-3 h-3
+                       bg-white border-r border-b border-slate-200
+                       rotate-45 -mt-1">
+            </div>
+    </div>
 
         {{-- ＋ボタン（右上） --}}
         <a href="{{ route('goals.create') }}"
-            class="absolute top-4 right-4
-                      w-10 h-10 flex items-center justify-center
-                      rounded-full bg-indigo-600 text-white text-xl font-bold
-                      hover:bg-indigo-700 transition shadow-md">
+           @mouseenter="open = true"
+           @mouseleave="open = false"
+           @click.prevent="open = !open"
+           class="absolute top-4 right-4
+                  w-10 h-10 flex items-center justify-center
+                  rounded-full bg-indigo-500 text-white text-xl font-bold
+                  hover:bg-indigo-600 active:scale-95 transition shadow-md">
             +
         </a>
 
