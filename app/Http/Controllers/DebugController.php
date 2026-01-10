@@ -18,12 +18,12 @@ class DebugController extends Controller
         MileHistory::create([
             'user_id'    => Auth::id(),
             'company_id' => Auth::user()->company_id,
-            'miles'      => 1000,
+            'miles'      => 100,
             'type'       => 'debug',
             'memo'       => 'テスト用付与',
         ]);
 
-        return back()->with('success', 'テスト用に +1000 マイル付与しました');
+        return back()->with('success', 'テスト用に +100 マイル付与しました');
     }
 
     /**
@@ -36,9 +36,9 @@ class DebugController extends Controller
         /** @var \App\Models\User $user */
         $user = User::findOrFail(Auth::id());
 
-        $user->personal_mission_points += 100;
+        $user->personal_mission_points += 10;
         $user->save();
 
-        return back()->with('success', 'テスト用に +100 スクラッチポイント付与しました');
+        return back()->with('success', 'テスト用に +10 スクラッチポイント付与しました');
     }
 }

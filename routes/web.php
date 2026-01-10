@@ -133,7 +133,7 @@ Route::middleware(['auth', 'company'])->group(function () {
     | Notifications
     */
     Route::post('/notifications/mark-all-read', function () {
-        \App\Models\Notification::where('user_id', auth()->id())
+        \App\Models\Notification::where('user_id', Auth::id())
             ->where('is_read', false)
             ->update(['is_read' => true]);
         return response()->json(['success' => true]);

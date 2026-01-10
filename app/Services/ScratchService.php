@@ -53,13 +53,6 @@ class ScratchService
                 ]);
             }
 
-            // 履歴（reward_id は null）
-            RewardHistory::create([
-                'user_id'   => $user->id,
-                'reward_id' => null,
-                'via'       => 'scratch',
-            ]);
-
             return [
                 'miles' => $miles,
             ];

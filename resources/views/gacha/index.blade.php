@@ -44,7 +44,18 @@
                 type="submit"
                 class="w-full py-2 rounded-xl bg-red-500 text-white font-semibold
                        hover:bg-red-600 transition">
-                🧪 テスト用 +1000 マイル
+                🧪 テスト用 +100 マイル
+            </button>
+        </form>
+
+        {{-- 🧪 開発環境のみ：テスト用スクラッチポイント --}}
+        <form method="POST" action="{{ route('debug.add-scratch-points') }}">
+            @csrf
+            <button
+                type="submit"
+                class="w-full py-2 rounded-xl bg-amber-400 text-white font-semibold
+               hover:bg-amber-500 transition">
+                🧪 テスト用 +10 スクラッチpt
             </button>
         </form>
         @endif
@@ -104,22 +115,22 @@
 
         </div>
 
-{{-- ===== フェードインアニメーション定義 ===== --}}
-<style>
-    @keyframes fadeInUp {
-        from {
-            opacity: 0;
-            transform: translateY(-6px);
-        }
+        {{-- ===== フェードインアニメーション定義 ===== --}}
+        <style>
+            @keyframes fadeInUp {
+                from {
+                    opacity: 0;
+                    transform: translateY(-6px);
+                }
 
-        to {
-            opacity: 1;
-            transform: translateY(0);
-        }
-    }
+                to {
+                    opacity: 1;
+                    transform: translateY(0);
+                }
+            }
 
-    .animate-fade-in {
-        animation: fadeInUp 0.4s ease-out forwards;
-    }
-</style>
-@endsection
+            .animate-fade-in {
+                animation: fadeInUp 0.4s ease-out forwards;
+            }
+        </style>
+        @endsection
