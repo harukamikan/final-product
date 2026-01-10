@@ -119,6 +119,7 @@ class MissionService
 
         // ここに来たら「今ちょうど達成した」
         $earned = (int) $mission->reward_miles;
+       
 
         DB::transaction(function () use ($user, $mission, $userMission, $earned, $payload) {
             // 念のためトランザクション内でも URL を反映
@@ -128,6 +129,10 @@ class MissionService
 
             $userMission->completed_at = Carbon::now();
             $userMission->save();
+             // 個人ミッション（user_id がある）なら、ポイント加算
+            if ($mission->user_id) {
+                $user->increment('personal_mission_points', 1);
+            }
 
             // マイル履歴作成
             MileHistory::create([

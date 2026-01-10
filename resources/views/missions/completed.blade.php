@@ -97,6 +97,17 @@
             'label' => '現在のマイル残高'
         ])
     </div>
+    {{-- ----- スクラッチポイントカード ----- --}}
+    <div class="bg-gradient-to-r from-amber-400 to-amber-500 text-white rounded-3xl p-6 shadow-md">
+        <div class="flex items-center justify-between">
+            <div>
+                <p class="text-sm font-medium opacity-90">スクラッチポイント</p>
+                <p class="text-4xl font-bold mt-2">{{ Auth::user()->personal_mission_points ?? 0 }}</p>
+                <p class="text-xs opacity-75 mt-1">個人ミッション達成で獲得</p>
+            </div>
+            <div class="text-6xl opacity-80">🎟️</div>
+        </div>
+    </div>
 
     {{-- タブ切り替え --}}
     <div class="flex gap-4 text-sm font-medium">
