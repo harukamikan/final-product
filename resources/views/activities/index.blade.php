@@ -2,29 +2,28 @@
 
 @section('content')
 <div class="max-w-5xl mx-auto px-4 py-8 space-y-10"
-    x-data="{ showPast: false}">
+    x-data="{ showActivities: true}">
 
-    {{-- ================= ページタイトル + 折り畳みトグル ================= --}}
+    {{-- ================= ページタイトル + 活動履歴トグル ================= --}}
     <div class="flex items-center justify-between">
         <h1 class="text-2xl font-bold text-slate-800">
-            活動一覧
+            活動履歴
         </h1>
 
         <button
-            @click="showPast = !showPast"
+            @click="showActivities = !showActivities"
             class="flex items-center gap-1
-                text-sm font-semibold
-                text-indigo-600 hover:text-indigo-800
-                transition">
+                   text-sm font-semibold
+                   text-indigo-600 hover:text-indigo-800
+                   transition">
             
             <span>過去の半期目標</span>
             <svg
-                :class="{ 'rotate-180': showPast }"
+                :class="{ 'rotate-180': showActivities }"
                 class="w-4 h-4 transition-transform"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24">
-            
                 <path stroke-linecap="round"
                       stroke-linejoin="round"
                       stroke-width="2"
@@ -33,8 +32,13 @@
         </button>
     </div>
 
-        {{-- ================= 活動履歴 ================= --}}
-    <div class="space-y-6">    
+        {{-- ================= 活動履歴（折りたたみあり） ================= --}}
+    <div 
+        x-show="showActivities"
+        x-transition
+        x-cloak
+        class="space-y-6">
+
         @if($activities->count())
         <div class="space-y-4">
             @foreach($activities as $activity)
@@ -85,12 +89,8 @@
         @endif
     </div>
 
-    {{-- ================= 過去の半期目標（折り畳みトグルあり） ================= --}}
-    <div
-        x-show="showPast"
-        x-transition
-        x-clock
-        class="space-y-6">
+    {{-- ================= 過去の半期目標（常時表示） ================= --}}
+    <div class="space-y-6">
 
         <h2 class="text-xl font-bold text-slate-800">
             📘 過去の半期目標
@@ -133,4 +133,8 @@
     </div>
 
 </div>
+{{-- Alpine x-cloak 対策 --}}
+<style>
+    [x-cloak] { display: none !important; }
+</style>
 @endsection
