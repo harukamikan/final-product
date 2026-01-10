@@ -16,7 +16,7 @@
                    text-sm font-semibold
                    text-indigo-600 hover:text-indigo-800
                    transition">
-            
+
             <span>過去の半期目標</span>
             <svg
                 :class="{ 'rotate-180': showActivities }"
@@ -25,15 +25,15 @@
                 stroke="currentColor"
                 viewBox="0 0 24 24">
                 <path stroke-linecap="round"
-                      stroke-linejoin="round"
-                      stroke-width="2"
-                      d="M19 9l-7 7-7-7" />
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M19 9l-7 7-7-7" />
             </svg>
         </button>
     </div>
 
-        {{-- ================= 活動履歴（折りたたみあり） ================= --}}
-    <div 
+    {{-- ================= 活動履歴（折りたたみあり） ================= --}}
+    <div
         x-show="showActivities"
         x-transition
         x-cloak
@@ -62,7 +62,7 @@
                         </p>
 
                         <p class="text-xs text-slate-400 mt-2">
-                            作成日時：{{ $activity->created_at->format('Y-m-d H:i') }}
+                            活動日：{{ optional($activity->date)->format('Y-m-d') }}
                         </p>
                     </div>
 
@@ -113,28 +113,30 @@
                                  text-xs font-semibold
                                  bg-gray-100 text-gray-600
                                  rounded-full">
-                                過去の半期目標
+                        過去の半期目標
                     </span>
                 </div>
-            
+
                 @if($goal->review)
-                    <p class="text-sm text-slate-600 mt-3">
-                        振り返り:{{ $goal->review}}
-                    </p>
+                <p class="text-sm text-slate-600 mt-3">
+                    振り返り:{{ $goal->review}}
+                </p>
                 @endif
             </div>
             @endforeach
         </div>
-    @else
+        @else
         <div class="bg-white rounded-xl shadow p-6 text-center text-slate-500">
             過去の半期目標はありません
         </div>
-    @endif
+        @endif
     </div>
 
 </div>
 {{-- Alpine x-cloak 対策 --}}
 <style>
-    [x-cloak] { display: none !important; }
+    [x-cloak] {
+        display: none !important;
+    }
 </style>
 @endsection

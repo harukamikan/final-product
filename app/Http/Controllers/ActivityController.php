@@ -22,7 +22,7 @@ class ActivityController extends Controller
             ->update(['is_current' => false]);
         
         $activities = Activity::where('user_id', Auth::id())
-            ->latest()
+            ->orderByDesc('date')
             ->paginate(10);
 
         $pastSemesterGoals = SemesterGoal::where('user_id', Auth::id())

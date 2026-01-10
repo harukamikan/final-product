@@ -49,7 +49,7 @@ class DashboardController extends Controller
         */
         //最新3件
         $recentActivities = Activity::where('user_id', $userId)
-            ->latest()
+            ->orderByDesc('date')
             ->take(3)
             ->get();
 

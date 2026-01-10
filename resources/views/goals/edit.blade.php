@@ -32,11 +32,11 @@
         <div>
             <label class="block font-semibold mb-2">活動日</label>
             <input type="date"
-                   name="deadline"
-                   value="{{ old('deadline', $goal->deadline) }}"
+                   name="activity_date"
+                   value="{{ old('activity_date', optional($activityDate)->format('Y-m-d')) }}"
                    class="w-full border rounded-lg p-3 text-sm sm:text-base"
                    required>
-            @error('deadline')
+            @error('activity_date')
                 <p class="text-sm text-red-500 mt-1">{{ $message }}</p>
             @enderror
         </div>
