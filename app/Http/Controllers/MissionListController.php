@@ -48,31 +48,28 @@ class MissionListController extends Controller
     public function personal(Request $request)
     {
         $user = $request->user();
-
-        // 個人ミッション（user_id が自分）のみ取得
-        $allMissions = Mission::personalOnly($user->id)
+        
+        // PersonalMission テーブルから取得
+        $allMissions = \App\Models\PersonalMission::where('user_id', $user->id)
             ->with(['userMissions' => function ($q) use ($user) {
                 $q->where('user_id', $user->id);
             }])
             ->orderBy('id')
             ->get();
-
+        
         // 未完了のみ
         $missions = $allMissions->filter(function ($mission) {
             $userMission = $mission->userMissions->first();
-
             if (!$userMission) {
                 return true;
             }
-
             return is_null($userMission->completed_at);
         });
-
+        
         $totalMiles = $user->total_miles
             ?? $user->mileHistories()->sum('miles');
-
         $earnedThisTime = (int) session('earned_miles', 0);
-
+        
         return view('missions.personal', [
             'missions'       => $missions,
             'totalMiles'     => $totalMiles,

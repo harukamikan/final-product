@@ -129,7 +129,8 @@ class MissionService
 
             $userMission->completed_at = Carbon::now();
             $userMission->save();
-             // 個人ミッション（user_id がある）なら、ポイント加算
+            
+            // 個人ミッション（user_id がある）なら、ポイント加算
             if ($mission->user_id) {
                 $user->increment('personal_mission_points', 1);
             }
@@ -149,6 +150,14 @@ class MissionService
 
             //達成ミッション数を加算
             $user->increment('completed_missions');
+            
+            // 【新規追加】関連する個人ミッションの進捗も更新
+            if ($userMission->related_personal_mission_id) {
+                $this->updateRelatedPersonalMission(
+                    $user,
+                    $userMission->related_personal_mission_id
+                );
+            }
         });
 
         // Activity を記録する
@@ -264,5 +273,41 @@ class MissionService
 
         // Slack DM送信
         $slackService->sendDM($user->slack_id, $message);
+    }
+    /**
+     * 関連する個人ミッションの進捗を更新
+     */
+    private function updateRelatedPersonalMission(User $user, int $personalMissionId): void
+    {
+        $personalMission = \App\Models\PersonalMission::find($personalMissionId);
+
+        if (!$personalMission) {
+            return;
+        }
+
+        // 個人ミッションの進捗を管理する UserMission レコード
+        $personalUserMission = UserMission::firstOrCreate(
+            [
+                'user_id' => $user->id,
+                'mission_id' => $personalMissionId
+            ],
+            [
+                'progress_count' => 0,
+                'company_id' => $user->company_id
+            ]
+        );
+
+        // 進捗を+1
+        $personalUserMission->progress_count += 1;
+
+        // 達成したか確認
+        if ($personalUserMission->progress_count >= $personalMission->required_count) {
+            $personalUserMission->completed_at = Carbon::now();
+
+            // スクラッチポイント加算
+            $user->increment('personal_mission_points', 1);
+        }
+
+        $personalUserMission->save();
     }
 }

@@ -189,29 +189,51 @@ class GoalAiUploadController extends Controller
                 $successCount++;
             }
 
-            // 2. missions 登録（定量的な目標）
-            if (isset($userData['missions']) && is_array($userData['missions'])) {
-                foreach ($userData['missions'] as $mission) {
-                    $newMission = \App\Models\Mission::create([
-                        'user_id' => $user->id,
-                        'key' => \Illuminate\Support\Str::slug($mission['title'] ?? ''),
-                        'title' => $mission['title'] ?? '',
-                        'description' => "個人目標: " . ($mission['category'] ?? ''),
-                        'trigger_type' => 'manual',
-                        'required_count' => $mission['count'] ?? 1,
-                        'reward_miles' => 0,
-                        'repeatable' => false,
-                    ]);
-                    
-                    // 個人ミッションタグを付与
-                    $personalTag = \App\Models\Tag::where('name', 'personal')->first();
-                    if ($personalTag) {
-                        $newMission->tags()->attach($personalTag->id);
+           // 2. missions 登録（定量的な目標）
+        if (isset($userData['missions']) && is_array($userData['missions'])) {
+            foreach ($userData['missions'] as $mission) {
+                // 個人ミッション作成
+                $newPersonalMission = \App\Models\PersonalMission::create([
+                    'user_id' => $user->id,
+                    'company_id' => $user->company_id,
+                    'key' => \Illuminate\Support\Str::slug($mission['title'] ?? ''),
+                    'title' => $mission['title'] ?? '',
+                    'description' => "個人目標: " . ($mission['category'] ?? ''),
+                    'trigger_type' => 'manual',
+                    'required_count' => $mission['count'] ?? 1,
+                    'reward_miles' => 0,
+                    'repeatable' => false,
+                ]);
+
+                // 【新規追加】対応する企業ミッションを探して紐付け
+                $enterpriseMission = $this->findRelatedEnterpriseMission(
+                    $mission['category'] ?? '',
+                    $mission['title'] ?? ''
+                );
+
+                if ($enterpriseMission) {
+                    // user_missions にこのユーザーの企業ミッション進捗を保存
+                    $userMission = \App\Models\UserMission::firstOrCreate(
+                        [
+                            'user_id' => $user->id,
+                            'mission_id' => $enterpriseMission->id
+                        ],
+                        [
+                            'progress_count' => 0,
+                            'company_id' => $user->company_id,
+                            'related_personal_mission_id' => $newPersonalMission->id
+                        ]
+                    );
+
+                    // 既に存在していた場合も related_personal_mission_id を更新
+                    if (!$userMission->wasRecentlyCreated) {
+                        $userMission->update(['related_personal_mission_id' => $newPersonalMission->id]);
                     }
-                    
-                    $successCount++;
                 }
+
+                $successCount++;
             }
+        }
         }
 
         // セッションをクリア
@@ -253,5 +275,32 @@ class GoalAiUploadController extends Controller
         }
 
         throw new \Exception('Unsupported file type');
+    }
+    /**
+     * カテゴリから対応する企業ミッションを探す
+     */
+    private function findRelatedEnterpriseMission(string $category, string $title): ?\App\Models\Mission
+    {
+        // カテゴリマッピング
+        $categoryMap = [
+            'ブログ' => 'write_tech_blog',
+            'blog' => 'write_tech_blog',
+            '登壇' => 'event_speaker',
+            'event' => 'event_speaker',
+            '資格' => 'acquire_certificate',
+            'certificate' => 'acquire_certificate',
+            'イベント企画' => 'event_organizer',
+            'organizer' => 'event_organizer',
+        ];
+
+        $key = $categoryMap[$category] ?? null;
+
+        if (!$key) {
+            return null;
+        }
+
+        return \App\Models\Mission::where('key', $key)
+            ->whereNull('user_id')
+            ->first();
     }
 }
