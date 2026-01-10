@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Support\Facades\Auth;
 use App\Services\GachaService;
-use App\Models\Reward;
+use App\Services\ScratchService;
 
 class RewardPlayController extends Controller
 {
@@ -15,25 +15,7 @@ class RewardPlayController extends Controller
     {
         $reward = $gacha->draw(
             Auth::id(),
-            Auth::user()->company_id,
-            'gacha'
-        );
-
-        return view('rewards.result', [
-            'reward' => $reward,
-            'via'    => 'gacha',
-        ]);
-    }
-
-    /* =======================
-       スクラッチ実行
-    ======================= */
-    public function scratch(GachaService $gacha)
-    {
-        $reward = $gacha->draw(
-            Auth::id(),
-            Auth::user()->company_id,
-            'scratch'
+            Auth::user()->company_id
         );
 
         if (!$reward) {
@@ -44,35 +26,56 @@ class RewardPlayController extends Controller
 
         return view('rewards.result', [
             'reward' => $reward,
-            'via'    => 'scratch',
+            'via'    => 'gacha',
         ]);
     }
 
     /* =======================
-       ガチャトップ画面
+       スクラッチ実行
     ======================= */
-    public function gachaPage(GachaService $gacha)
+    public function scratch(\App\Services\ScratchService $scratch)
+    {
+        $result = $scratch->draw(Auth::id());
+
+        if (!$result) {
+            return redirect()
+                ->route('rewards.scratch')
+                ->with('error', 'ポイントが足りません');
+        }
+
+        return view('rewards.result', [
+            'via'   => 'scratch',
+            'miles' => $result['miles'],
+        ]);
+    }
+
+
+
+    /* =======================
+       ガチャ・スクラッチトップ画面
+    ======================= */
+    public function gachaPage(GachaService $gacha, ScratchService $scratch)
     {
         $user = Auth::user();
 
         $totalMiles = $user->total_miles ?? 0;
+        $points     = $user->personal_mission_points ?? 0;
 
-        $gachaCost   = $gacha->cost('gacha');
-        $scratchCost = $gacha->cost('scratch');
+        // ガチャはマイル
+        $gachaCost = GachaService::COST;
+        $canDrawGacha = $totalMiles >= $gachaCost;
 
-        $canDrawGacha   = $totalMiles >= $gachaCost;
-        $canDrawScratch = $totalMiles >= $scratchCost;
-
-        // ★ Service に聞くだけ
-        $hasActiveReward = $gacha->hasActiveDistribution($user->company_id);
+        // スクラッチはポイント
+        $scratchCost = ScratchService::COST;
+        $canDrawScratch = $points >= $scratchCost;
 
         return view('gacha.index', compact(
             'totalMiles',
+            'points',
             'gachaCost',
             'scratchCost',
             'canDrawGacha',
             'canDrawScratch',
-            'hasActiveReward',
         ));
     }
 }

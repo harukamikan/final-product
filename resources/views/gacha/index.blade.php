@@ -19,8 +19,7 @@
                    transition-all duration-300 ease-out
                    hover:-translate-y-1 hover:shadow-lg hover:bg-indigo-50
 
-                   animate-fade-in"
-        >
+                   animate-fade-in">
             📜 履歴
         </a>
 
@@ -45,7 +44,18 @@
                 type="submit"
                 class="w-full py-2 rounded-xl bg-red-500 text-white font-semibold
                        hover:bg-red-600 transition">
-                🧪 テスト用 +1000 マイル
+                🧪 テスト用 +100 マイル
+            </button>
+        </form>
+
+        {{-- 🧪 開発環境のみ：テスト用スクラッチポイント --}}
+        <form method="POST" action="{{ route('debug.add-scratch-points') }}">
+            @csrf
+            <button
+                type="submit"
+                class="w-full py-2 rounded-xl bg-amber-400 text-white font-semibold
+               hover:bg-amber-500 transition">
+                🧪 テスト用 +10 スクラッチpt
             </button>
         </form>
         @endif
@@ -53,8 +63,6 @@
         {{-- ============================= --}}
         {{-- ガチャ / スクラッチ --}}
         {{-- ============================= --}}
-        @if($hasActiveReward)
-
         <div class="space-y-4 pt-2">
 
             {{-- 🎰 ガチャ --}}
@@ -65,17 +73,16 @@
                     class="w-full py-3 rounded-xl font-bold text-lg shadow-md transition
                         {{ $canDrawGacha
                             ? 'bg-gradient-to-r from-indigo-500 to-purple-500 text-white hover:opacity-90'
-                            : 'bg-gray-300 text-gray-500 cursor-not-allowed' }}"
-                >
+                            : 'bg-gray-300 text-gray-500 cursor-not-allowed' }}">
                     🎰 ガチャを引く
                 </button>
 
                 <p class="text-xs mt-1 text-slate-600">
                     消費：{{ $gachaCost }} マイル
                     @unless($canDrawGacha)
-                        <span class="text-red-500">
-                            （あと {{ max(0, $gachaCost - $totalMiles) }} マイル不足）
-                        </span>
+                    <span class="text-red-500">
+                        （あと {{ max(0, $gachaCost - $totalMiles) }} マイル不足）
+                    </span>
                     @endunless
                 </p>
             </form>
@@ -88,51 +95,42 @@
                     class="w-full py-3 rounded-xl font-bold text-lg shadow-md transition
                         {{ $canDrawScratch
                             ? 'bg-gradient-to-r from-amber-400 to-orange-400 text-white hover:opacity-90'
-                            : 'bg-gray-300 text-gray-500 cursor-not-allowed' }}"
-                >
+                            : 'bg-gray-300 text-gray-500 cursor-not-allowed' }}">
                     🪙 スクラッチを削る
                 </button>
 
                 <p class="text-xs mt-1 text-slate-600">
-                    消費：{{ $scratchCost }} マイル
+                    消費：{{ $scratchCost }} pt
                     @unless($canDrawScratch)
-                        <span class="text-red-500">
-                            （あと {{ max(0, $scratchCost - $totalMiles) }} マイル不足）
-                        </span>
+                    <span class="text-red-500">
+                        （あと {{ max(0, $scratchCost - $points) }} pt 不足）
+                    </span>
                     @endunless
+                </p>
+
+                <p class="text-[11px] text-slate-400 mt-1">
+                    ※ スクラッチはミッションポイントを消費します
                 </p>
             </form>
 
         </div>
 
-        {{-- 📦 報酬なし --}}
-        @else
+        {{-- ===== フェードインアニメーション定義 ===== --}}
+        <style>
+            @keyframes fadeInUp {
+                from {
+                    opacity: 0;
+                    transform: translateY(-6px);
+                }
 
-        <div class="bg-slate-50 rounded-xl p-4 text-slate-600 text-sm leading-relaxed">
-            現在、ガチャに配布中の報酬がありません。<br>
-            管理者が報酬を設定するまでお待ちください。
-        </div>
+                to {
+                    opacity: 1;
+                    transform: translateY(0);
+                }
+            }
 
-        @endif
-
-    </div>
-</div>
-
-{{-- ===== フェードインアニメーション定義 ===== --}}
-<style>
-@keyframes fadeInUp {
-    from {
-        opacity: 0;
-        transform: translateY(-6px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
-.animate-fade-in {
-    animation: fadeInUp 0.4s ease-out forwards;
-}
-</style>
-@endsection
+            .animate-fade-in {
+                animation: fadeInUp 0.4s ease-out forwards;
+            }
+        </style>
+        @endsection

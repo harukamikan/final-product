@@ -7,8 +7,6 @@ use App\Models\Goal;
 use App\Models\Activity;
 use Illuminate\Support\Facades\Auth;
 
-use function Symfony\Component\Clock\now;
-
 class GoalController extends Controller
 {
     /*
@@ -36,6 +34,7 @@ class GoalController extends Controller
 
         $goal = Goal::create([
             'user_id' => Auth::id(),
+            'company_id' => Auth::user()->company_id,
             'title' => $request->title,
             'deadline' => $request->deadline,
             'category' => $request->category,
@@ -50,7 +49,7 @@ class GoalController extends Controller
             'company_id' => Auth::user()->company_id,
             'type' => 'goal',
             'title' => '活動を記録しました：' . $goal->title,
-            'date' => now(),
+            'date' => $request->deadline,
             'url' => route('goals.edit', $goal),
         ]);
 

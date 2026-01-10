@@ -12,7 +12,7 @@ class GachaController extends Controller
         $user = Auth::user();
 
         $totalMiles = $user->total_miles;
-        $canDrawGacha = $totalMiles >= GachaService::COST_MILES;
+        $canDrawGacha = $totalMiles >= GachaService::COST;
 
         return view('gacha.index', compact('canDrawGacha', 'totalMiles'));
     }
@@ -23,8 +23,7 @@ class GachaController extends Controller
 
         $reward = $gacha->draw(
             $user->id,
-            $user->company_id,
-            'gacha'
+            $user->company_id
         );
 
         if (!$reward) {
