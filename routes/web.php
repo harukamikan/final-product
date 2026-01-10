@@ -27,6 +27,7 @@ use App\Http\Controllers\{
     DebugController,
     RewardSurveyController,
     UserRewardController,
+    PersonalMissionController,
 };
 
 use App\Http\Controllers\Admin\{

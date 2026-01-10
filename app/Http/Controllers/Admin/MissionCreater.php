@@ -8,9 +8,10 @@ use Illuminate\Http\Request;
 
 class MissionCreater extends Controller
 {
-    public function index()
+   public function index()
     {
-        $missions = Mission::orderBy('id')->paginate(20);
+        // 企業ミッション（user_id が null）のみ取得
+        $missions = Mission::whereNull('user_id')->orderBy('id')->paginate(20);
 
         return view('admin.missions.index', compact('missions'));
     }

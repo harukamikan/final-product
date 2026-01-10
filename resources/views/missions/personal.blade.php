@@ -41,6 +41,7 @@
        class="px-4 py-2 rounded-xl {{ request()->routeIs('missions.index') ? 'bg-indigo-600 text-white' : 'bg-gray-100 text-gray-600' }}">
         進行中のミッション
     </a>
+    
 
     <a href="{{ route('missions.completed') }}"
         class="px-4 py-2 rounded-xl {{ request()->routeIs('missions.completed') ? 'bg-indigo-600 text-white' : 'bg-gray-100 text-gray-600' }}">
@@ -51,6 +52,13 @@
         class="px-4 py-2 rounded-xl {{ request()->routeIs('missions.personal') ? 'bg-indigo-600 text-white' : 'bg-gray-100 text-gray-600' }}">
         個人ミッション
     </a>
+    </div>
+    {{-- 個人ミッション追加ボタン --}}
+    <div class="flex justify-end">
+        <a href="{{ route('personal-missions.create') }}"
+        class="px-6 py-2 rounded-xl bg-indigo-600 text-white font-medium hover:bg-indigo-700 transition">
+            ➕ 個人ミッションを追加
+        </a>
     </div>
 
     {{-- フラッシュメッセージ --}}
@@ -111,15 +119,41 @@
                 </div>
 
                 
-                {{-- ボタン --}}
-                <div class="pt-3 border-t flex justify-end">
-                    <form action="{{ route('missions.complete', $mission) }}" method="POST">
-                        @csrf
-                        <button type="submit"
-                                class="px-4 py-2 rounded-xl bg-indigo-600 text-white text-sm font-medium hover:bg-indigo-700 transition">
-                            完了 +1
-                        </button>
-                    </form>
+                    {{-- ボタン --}}
+                <div class="pt-3 border-t flex justify-between items-center">
+                    <div class="flex gap-2">
+                        @php
+                            $canManage = $mission->user_id && $mission->created_at->addDays(10)->isFuture();
+                        @endphp
+                        
+                        @if ($canManage)
+                            <a href="{{ route('personal-missions.edit', $mission) }}"
+                            class="px-3 py-1 rounded-lg bg-amber-500 text-white text-xs font-medium hover:bg-amber-600 transition">
+                                ✏️ 編集
+                            </a>
+                            
+                            <form action="{{ route('personal-missions.destroy', $mission) }}" method="POST" style="display:inline;">
+                                @csrf
+                                @method('DELETE')
+                                <button type="submit"
+                                        onclick="return confirm('削除してもいいですか？')"
+                                        class="px-3 py-1 rounded-lg bg-red-500 text-white text-xs font-medium hover:bg-red-600 transition">
+                                    🗑️ 削除
+                                </button>
+                            </form>
+                        @endif
+                    </div>
+                    
+                    {{-- 個人ミッションのみ「完了 +1」ボタン --}}
+                    @if ($mission->user_id)
+                        <form action="{{ route('missions.complete', $mission) }}" method="POST">
+                            @csrf
+                            <button type="submit"
+                                    class="px-4 py-2 rounded-xl bg-indigo-600 text-white text-sm font-medium hover:bg-indigo-700 transition">
+                                完了 +1
+                            </button>
+                        </form>
+                    @endif
                 </div>
             </div>
         @endforeach

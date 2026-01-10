@@ -102,4 +102,9 @@ class User extends Authenticatable
     {
         return $this->hasOne(OnboardingSurvey::class);
     }
+
+    public function semesterGoals()
+    {
+        return $this->hasMany(SemesterGoal::class);
+    }
 }
