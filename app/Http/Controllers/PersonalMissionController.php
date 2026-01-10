@@ -1,0 +1,174 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use Illuminate\Http\Request;
+use App\Models\Mission;
+use App\Models\Tag;
+use Carbon\Carbon;
+
+class PersonalMissionController extends Controller
+{
+    /**
+     * 個人ミッション作成フォーム表示
+     */
+    public function create()
+    {
+        $user = auth()->user();
+        
+        // 現在の半期目標を取得
+        $currentSemesterGoal = $user->semesterGoals()
+            ->where('is_current', true)
+            ->first();
+        
+        // この半期で追加した個人ミッション数をカウント
+        $personalMissionsCount = Mission::where('user_id', $user->id)
+            ->where('trigger_type', 'manual')
+            ->count();
+        
+        // 管理者設定から制限数を取得（デフォルト10）
+        $maxPersonalMissions = \App\Models\AdminSetting::first()->personal_missions_limit ?? 10;
+        
+        $canAdd = $personalMissionsCount < $maxPersonalMissions;
+        
+        return view('missions.personal-create', [
+            'currentSemesterGoal' => $currentSemesterGoal,
+            'personalMissionsCount' => $personalMissionsCount,
+            'maxPersonalMissions' => $maxPersonalMissions,
+            'canAdd' => $canAdd,
+        ]);
+    }
+
+    /**
+     * 個人ミッション保存
+     */
+    public function store(Request $request)
+    {
+        $user = auth()->user();
+        
+        $request->validate([
+            'title' => 'required|string|max:255',
+            'description' => 'nullable|string',
+            'required_count' => 'required|integer|min:1',
+        ]);
+        
+        // 制限チェック
+        $personalMissionsCount = Mission::where('user_id', $user->id)
+            ->where('trigger_type', 'manual')
+            ->count();
+        
+        $maxPersonalMissions = \App\Models\AdminSetting::first()->personal_missions_limit ?? 10;
+        
+        if ($personalMissionsCount >= $maxPersonalMissions) {
+            return back()->with('error', '個人ミッションの上限に達しました');
+        }
+        
+        // 個人ミッション作成
+        $mission = Mission::create([
+            'user_id' => $user->id,
+            'company_id' => $user->company_id,
+            'key' => \Illuminate\Support\Str::slug($request->title),
+            'title' => $request->title,
+            'description' => $request->description,
+            'trigger_type' => 'manual',
+            'required_count' => $request->required_count,
+            'reward_miles' => 0,
+            'repeatable' => false,
+        ]);
+        
+        // personalタグを付与
+        $personalTag = Tag::where('name', 'personal')->first();
+        if ($personalTag) {
+            $mission->tags()->attach($personalTag->id);
+        }
+        
+        return redirect()->route('missions.personal')
+            ->with('success', '個人ミッションを追加しました！');
+    }
+
+    /**
+     * 個人ミッション編集フォーム表示
+     */
+    public function edit(Mission $mission)
+    {
+        $user = auth()->user();
+        
+        // 自分の個人ミッション以外は編集不可
+        if ($mission->user_id !== $user->id) {
+            abort(403);
+        }
+        
+        // 登録日から10日以内か確認
+        $createdAt = $mission->created_at;
+        $canEdit = $createdAt->addDays(10)->isFuture();
+        
+        if (!$canEdit) {
+            return back()->with('error', '編集期間が終了しています');
+        }
+        
+        return view('missions.personal-edit', [
+            'mission' => $mission,
+            'canEdit' => $canEdit,
+        ]);
+    }
+
+    /**
+     * 個人ミッション更新
+     */
+    public function update(Request $request, Mission $mission)
+    {
+        $user = auth()->user();
+        
+        if ($mission->user_id !== $user->id) {
+            abort(403);
+        }
+        
+        // 登録日から10日以内か確認
+        $createdAt = $mission->created_at;
+        $canEdit = $createdAt->addDays(10)->isFuture();
+        
+        if (!$canEdit) {
+            return back()->with('error', '編集期間が終了しています');
+        }
+        
+        $request->validate([
+            'title' => 'required|string|max:255',
+            'description' => 'nullable|string',
+            'required_count' => 'required|integer|min:1',
+        ]);
+        
+        $mission->update([
+            'title' => $request->title,
+            'description' => $request->description,
+            'required_count' => $request->required_count,
+        ]);
+        
+        return redirect()->route('missions.personal')
+            ->with('success', 'ミッションを更新しました！');
+    }
+
+    /**
+     * 個人ミッション削除
+     */
+    public function destroy(Mission $mission)
+    {
+        $user = auth()->user();
+        
+        if ($mission->user_id !== $user->id) {
+            abort(403);
+        }
+        
+        // 登録日から10日以内か確認
+        $createdAt = $mission->created_at;
+        $canDelete = $createdAt->addDays(10)->isFuture();
+        
+        if (!$canDelete) {
+            return back()->with('error', '削除期間が終了しています');
+        }
+        
+        $mission->delete();
+        
+        return redirect()->route('missions.personal')
+            ->with('success', 'ミッションを削除しました！');
+    }
+}
