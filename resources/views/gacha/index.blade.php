@@ -19,8 +19,7 @@
                    transition-all duration-300 ease-out
                    hover:-translate-y-1 hover:shadow-lg hover:bg-indigo-50
 
-                   animate-fade-in"
-        >
+                   animate-fade-in">
             📜 履歴
         </a>
 
@@ -53,8 +52,6 @@
         {{-- ============================= --}}
         {{-- ガチャ / スクラッチ --}}
         {{-- ============================= --}}
-        @if($hasActiveReward)
-
         <div class="space-y-4 pt-2">
 
             {{-- 🎰 ガチャ --}}
@@ -65,17 +62,16 @@
                     class="w-full py-3 rounded-xl font-bold text-lg shadow-md transition
                         {{ $canDrawGacha
                             ? 'bg-gradient-to-r from-indigo-500 to-purple-500 text-white hover:opacity-90'
-                            : 'bg-gray-300 text-gray-500 cursor-not-allowed' }}"
-                >
+                            : 'bg-gray-300 text-gray-500 cursor-not-allowed' }}">
                     🎰 ガチャを引く
                 </button>
 
                 <p class="text-xs mt-1 text-slate-600">
                     消費：{{ $gachaCost }} マイル
                     @unless($canDrawGacha)
-                        <span class="text-red-500">
-                            （あと {{ max(0, $gachaCost - $totalMiles) }} マイル不足）
-                        </span>
+                    <span class="text-red-500">
+                        （あと {{ max(0, $gachaCost - $totalMiles) }} マイル不足）
+                    </span>
                     @endunless
                 </p>
             </form>
@@ -88,51 +84,42 @@
                     class="w-full py-3 rounded-xl font-bold text-lg shadow-md transition
                         {{ $canDrawScratch
                             ? 'bg-gradient-to-r from-amber-400 to-orange-400 text-white hover:opacity-90'
-                            : 'bg-gray-300 text-gray-500 cursor-not-allowed' }}"
-                >
+                            : 'bg-gray-300 text-gray-500 cursor-not-allowed' }}">
                     🪙 スクラッチを削る
                 </button>
 
                 <p class="text-xs mt-1 text-slate-600">
-                    消費：{{ $scratchCost }} マイル
+                    消費：{{ $scratchCost }} pt
                     @unless($canDrawScratch)
-                        <span class="text-red-500">
-                            （あと {{ max(0, $scratchCost - $totalMiles) }} マイル不足）
-                        </span>
+                    <span class="text-red-500">
+                        （あと {{ max(0, $scratchCost - $points) }} pt 不足）
+                    </span>
                     @endunless
+                </p>
+
+                <p class="text-[11px] text-slate-400 mt-1">
+                    ※ スクラッチはミッションポイントを消費します
                 </p>
             </form>
 
         </div>
 
-        {{-- 📦 報酬なし --}}
-        @else
-
-        <div class="bg-slate-50 rounded-xl p-4 text-slate-600 text-sm leading-relaxed">
-            現在、ガチャに配布中の報酬がありません。<br>
-            管理者が報酬を設定するまでお待ちください。
-        </div>
-
-        @endif
-
-    </div>
-</div>
-
 {{-- ===== フェードインアニメーション定義 ===== --}}
 <style>
-@keyframes fadeInUp {
-    from {
-        opacity: 0;
-        transform: translateY(-6px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(-6px);
+        }
 
-.animate-fade-in {
-    animation: fadeInUp 0.4s ease-out forwards;
-}
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .animate-fade-in {
+        animation: fadeInUp 0.4s ease-out forwards;
+    }
 </style>
 @endsection
