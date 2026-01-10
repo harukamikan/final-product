@@ -281,7 +281,7 @@
                         </p>
 
                         <p class="text-xs text-slate-400 mt-1">
-                            作成日時：{{ $activity->created_at->format('Y-m-d H:i') }}
+                            活動日：{{ optional($activity->date)->format('Y-m-d') }}
                         </p>
                     </div>
 

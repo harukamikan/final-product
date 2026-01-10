@@ -18,6 +18,10 @@ class Activity extends Model
         'url'
     ];
 
+    protected $casts = [
+        'date' => 'date',
+    ];
+
     public function user()
     {
         return $this->belongsTo(User::class);
