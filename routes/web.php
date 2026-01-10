@@ -27,6 +27,7 @@ use App\Http\Controllers\{
     DebugController,
     RewardSurveyController,
     UserRewardController,
+    PersonalMissionController,
 };
 
 use App\Http\Controllers\Admin\{
@@ -246,6 +247,17 @@ Route::middleware(['auth', 'company'])->group(function () {
 
     Route::post('/missions/{mission}/complete', [UserMissionController::class, 'complete'])
         ->name('missions.complete');
+    // 個人ミッション管理（作成・編集・削除）
+    Route::get('/missions/personal/create', [PersonalMissionController::class, 'create'])
+        ->name('personal-missions.create');
+    Route::post('/missions/personal', [PersonalMissionController::class, 'store'])
+        ->name('personal-missions.store');
+    Route::get('/missions/personal/{mission}/edit', [PersonalMissionController::class, 'edit'])
+        ->name('personal-missions.edit');
+    Route::patch('/missions/personal/{mission}', [PersonalMissionController::class, 'update'])
+        ->name('personal-missions.update');
+    Route::delete('/missions/personal/{mission}', [PersonalMissionController::class, 'destroy'])
+        ->name('personal-missions.destroy');
 
     /*
     | Qiita
