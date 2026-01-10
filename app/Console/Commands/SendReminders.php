@@ -110,7 +110,7 @@ class SendReminders extends Command
             $query->select('mission_id')
                 ->from('user_missions')
                 ->where('user_id', $user->id)
-                ->whereNotNull('completed_at')
+                ->whereNotNull('completed_at');
         })->orderBy('reward_miles', 'desc')->first();
         
         // メッセージ作成
