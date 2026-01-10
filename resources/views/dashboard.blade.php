@@ -232,9 +232,9 @@
                    px-4 py-2
                    text-xs text-slate-700
                    bg-indigo-50
-                   rouded-xl
+                   rounded-xl
                    shadow-lg
-                   border birder-slate-200
+                   border border-slate-200
                    whitespace-nowrap
                    flex items-center gap-1">
             日々の活動を記録しましょう
@@ -251,7 +251,12 @@
         <a href="{{ route('goals.create') }}"
            @mouseenter="open = true"
            @mouseleave="open = false"
-           @click.prevent="open = !open"
+           @click="
+                if (window.innerWidth < 640 && !open) {
+                    open = true;
+                    $event.preventDefault();
+                }
+                "
            class="absolute top-4 right-4
                   w-10 h-10 flex items-center justify-center
                   rounded-full bg-indigo-500 text-white text-xl font-bold
