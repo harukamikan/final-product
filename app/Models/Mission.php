@@ -35,7 +35,13 @@ class Mission extends Model
     {
         return $this->hasMany(UserMission::class);
     }
-
+    /**
+     * このミッションに付けられたタグ
+     */
+    public function tags()
+    {
+        return $this->belongsToMany(Tag::class, 'mission_tag');
+    }
     /**
      * ミッション作成者（個人ミッションの場合）
      */

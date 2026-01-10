@@ -192,7 +192,7 @@ class GoalAiUploadController extends Controller
             // 2. missions 登録（定量的な目標）
             if (isset($userData['missions']) && is_array($userData['missions'])) {
                 foreach ($userData['missions'] as $mission) {
-                    \App\Models\Mission::create([
+                    $newMission = \App\Models\Mission::create([
                         'user_id' => $user->id,
                         'key' => \Illuminate\Support\Str::slug($mission['title'] ?? ''),
                         'title' => $mission['title'] ?? '',
@@ -202,6 +202,13 @@ class GoalAiUploadController extends Controller
                         'reward_miles' => 0,
                         'repeatable' => false,
                     ]);
+                    
+                    // 個人ミッションタグを付与
+                    $personalTag = \App\Models\Tag::where('name', 'personal')->first();
+                    if ($personalTag) {
+                        $newMission->tags()->attach($personalTag->id);
+                    }
+                    
                     $successCount++;
                 }
             }
