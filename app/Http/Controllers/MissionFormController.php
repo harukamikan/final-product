@@ -26,7 +26,7 @@ class MissionFormController extends Controller
         $user = auth()->user();
 
         // 1) フォーム提出を保存
-        MissionForm::create([
+        $missionForm = MissionForm::create([
             'user_id'     => $user->id,
             'mission_id'  => $mission->id,
             'category'    => $mission->key,
@@ -39,6 +39,16 @@ class MissionFormController extends Controller
         // 2) ミッション達成処理（MissionServiceを使ってマイル付与も行う）
         $missionService = app(\App\Services\MissionService::class);
         $achievementData = $missionService->completeManually($user, $mission);
+
+        // 3) タイムラインイベントを作成
+        $timelineService = app(\App\Services\TimelineService::class);
+        
+        match($mission->key) {
+            'event_host' => $timelineService->createEventHostingEvent($user, $missionForm),
+            'event_speaker' => $timelineService->createEventSpeakingEvent($user, $missionForm),
+            'acquire_certificate', 'certification' => $timelineService->createCertificationEvent($user, $missionForm),
+            default => null,
+        };
 
         return redirect()->route('missions.index')
             ->with('achievementData', $achievementData);
