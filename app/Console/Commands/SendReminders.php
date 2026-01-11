@@ -21,9 +21,19 @@ class SendReminders extends Command
 
         try {
             $userCount = \App\Models\User::count();
-            \Log::info('DB OK - User count: ' . $userCount);
+            \Log::info('DB OK - Total users: ' . $userCount);
+            
+            // リマインド対象ユーザーを確認
+            $reminderUsers = \App\Models\User::where('reminder_enabled', true)
+                ->where('reminder_weekly_enabled', true)
+                ->get();
+            \Log::info('Reminder enabled users: ' . $reminderUsers->count());
+            
+            foreach ($reminderUsers as $user) {
+                \Log::info("User: {$user->name}, slack_id: {$user->slack_id}, hour: {$user->reminder_hour}, freq: {$user->reminder_frequency}");
+            }
         } catch (\Exception $e) {
-            \Log::error('DB connection failed: ' . $e->getMessage());
+            \Log::error('Error: ' . $e->getMessage());
             return;
         }
 
