@@ -258,6 +258,8 @@ Route::middleware(['auth', 'company'])->group(function () {
         ->name('personal-missions.update');
     Route::delete('/missions/personal/{personalMission}', [PersonalMissionController::class, 'destroy'])
         ->name('personal-missions.destroy');
+    Route::post('/missions/personal/{personalMission}/complete', [PersonalMissionController::class, 'complete'])
+        ->name('personal-missions.complete');
 
     /*
     | Qiita

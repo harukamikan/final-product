@@ -19,6 +19,9 @@ class PersonalMission extends Model
         'repeatable',
     ];
 
+    protected $casts = [
+        'completed_at' => 'datetime',
+    ];
     /**
      * ユーザーとのリレーション
      */

@@ -147,7 +147,7 @@
                     {{-- 個人ミッションのみ「完了 +1」ボタン --}}
                     @if ($mission->user_id)
                         @if (!$mission->linked_category)
-                            <form action="{{ route('missions.complete', $mission) }}" method="POST">
+                            <form action="{{ route('personal-missions.complete', $mission) }}" method="POST">
                                 @csrf
                                 <button type="submit"
                                         class="px-4 py-2 rounded-xl bg-indigo-600 text-white text-sm font-medium hover:bg-indigo-700 transition">

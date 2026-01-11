@@ -165,4 +165,35 @@ class PersonalMissionController extends Controller
         return redirect()->route('missions.personal')
             ->with('success', 'ミッションを削除しました！');
     }
+    /**
+     * 個人ミッション完了（手動）
+     */
+    public function complete(\App\Models\PersonalMission $personalMission)
+    {
+        $user = auth()->user();
+        
+        if ($personalMission->user_id !== $user->id) {
+            abort(403);
+        }
+        
+        // すでに完了してたら何もしない
+        if ($personalMission->completed_at) {
+            return back()->with('error', 'すでに完了しています');
+        }
+        
+        // 進捗+1
+        $personalMission->increment('progress_count');
+        $personalMission->refresh();
+        
+        // 達成したか確認
+        if ($personalMission->progress_count >= $personalMission->required_count) {
+            $personalMission->update(['completed_at' => now()]);
+            $user->increment('personal_mission_points', 1);
+            return redirect()->route('missions.personal')
+                ->with('success', 'ミッション達成！🎉');
+        }
+        
+        return redirect()->route('missions.personal')
+            ->with('success', '進捗 +1！');
+    }
 }

@@ -314,6 +314,7 @@ class MissionService
             
             // 進捗+1
             $personalMission->increment('progress_count');
+            $personalMission->refresh();  // ← 追加！最新の値を取得
             
             // 達成したか確認
             if ($personalMission->progress_count >= $personalMission->required_count) {

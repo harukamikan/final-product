@@ -127,17 +127,16 @@
         </a>
     </div>
 
-    {{-- ミッションなし --}}
-    @if ($missions->isEmpty())
+    {{-- 完了ミッション一覧 --}}
+    @if ($missions->isEmpty() && $personalMissions->isEmpty())
     <div class="text-center p-10 bg-white rounded-3xl shadow-sm">
         <div class="text-5xl mb-4">🎉</div>
         <p class="text-xl font-semibold">まだ完了したミッションがありません</p>
         <p class="text-gray-500 mt-2">進行中のミッションを達成していきましょう！</p>
     </div>
-    @endif
-
-    {{-- 完了ミッション一覧 --}}
+    @else
     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {{-- 企業ミッション --}}
         @foreach ($missions as $mission)
         @php
         $userMission = $mission->userMissions->first();
@@ -172,14 +171,53 @@
 
             <div class="pt-3 border-t">
                 <span class="inline-flex items-center px-3 py-1 rounded-full
-                             bg-emerald-50 text-emerald-700
-                             text-sm font-medium">
+                            bg-emerald-50 text-emerald-700
+                            text-sm font-medium">
                     🎉 達成済み
                 </span>
             </div>
         </div>
         @endforeach
-    </div>
 
-</div>
+        {{-- 個人ミッション --}}
+        @foreach ($personalMissions as $mission)
+        <div class="rounded-3xl border bg-white px-5 py-6 shadow-sm space-y-4">
+            <div class="flex justify-between items-start">
+                <div>
+                    <h2 class="text-lg font-semibold text-gray-900">
+                        {{ $mission->title }}
+                    </h2>
+
+                    <p class="text-xs text-gray-500 mt-1">
+                        {{ $mission->description }}
+                    </p>
+
+                    @if($mission->completed_at)
+                    <p class="text-xs text-gray-400 mt-2">
+                        🗓 達成日：
+                        {{ $mission->completed_at->format('Y年m月d日') }}
+                    </p>
+                    @endif
+                </div>
+
+                <div class="text-right">
+                    <p class="text-xs text-gray-500">進捗</p>
+                    <p class="text-lg font-bold text-emerald-600">
+                        {{ $mission->progress_count }}/{{ $mission->required_count }}
+                    </p>
+                </div>
+            </div>
+
+            <div class="pt-3 border-t">
+                <span class="inline-flex items-center px-3 py-1 rounded-full
+                            bg-amber-50 text-amber-700
+                            text-sm font-medium">
+                    🎯 個人ミッション達成
+                </span>
+            </div>
+        </div>
+        @endforeach
+    </div>
+    @endif
+            
 @endsection
