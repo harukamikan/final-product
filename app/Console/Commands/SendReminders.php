@@ -16,7 +16,11 @@ class SendReminders extends Command
 
     public function handle()
     {
+        \Log::info('=== SendReminders started ===');
+
         $now = Carbon::now();
+        \Log::info('Current time: ' . $now->toDateTimeString());
+        \Log::info('Current hour: ' . $now->hour);
         
         // 期限リマインドをチェック
         $this->checkDeadlineReminders($now);
@@ -25,14 +29,19 @@ class SendReminders extends Command
         $this->checkWeeklyReminders($now);
         
         $this->info("Reminders checked and sent successfully!");
+        \Log::info('=== SendReminders finished ===');
     }
     
     protected function checkDeadlineReminders($now)
     {
+        \Log::info('=== checkDeadlineReminders ===');
+
         // 期限リマインドONのユーザーを取得
         $users = \App\Models\User::where('reminder_enabled', true)
             ->where('reminder_deadline_enabled', true)
             ->get();
+
+        \Log::info('Found deadline users: ' . $users->count());
         
         foreach ($users as $user) {
             // ユーザーごとのリマインド日数を使用
@@ -45,6 +54,37 @@ class SendReminders extends Command
             
             foreach ($upcomingGoals as $goal) {
                 $this->sendDeadlineReminderToUser($goal);
+            }
+        }
+    }
+
+    protected function checkWeeklyReminders($now)
+    {
+        \Log::info('=== checkWeeklyReminders ===');
+        
+        // 週次リマインドONのユーザーを取得
+        $users = \App\Models\User::where('reminder_enabled', true)
+            ->where('reminder_weekly_enabled', true)
+            ->get();
+        
+        \Log::info('Found weekly users: ' . $users->count());
+        
+        foreach ($users as $user) {
+            \Log::info("User {$user->id}: hour={$user->reminder_hour}, now_hour={$now->hour}, freq={$user->reminder_frequency}");
+            
+            $shouldSend = false;
+            
+            if ($user->reminder_frequency === 'daily') {
+                $shouldSend = ($now->hour == $user->reminder_hour);
+            } else {
+                $reminderDays = json_decode($user->reminder_days, true) ?? [];
+                $shouldSend = in_array($now->dayOfWeek, $reminderDays) && ($now->hour == $user->reminder_hour);
+            }
+            
+            \Log::info("shouldSend: " . ($shouldSend ? 'true' : 'false'));
+            
+            if ($shouldSend) {
+                $this->sendWeeklyReminder($user);
             }
         }
     }
