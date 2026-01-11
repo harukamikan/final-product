@@ -211,6 +211,13 @@ class GoalAiUploadController extends Controller
                     $mission['title'] ?? ''
                 );
 
+                // デバッグログ
+                \Log::info('Enterprise Mission Search', [
+                    'category' => $mission['category'],
+                    'title' => $mission['title'],
+                    'found' => $enterpriseMission ? $enterpriseMission->id : 'NOT FOUND',
+                ]);
+
                 if ($enterpriseMission) {
                     // user_missions にこのユーザーの企業ミッション進捗を保存
                     $userMission = \App\Models\UserMission::firstOrCreate(
