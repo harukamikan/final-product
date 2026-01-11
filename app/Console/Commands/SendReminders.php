@@ -29,7 +29,7 @@ class SendReminders extends Command
         $this->checkWeeklyReminders($now);
         
         $this->info("Reminders checked and sent successfully!");
-        \Log::info('=== SendReminders finished ===');
+    \Log::info('=== SendReminders finished ===');
     }
     
     protected function checkDeadlineReminders($now)
@@ -82,31 +82,6 @@ class SendReminders extends Command
             }
             
             \Log::info("shouldSend: " . ($shouldSend ? 'true' : 'false'));
-            
-            if ($shouldSend) {
-                $this->sendWeeklyReminder($user);
-            }
-        }
-    }
-    
-    protected function checkWeeklyReminders($now)
-    {
-        // 週次リマインドONのユーザーを取得
-        $users = \App\Models\User::where('reminder_enabled', true)
-            ->where('reminder_weekly_enabled', true)
-            ->get();
-        
-        foreach ($users as $user) {
-            $shouldSend = false;
-            
-            if ($user->reminder_frequency === 'daily') {
-                // 毎日、設定した時間に送る
-                $shouldSend = ($now->hour == $user->reminder_hour);
-            } else {
-                // 選択した曜日だけ
-                $reminderDays = json_decode($user->reminder_days, true) ?? [];
-                $shouldSend = in_array($now->dayOfWeek, $reminderDays) && ($now->hour == $user->reminder_hour);
-            }
             
             if ($shouldSend) {
                 $this->sendWeeklyReminder($user);
