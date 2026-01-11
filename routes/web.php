@@ -252,11 +252,11 @@ Route::middleware(['auth', 'company'])->group(function () {
         ->name('personal-missions.create');
     Route::post('/missions/personal', [PersonalMissionController::class, 'store'])
         ->name('personal-missions.store');
-    Route::get('/missions/personal/{mission}/edit', [PersonalMissionController::class, 'edit'])
+    Route::get('/missions/personal/{personalMission}/edit', [PersonalMissionController::class, 'edit'])
         ->name('personal-missions.edit');
-    Route::patch('/missions/personal/{mission}', [PersonalMissionController::class, 'update'])
+    Route::patch('/missions/personal/{personalMission}', [PersonalMissionController::class, 'update'])
         ->name('personal-missions.update');
-    Route::delete('/missions/personal/{mission}', [PersonalMissionController::class, 'destroy'])
+    Route::delete('/missions/personal/{personalMission}', [PersonalMissionController::class, 'destroy'])
         ->name('personal-missions.destroy');
 
     /*

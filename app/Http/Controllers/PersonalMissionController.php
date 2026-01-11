@@ -85,12 +85,10 @@ class PersonalMissionController extends Controller
     {
         $user = auth()->user();
         
-        // 自分の個人ミッション以外は編集不可
         if ($personalMission->user_id !== $user->id) {
             abort(403);
         }
         
-        // 登録日から10日以内か確認
         $createdAt = $personalMission->created_at;
         $canEdit = $createdAt->addDays(10)->isFuture();
         
@@ -99,7 +97,7 @@ class PersonalMissionController extends Controller
         }
         
         return view('missions.personal-edit', [
-            'personalMission' => $personalMission,
+            'mission' => $personalMission,  // ← 'mission' として渡す
             'canEdit' => $canEdit,
         ]);
     }
