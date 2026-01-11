@@ -34,13 +34,20 @@ $via = $via ?? 'gacha';
                 class="relative w-80 h-48 overflow-hidden rounded-xl">
 
                 {{-- 下層（報酬） --}}
+                @if($via === 'scratch')
                 <div
                     id="rewardCard"
                     class="absolute inset-0 flex items-center justify-center
-                           bg-yellow-100 text-2xl font-semibold text-indigo-600
+                           bg-yellow-100 text-2xl font-bold text-indigo-600
                            scale-95 opacity-0 transition-all duration-500">
-                    {{ $reward->name }}
+                    @if($miles > 0)
+                    🎉 {{ $miles }} マイル獲得！
+                    @else
+                    😢 はずれ…
+                    @endif
                 </div>
+                @endif
+
 
                 {{-- 上層（削る部分） --}}
                 <canvas
