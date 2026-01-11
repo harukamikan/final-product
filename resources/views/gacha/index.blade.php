@@ -36,6 +36,14 @@
             </p>
         </div>
 
+        {{-- 🪙 現在のスクラッチポイント --}}
+        <div class="bg-amber-50 rounded-xl py-4">
+            <p class="text-sm text-slate-600">現在のスクラッチポイント</p>
+            <p class="text-3xl font-bold text-amber-600">
+                {{ number_format($points) }}
+            </p>
+        </div>
+
         {{-- 🧪 開発環境のみ：テスト用マイル --}}
         @if(app()->environment('local'))
         <form method="POST" action="{{ route('debug.add-miles') }}">
