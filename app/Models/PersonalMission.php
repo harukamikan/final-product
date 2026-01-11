@@ -10,14 +10,20 @@ class PersonalMission extends Model
         'user_id',
         'company_id',
         'key',
+        'linked_category',
         'title',
         'description',
         'trigger_type',
         'required_count',
+        'progress_count',   
+        'completed_at', 
         'reward_miles',
         'repeatable',
     ];
 
+    protected $casts = [
+        'completed_at' => 'datetime',
+    ];
     /**
      * ユーザーとのリレーション
      */

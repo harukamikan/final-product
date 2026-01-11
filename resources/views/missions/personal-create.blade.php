@@ -76,6 +76,27 @@
                 @enderror
             </div>
 
+            {{-- 連携する企業ミッション --}}
+            <div>
+                <label for="linked_category" class="block text-sm font-medium text-gray-700 mb-2">
+                    連携する企業ミッション（任意）
+                </label>
+                <select
+                    id="linked_category"
+                    name="linked_category"
+                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent">
+                    <option value="">連携しない</option>
+                    <option value="write_tech_blog" {{ old('linked_category') == 'write_tech_blog' ? 'selected' : '' }}>技術系ブログ（Qiita）を書く</option>
+                    <option value="acquire_certificate" {{ old('linked_category') == 'acquire_certificate' ? 'selected' : '' }}>資格を取得する</option>
+                    <option value="event_speaker" {{ old('linked_category') == 'event_speaker' ? 'selected' : '' }}>イベントに登壇する</option>
+                    <option value="event_organizer" {{ old('linked_category') == 'event_organizer' ? 'selected' : '' }}>イベントを企画・開催する</option>
+                </select>
+                <p class="text-gray-500 text-sm mt-1">選択すると、企業ミッション完了時に自動で進捗が反映されます</p>
+                @error('linked_category')
+                    <p class="text-red-600 text-sm mt-1">{{ $message }}</p>
+                @enderror
+            </div>
+
             {{-- ボタン --}}
             <div class="flex gap-4">
                 <button

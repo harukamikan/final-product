@@ -87,7 +87,7 @@
         @foreach ($missions as $mission)
             @php
                 $userMission = $mission->userMissions->first();
-                $progress = $userMission->progress_count ?? 0;
+                $progress = $mission->progress_count ?? 0;
                 $required = $mission->required_count;
                 $ratio = min(100, intval($progress / max(1, $required) * 100));
             @endphp
@@ -146,13 +146,15 @@
                     
                     {{-- 個人ミッションのみ「完了 +1」ボタン --}}
                     @if ($mission->user_id)
-                        <form action="{{ route('missions.complete', $mission) }}" method="POST">
-                            @csrf
-                            <button type="submit"
-                                    class="px-4 py-2 rounded-xl bg-indigo-600 text-white text-sm font-medium hover:bg-indigo-700 transition">
-                                完了 +1
-                            </button>
-                        </form>
+                        @if (!$mission->linked_category)
+                            <form action="{{ route('personal-missions.complete', $mission) }}" method="POST">
+                                @csrf
+                                <button type="submit"
+                                        class="px-4 py-2 rounded-xl bg-indigo-600 text-white text-sm font-medium hover:bg-indigo-700 transition">
+                                    完了 +1
+                                </button>
+                            </form>
+                        @endif
                     @endif
                 </div>
             </div>

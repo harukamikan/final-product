@@ -11,58 +11,22 @@ use Illuminate\Support\Facades\DB;
 
 class GachaService
 {
-    public const COSTS = [
-        'gacha'   => 100,
-        'scratch' => 50,
-    ];
+    public const COST = 100;
 
-    /* =======================
-       消費マイル取得
-    ======================= */
-    public function cost(string $via): int
+    public function cost(): int
     {
-        return self::COSTS[$via] ?? 0;
+        return self::COST;
     }
 
-    /* =======================
-       配布中の報酬があるか
-    ======================= */
-    public function hasActiveDistribution(int $companyId): bool
+    public function draw(int $userId, int $companyId)
     {
-        return RewardDistribution::where('company_id', $companyId)
-            ->where('is_active', true)
-            ->where(function ($q) {
-                $q->whereNull('starts_at')
-                  ->orWhere('starts_at', '<=', now());
-            })
-            ->where(function ($q) {
-                $q->whereNull('ends_at')
-                  ->orWhere('ends_at', '>=', now());
-            })
-            ->where(function ($q) {
-                $q->whereNull('quantity')
-                  ->orWhere('quantity', '>', 0);
-            })
-            ->exists();
-    }
+        return DB::transaction(function () use ($userId, $companyId) {
 
-    /* =======================
-       ガチャ / スクラッチ実行
-    ======================= */
-    public function draw(int $userId, int $companyId, string $via = 'gacha')
-    {
-        return DB::transaction(function () use ($userId, $companyId, $via) {
-
-            // ユーザー取得（排他ロック）
             $user = User::lockForUpdate()->findOrFail($userId);
 
-            // 現在のマイル
             $currentMiles = $user->mileHistories()->sum('miles');
 
-            $cost = $this->cost($via);
-
-            // マイル不足チェック（二重防御）
-            if ($currentMiles < $cost) {
+            if ($currentMiles < self::COST) {
                 return null;
             }
 
@@ -70,25 +34,25 @@ class GachaService
             MileHistory::create([
                 'user_id'    => $userId,
                 'company_id' => $companyId,
-                'miles'      => -$cost,
-                'type'       => $via,
-                'memo'       => "{$via} 消費",
+                'miles'      => -self::COST,
+                'type'       => 'gacha',
+                'memo'       => 'gacha 消費',
             ]);
 
-            // 配布中報酬プール
+            // 配布プール
             $pool = RewardDistribution::where('company_id', $companyId)
                 ->where('is_active', true)
                 ->where(function ($q) {
                     $q->whereNull('starts_at')
-                      ->orWhere('starts_at', '<=', now());
+                        ->orWhere('starts_at', '<=', now());
                 })
                 ->where(function ($q) {
                     $q->whereNull('ends_at')
-                      ->orWhere('ends_at', '>=', now());
+                        ->orWhere('ends_at', '>=', now());
                 })
                 ->where(function ($q) {
                     $q->whereNull('quantity')
-                      ->orWhere('quantity', '>', 0);
+                        ->orWhere('quantity', '>', 0);
                 })
                 ->lockForUpdate()
                 ->get();
@@ -97,10 +61,8 @@ class GachaService
                 return null;
             }
 
-            // 抽選
             $selected = $pool->random();
 
-            // 数量管理
             if (!is_null($selected->quantity)) {
                 $selected->decrement('quantity');
 
@@ -109,15 +71,13 @@ class GachaService
                 }
             }
 
-            // 報酬履歴
             RewardHistory::create([
                 'user_id'   => $userId,
                 'reward_id' => $selected->reward_id,
-                'via'       => $via,
+                'via'       => 'gacha',
                 'expires_at' => $selected->reward_expires_at,
             ]);
 
-            // ユーザー報酬（有効期限付き）
             UserReward::create([
                 'user_id'     => $userId,
                 'reward_id'   => $selected->reward_id,

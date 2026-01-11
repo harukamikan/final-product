@@ -245,19 +245,19 @@
                        bg-white border-r border-b border-slate-200
                        rotate-45 -mt-1">
             </div>
-    </div>
+        </div>
 
         {{-- ＋ボタン（右上） --}}
         <a href="{{ route('goals.create') }}"
-           @mouseenter="open = true"
-           @mouseleave="open = false"
-           @click="
+            @mouseenter="open = true"
+            @mouseleave="open = false"
+            @click="
                 if (window.innerWidth < 640 && !open) {
                     open = true;
                     $event.preventDefault();
                 }
                 "
-           class="absolute top-4 right-4
+            class="absolute top-4 right-4
                   w-10 h-10 flex items-center justify-center
                   rounded-full bg-indigo-500 text-white text-xl font-bold
                   hover:bg-indigo-600 active:scale-95 transition shadow-md">

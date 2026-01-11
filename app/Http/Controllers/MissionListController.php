@@ -48,31 +48,17 @@ class MissionListController extends Controller
     public function personal(Request $request)
     {
         $user = $request->user();
-
-        // 個人ミッション（user_id が自分）のみ取得
-        $allMissions = Mission::personalOnly($user->id)
-            ->with(['userMissions' => function ($q) use ($user) {
-                $q->where('user_id', $user->id);
-            }])
+        
+        // PersonalMission テーブルから未完了のみ取得
+        $missions = \App\Models\PersonalMission::where('user_id', $user->id)
+            ->whereNull('completed_at')
             ->orderBy('id')
             ->get();
-
-        // 未完了のみ
-        $missions = $allMissions->filter(function ($mission) {
-            $userMission = $mission->userMissions->first();
-
-            if (!$userMission) {
-                return true;
-            }
-
-            return is_null($userMission->completed_at);
-        });
-
+                
         $totalMiles = $user->total_miles
             ?? $user->mileHistories()->sum('miles');
-
         $earnedThisTime = (int) session('earned_miles', 0);
-
+        
         return view('missions.personal', [
             'missions'       => $missions,
             'totalMiles'     => $totalMiles,
@@ -83,23 +69,30 @@ class MissionListController extends Controller
     public function completed(Request $request)
     {
         $user = $request->user();
-
-        // 完了済みだけ（自分が見えるミッションのみ）
-        $missions = Mission::availableForUser($user->id)
+        
+        // 完了済みの企業ミッション
+        $companyMissions = Mission::availableForUser($user->id)
             ->with(['userMissions' => function ($q) use ($user) {
                 $q->where('user_id', $user->id)
-                  ->whereNotNull('completed_at');
+                ->whereNotNull('completed_at');
             }])
             ->orderBy('id')
             ->get()
             ->filter(fn ($mission) => $mission->userMissions->isNotEmpty());
-
+        
+        // 完了済みの個人ミッション
+        $personalMissions = \App\Models\PersonalMission::where('user_id', $user->id)
+            ->whereNotNull('completed_at')
+            ->orderBy('id')
+            ->get();
+        
         $totalMiles = $user->total_miles
             ?? $user->mileHistories()->sum('miles');
-
+        
         return view('missions.completed', [
-            'missions'   => $missions,
-            'totalMiles' => $totalMiles,
+            'missions'         => $companyMissions,
+            'personalMissions' => $personalMissions,
+            'totalMiles'       => $totalMiles,
         ]);
     }
 }

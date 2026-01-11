@@ -99,6 +99,10 @@ class MissionService
 
         // 進捗を1進める
         $userMission->progress_count += 1;
+        
+        // ★【追加】企業ミッション進捗時に、関連する個人ミッションも更新
+        // ★【修正】企業ミッション完了時に、カテゴリで個人ミッションも更新
+        $this->updatePersonalMissionByCategory($user, $mission);
 
         // まだ達成していない or すでに completed_at が入っている場合 → 進捗だけ保存
         if ($userMission->progress_count < $mission->required_count || $userMission->isCompleted()) {
@@ -129,7 +133,8 @@ class MissionService
 
             $userMission->completed_at = Carbon::now();
             $userMission->save();
-             // 個人ミッション（user_id がある）なら、ポイント加算
+            
+            // 個人ミッション（user_id がある）なら、ポイント加算
             if ($mission->user_id) {
                 $user->increment('personal_mission_points', 1);
             }
@@ -149,6 +154,7 @@ class MissionService
 
             //達成ミッション数を加算
             $user->increment('completed_missions');
+            
         });
 
         // Activity を記録する
@@ -265,4 +271,57 @@ class MissionService
         // Slack DM送信
         $slackService->sendDM($user->slack_id, $message);
     }
+
+        /**
+         * 関連する個人ミッションの進捗を更新
+         */
+        private function updateRelatedPersonalMission(User $user, int $personalMissionId): void
+        {
+            $personalMission = \App\Models\PersonalMission::find($personalMissionId);
+            
+            
+            
+            if (!$personalMission) {
+                return;
+            }
+            
+            // personal_missions の progress_count を直接更新
+            $personalMission->increment('progress_count');
+            
+            
+            
+            // 達成したか確認
+            if ($personalMission->progress_count >= $personalMission->required_count) {
+                $personalMission->update(['completed_at' => Carbon::now()]);
+                $user->increment('personal_mission_points', 1);
+            }
+
+        }
+        /**
+         * カテゴリ（キーワード）で個人ミッションを自動マッチングして更新
+         */
+        private function updatePersonalMissionByCategory(User $user, Mission $mission): void
+        {
+            // linked_category が企業ミッションの key と一致する個人ミッションを検索
+            $personalMission = \App\Models\PersonalMission::where('user_id', $user->id)
+                ->where('linked_category', $mission->key)
+                ->whereNull('completed_at')
+                ->first();
+            
+            if (!$personalMission) {
+                return;
+            }
+            
+            // 進捗+1
+            $personalMission->increment('progress_count');
+            $personalMission->refresh();  // ← 追加！最新の値を取得
+            
+            // 達成したか確認
+            if ($personalMission->progress_count >= $personalMission->required_count) {
+                $personalMission->update(['completed_at' => Carbon::now()]);
+                $user->increment('personal_mission_points', 1);
+            }
+        }
+            
+          
 }

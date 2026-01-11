@@ -19,6 +19,7 @@ class UserMission extends Model
         'proof_url',
         'progress_count',
         'completed_at',
+        'related_personal_mission_id',
     ];
 
     protected $casts = [

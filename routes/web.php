@@ -132,8 +132,8 @@ Route::middleware(['auth', 'company'])->group(function () {
     /*
     | Notifications
     */
-    Route::post('/notifications/mark-all-read', function() {
-        \App\Models\Notification::where('user_id', auth()->id())
+    Route::post('/notifications/mark-all-read', function () {
+        \App\Models\Notification::where('user_id', Auth::id())
             ->where('is_read', false)
             ->update(['is_read' => true]);
         return response()->json(['success' => true]);
@@ -252,12 +252,14 @@ Route::middleware(['auth', 'company'])->group(function () {
         ->name('personal-missions.create');
     Route::post('/missions/personal', [PersonalMissionController::class, 'store'])
         ->name('personal-missions.store');
-    Route::get('/missions/personal/{mission}/edit', [PersonalMissionController::class, 'edit'])
+    Route::get('/missions/personal/{personalMission}/edit', [PersonalMissionController::class, 'edit'])
         ->name('personal-missions.edit');
-    Route::patch('/missions/personal/{mission}', [PersonalMissionController::class, 'update'])
+    Route::patch('/missions/personal/{personalMission}', [PersonalMissionController::class, 'update'])
         ->name('personal-missions.update');
-    Route::delete('/missions/personal/{mission}', [PersonalMissionController::class, 'destroy'])
+    Route::delete('/missions/personal/{personalMission}', [PersonalMissionController::class, 'destroy'])
         ->name('personal-missions.destroy');
+    Route::post('/missions/personal/{personalMission}/complete', [PersonalMissionController::class, 'complete'])
+        ->name('personal-missions.complete');
 
     /*
     | Qiita
@@ -410,6 +412,7 @@ Route::middleware(['auth', 'company'])
         // 🧪 テスト用マイル付与
         Route::post('/add-miles', [DebugController::class, 'addMiles'])
             ->name('debug.add-miles');
+
+        Route::post('/add-scratch-points', [DebugController::class, 'addScratchPoints'])
+            ->name('debug.add-scratch-points');
     });
-
-
