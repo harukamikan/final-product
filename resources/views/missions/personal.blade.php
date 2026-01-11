@@ -146,13 +146,26 @@
                     
                     {{-- 個人ミッションのみ「完了 +1」ボタン --}}
                     @if ($mission->user_id)
-                        <form action="{{ route('missions.complete', $mission) }}" method="POST">
-                            @csrf
-                            <button type="submit"
-                                    class="px-4 py-2 rounded-xl bg-indigo-600 text-white text-sm font-medium hover:bg-indigo-700 transition">
-                                完了 +1
-                            </button>
-                        </form>
+                        @php
+                            // 自動連携するカテゴリのキーワード
+                            $autoSyncKeywords = ['ブログ', 'Blog', 'blog', '投稿', 'Qiita', '資格', '取得', 'Certificate', '一陸', '登壇', 'Speaker', '発表', '運営', '主催', 'Organizer', '企画', '開催'];
+                            $isAutoSync = false;
+                            foreach ($autoSyncKeywords as $keyword) {
+                                if (str_contains($mission->title, $keyword)) {
+                                    $isAutoSync = true;
+                                    break;
+                                }
+                            }
+                        @endphp
+                        @if (!$isAutoSync)
+                            <form action="{{ route('missions.complete', $mission) }}" method="POST">
+                                @csrf
+                                <button type="submit"
+                                        class="px-4 py-2 rounded-xl bg-indigo-600 text-white text-sm font-medium hover:bg-indigo-700 transition">
+                                    完了 +1
+                                </button>
+                            </form>
+                        @endif
                     @endif
                 </div>
             </div>
