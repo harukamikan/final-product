@@ -87,7 +87,7 @@
         @foreach ($missions as $mission)
             @php
                 $userMission = $mission->userMissions->first();
-                $progress = $userMission->progress_count ?? 0;
+                $progress = $mission->progress_count ?? 0;
                 $required = $mission->required_count;
                 $ratio = min(100, intval($progress / max(1, $required) * 100));
             @endphp
