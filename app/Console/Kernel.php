@@ -26,9 +26,9 @@ class Kernel extends ConsoleKernel
             ->command('rewards:deactivate-expired')
             ->everyMinute();
 
-            // リマインド通知（30分ごと）
+            // リマインド通知（テスト用：毎分実行）
             $schedule
                 ->command('reminders:send')
-                ->everyThirtyMinutes();
+                ->everyMinute();
     }
 }
