@@ -99,10 +99,7 @@ class MissionService
 
         // 進捗を1進める
         $userMission->progress_count += 1;
-        \Log::info('★ProgressMission: 進捗+1した後', [
-            'progress_count' => $userMission->progress_count,
-            'related_personal_mission_id' => $userMission->related_personal_mission_id,
-        ]);
+        
         // ★【追加】企業ミッション進捗時に、関連する個人ミッションも更新
         // ★【修正】企業ミッション完了時に、カテゴリで個人ミッションも更新
         $this->updatePersonalMissionByCategory($user, $mission);
@@ -282,11 +279,7 @@ class MissionService
         {
             $personalMission = \App\Models\PersonalMission::find($personalMissionId);
             
-            \Log::info('updateRelatedPersonalMission called', [
-                'personalMissionId' => $personalMissionId,
-                'found' => $personalMission ? true : false,
-                'before_progress' => $personalMission?->progress_count
-            ]);
+            
             
             if (!$personalMission) {
                 return;
@@ -295,9 +288,7 @@ class MissionService
             // personal_missions の progress_count を直接更新
             $personalMission->increment('progress_count');
             
-            \Log::info('After increment', [
-                'after_progress' => $personalMission->progress_count
-            ]);
+            
             
             // 達成したか確認
             if ($personalMission->progress_count >= $personalMission->required_count) {
@@ -321,13 +312,9 @@ class MissionService
             
             $keywords = $categoryKeywords[$mission->key] ?? [];
             
-            \Log::info('カテゴリマッチング開始', [
-                'mission_key' => $mission->key,
-                'keywords' => $keywords
-            ]);
+            
             
             if (empty($keywords)) {
-                \Log::info('対応するカテゴリなし', ['key' => $mission->key]);
                 return;
             }
             
@@ -344,22 +331,15 @@ class MissionService
             $personalMission = $query->first();
             
             if (!$personalMission) {
-                \Log::info('対応する個人ミッションなし');
                 return;
             }
             
-            \Log::info('個人ミッション見つかった', [
-                'id' => $personalMission->id,
-                'title' => $personalMission->title,
-                'before_progress' => $personalMission->progress_count
-            ]);
+            
             
             // 進捗+1
             $personalMission->increment('progress_count');
             
-            \Log::info('進捗更新完了', [
-                'after_progress' => $personalMission->progress_count
-            ]);
+           
             
             // 達成したか確認
             if ($personalMission->progress_count >= $personalMission->required_count) {
