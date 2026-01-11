@@ -15,6 +15,8 @@ class PersonalMission extends Model
         'description',
         'trigger_type',
         'required_count',
+        'progress_count',   
+        'completed_at', 
         'reward_miles',
         'repeatable',
     ];
