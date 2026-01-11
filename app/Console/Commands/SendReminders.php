@@ -17,6 +17,15 @@ class SendReminders extends Command
     public function handle()
     {
         \Log::info('=== SendReminders started ===');
+        \Log::info('Bot token exists: ' . (config('services.slack.notifications.bot_user_oauth_token') ? 'YES' : 'NO'));
+
+        try {
+            $userCount = \App\Models\User::count();
+            \Log::info('DB OK - User count: ' . $userCount);
+        } catch (\Exception $e) {
+            \Log::error('DB connection failed: ' . $e->getMessage());
+            return;
+        }
 
         $now = Carbon::now();
         \Log::info('Current time: ' . $now->toDateTimeString());
