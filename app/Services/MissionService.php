@@ -302,51 +302,25 @@ class MissionService
          */
         private function updatePersonalMissionByCategory(User $user, Mission $mission): void
         {
-            // 企業ミッションの key からカテゴリを判定
-           $categoryKeywords = [
-                'write_tech_blog' => ['ブログ', 'Blog', 'blog', '投稿', 'Qiita'],
-                'acquire_certificate' => ['資格', '取得', 'Certificate', '一陸'],
-                'event_speaker' => ['登壇', 'Speaker', '発表'],
-                'event_organizer' => ['運営', '主催', 'Organizer', '企画', '開催'],
-            ];
-            
-            $keywords = $categoryKeywords[$mission->key] ?? [];
-            
-            
-            
-            if (empty($keywords)) {
-                return;
-            }
-            
-            // キーワードで個人ミッションを検索
-            $query = \App\Models\PersonalMission::where('user_id', $user->id)
-                ->whereNull('completed_at');
-            
-            $query->where(function($q) use ($keywords) {
-                foreach ($keywords as $keyword) {
-                    $q->orWhere('title', 'like', "%{$keyword}%");
-                }
-            });
-            
-            $personalMission = $query->first();
+            // linked_category が企業ミッションの key と一致する個人ミッションを検索
+            $personalMission = \App\Models\PersonalMission::where('user_id', $user->id)
+                ->where('linked_category', $mission->key)
+                ->whereNull('completed_at')
+                ->first();
             
             if (!$personalMission) {
                 return;
             }
             
-            
-            
             // 進捗+1
             $personalMission->increment('progress_count');
-            
-           
             
             // 達成したか確認
             if ($personalMission->progress_count >= $personalMission->required_count) {
                 $personalMission->update(['completed_at' => Carbon::now()]);
                 $user->increment('personal_mission_points', 1);
-                \Log::info('個人ミッション達成！');
             }
         }
+            
           
 }

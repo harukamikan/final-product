@@ -49,6 +49,7 @@ class PersonalMissionController extends Controller
             'title' => 'required|string|max:255',
             'description' => 'nullable|string',
             'required_count' => 'required|integer|min:1',
+            'linked_category' => 'nullable|string|in:write_tech_blog,acquire_certificate,event_speaker,event_organizer',
         ]);
         
         // 制限チェック
@@ -66,6 +67,7 @@ class PersonalMissionController extends Controller
             'user_id' => $user->id,
             'company_id' => $user->company_id,
             'key' => \Illuminate\Support\Str::slug($request->title),
+            'linked_category' => $request->linked_category,
             'title' => $request->title,
             'description' => $request->description,
             'trigger_type' => 'manual',
@@ -125,12 +127,14 @@ class PersonalMissionController extends Controller
             'title' => 'required|string|max:255',
             'description' => 'nullable|string',
             'required_count' => 'required|integer|min:1',
+            'linked_category' => 'nullable|string|in:write_tech_blog,acquire_certificate,event_speaker,event_organizer',
         ]);
         
         $personalMission->update([
             'title' => $request->title,
             'description' => $request->description,
             'required_count' => $request->required_count,
+            'linked_category' => $request->linked_category,
         ]);
         
         return redirect()->route('missions.personal')

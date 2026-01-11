@@ -10,6 +10,7 @@ class PersonalMission extends Model
         'user_id',
         'company_id',
         'key',
+        'linked_category',
         'title',
         'description',
         'trigger_type',

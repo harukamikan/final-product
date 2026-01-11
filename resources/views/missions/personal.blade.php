@@ -146,18 +146,7 @@
                     
                     {{-- 個人ミッションのみ「完了 +1」ボタン --}}
                     @if ($mission->user_id)
-                        @php
-                            // 自動連携するカテゴリのキーワード
-                            $autoSyncKeywords = ['ブログ', 'Blog', 'blog', '投稿', 'Qiita', '資格', '取得', 'Certificate', '一陸', '登壇', 'Speaker', '発表', '運営', '主催', 'Organizer', '企画', '開催'];
-                            $isAutoSync = false;
-                            foreach ($autoSyncKeywords as $keyword) {
-                                if (str_contains($mission->title, $keyword)) {
-                                    $isAutoSync = true;
-                                    break;
-                                }
-                            }
-                        @endphp
-                        @if (!$isAutoSync)
+                        @if (!$mission->linked_category)
                             <form action="{{ route('missions.complete', $mission) }}" method="POST">
                                 @csrf
                                 <button type="submit"
