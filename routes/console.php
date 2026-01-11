@@ -8,7 +8,8 @@ Artisan::command('inspire', function () {
     $this->comment(Inspiring::quote());
 })->purpose('Display an inspiring quote');
 
-// リマインド機能のスケジュール
+// リマインド機能のスケジュール（テスト用：毎分）
 Schedule::command('reminders:send')
-    ->hourly()
+    ->everyMinute()
     ->withoutOverlapping();
+    
