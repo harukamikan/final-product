@@ -12,5 +12,5 @@ Artisan::command('inspire', function () {
 Schedule::command('reminders:send')
     ->everyMinute()
     ->withoutOverlapping()
-    ->sendOutputTo(storage_path('logs/reminders.log'));
+    ->appendOutputTo('php://stdout');
     
