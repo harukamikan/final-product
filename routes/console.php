@@ -11,5 +11,6 @@ Artisan::command('inspire', function () {
 // リマインド機能のスケジュール（テスト用：毎分）
 Schedule::command('reminders:send')
     ->everyMinute()
-    ->withoutOverlapping();
+    ->withoutOverlapping()
+    ->appendOutputTo('/proc/1/fd/1');
     
