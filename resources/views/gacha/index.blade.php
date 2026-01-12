@@ -8,7 +8,8 @@
         {{-- 📜 報酬履歴（右上・アニメーション付き） --}}
         <button
             type="button"
-            @click="window.location.href = '{{ route('rewards.history') }}'"
+            data-url="{{ route('rewards.history') }}"
+            onclick="location.href=this.dataset.url"
             class="absolute top-4 right-4
            inline-flex items-center gap-1
            px-4 py-2 text-xs font-bold
@@ -16,10 +17,8 @@
            bg-white/90 backdrop-blur
            border border-indigo-200
            rounded-full shadow-md
-
            transition-all duration-300 ease-out
            hover:-translate-y-1 hover:shadow-lg hover:bg-indigo-50
-
            animate-fade-in">
             📜 履歴
         </button>
