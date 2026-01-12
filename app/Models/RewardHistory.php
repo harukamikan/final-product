@@ -10,6 +10,8 @@ class RewardHistory extends Model
         'user_id',
         'reward_id',
         'via',
+        'result',
+        'miles',
         'expires_at',
     ];
 
