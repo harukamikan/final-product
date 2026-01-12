@@ -4,8 +4,6 @@ namespace App\Http\Controllers;
 
 use Illuminate\Support\Facades\Auth;
 use App\Models\RewardHistory;
-use App\Models\MileHistory;
-use Illuminate\Support\Collection;
 
 class RewardHistoryController extends Controller
 {
@@ -13,55 +11,75 @@ class RewardHistoryController extends Controller
     {
         $userId = Auth::id();
 
-        // ガチャ履歴
-        $gachaHistories = RewardHistory::with('reward')
+        $rawHistories = RewardHistory::with('reward')
             ->where('user_id', $userId)
-            ->where('via', 'gacha')
             ->latest()
-            ->get()
-            ->map(function ($h) {
-                return [
-                    'type'       => 'gacha',
-                    'title'      => $h->reward->name ?? '(不明な報酬)',
-                    'created_at' => $h->created_at,
-                    'expires_at' => $h->expires_at,
-                    'icon'       => '🎰',
-                ];
-            });
+            ->get();
 
+        $histories = $rawHistories->map(function ($h) {
 
-        // 🪙 スクラッチ履歴
-        $scratchHistories = MileHistory::where('user_id', $userId)
-            ->where('type', 'scratch')
-            ->latest()
-            ->get()
-            ->map(function ($h) {
+            /*
+            |--------------------------------------------------------------------------
+            | 🪙 スクラッチ
+            |--------------------------------------------------------------------------
+            */
+            if ($h->via === 'scratch') {
 
-                // マイル数（正の値で扱う）
-                $miles = (int) $h->miles;
+                // はずれ
+                if ($h->result === 'lose') {
+                    return [
+                        'icon'       => '😢',
+                        'title'      => 'スクラッチ はずれ',
+                        'type'       => 'scratch',
+                        'created_at' => $h->created_at,
+                        'expires_at' => null,
+                    ];
+                }
 
-                // タイトルを結果に応じて分岐
-                if ($miles > 0) {
-                    $title = "🎉 スクラッチ当たり（+{$miles} マイル）";
-                } else {
-                    $title = "😢 スクラッチはずれ";
+                // マイル当たり
+                if ($h->result === 'miles') {
+                    return [
+                        'icon'       => '🪙',
+                        'title'      => "{$h->miles} マイル獲得",
+                        'type'       => 'scratch',
+                        'created_at' => $h->created_at,
+                        'expires_at' => null,
+                    ];
+                }
+
+                // 報酬当たり
+                if ($h->result === 'win') {
+                    return [
+                        'icon'       => '🎁',
+                        'title'      => $h->reward?->name ?? 'スクラッチ報酬',
+                        'type'       => 'scratch',
+                        'created_at' => $h->created_at,
+                        'expires_at' => $h->expires_at,
+                    ];
                 }
 
                 return [
+                    'icon'       => '😢',
+                    'title'      => 'スクラッチ（結果不明）',
                     'type'       => 'scratch',
-                    'title'      => $title,
                     'created_at' => $h->created_at,
                     'expires_at' => null,
-                    'icon'       => '🪙',
-                    'miles'      => $miles,
                 ];
-            });
+            }
 
-
-        //ガチャとスクラッチ履歴を統合して新しい順
-        $histories = $gachaHistories
-            ->merge($scratchHistories)
-            ->sortByDesc('created_at');
+            /*
+            |--------------------------------------------------------------------------
+            | 🎰 ガチャ（最後のフォールバック）
+            |--------------------------------------------------------------------------
+            */
+            return [
+                'icon'       => '🎰',
+                'title'      => $h->reward?->name ?? 'ガチャ報酬',
+                'type'       => 'gacha',
+                'created_at' => $h->created_at,
+                'expires_at' => $h->expires_at,
+            ];
+        });
 
         return view('rewards.history', compact('histories'));
     }

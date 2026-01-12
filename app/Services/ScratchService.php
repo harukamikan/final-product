@@ -42,8 +42,16 @@ class ScratchService
             $result = $this->lottery();
             $miles  = $result['miles'];
 
-            // マイル付与（0は履歴だけ残す）
-            if ($miles !== 0) {
+            // RewardHistory は必ず作る（はずれも含む）
+            RewardHistory::create([
+                'user_id' => $user->id,
+                'via'     => 'scratch',
+                'result'  => $miles === 0 ? 'lose' : 'miles',
+                'miles'   => $miles,
+            ]);
+
+            // マイルがあれば MileHistory
+            if ($miles > 0) {
                 MileHistory::create([
                     'user_id'    => $user->id,
                     'company_id' => $user->company_id,
