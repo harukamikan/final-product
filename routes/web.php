@@ -306,6 +306,12 @@ Route::middleware(['auth', 'company'])->group(function () {
         Route::get('/dashboard', [AdminDashboardController::class, 'index'])
             ->name('dashboard');
 
+        // 半期設定
+        Route::get('/semester/settings', [App\Http\Controllers\SemesterSettingController::class, 'index'])
+            ->name('semester.index');
+        Route::post('/semester/settings', [App\Http\Controllers\SemesterSettingController::class, 'update'])
+            ->name('semester.update');
+
         Route::post('/rewards/toggle', [AdminRewardController::class, 'toggle'])
             ->name('rewards.toggle');
 
