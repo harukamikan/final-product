@@ -112,6 +112,8 @@ class OnboardingService
             'trigger_type' => $template['trigger_type'],
             'required_count' => $template['required_count'],
             'reward_miles' => $template['reward_miles'],
+            'mile_min' => $template['mile_min'],
+            'mile_max' => $template['mile_max'],
             'repeatable' => false, // Initial missions are one-time
         ]);
     }
@@ -150,7 +152,7 @@ class OnboardingService
         // Calculate required count based on user profile
         $requiredCount = $this->calculateRequiredCount($modifiers);
         
-        // Base templates with dynamic count
+        // Base templates with dynamic count and miles within defined ranges
         $templates = [
             'write_tech_blog' => [
                 'key' => 'write_tech_blog',
@@ -158,7 +160,9 @@ class OnboardingService
                 'title' => '技術ブログを書こう',
                 'description' => "Qiitaなどで技術記事を{$requiredCount}本投稿しましょう",
                 'required_count' => $requiredCount,
-                'reward_miles' => 100 * $requiredCount,
+                'reward_miles' => 45 * $requiredCount, // Mid-range: 30-60
+                'mile_min' => 30,
+                'mile_max' => 60,
             ],
             'event_organizer' => [
                 'key' => 'event_organizer',
@@ -166,7 +170,9 @@ class OnboardingService
                 'title' => 'イベントを企画しよう',
                 'description' => "社内外の勉強会やイベントを{$requiredCount}回企画・開催しましょう",
                 'required_count' => $requiredCount,
-                'reward_miles' => 150 * $requiredCount,
+                'reward_miles' => 95 * $requiredCount, // Mid-range: 70-120
+                'mile_min' => 70,
+                'mile_max' => 120,
             ],
             'event_speaker' => [
                 'key' => 'event_speaker',
@@ -174,7 +180,9 @@ class OnboardingService
                 'title' => 'イベントで登壇しよう',
                 'description' => "勉強会やカンファレンスで{$requiredCount}回発表しましょう",
                 'required_count' => $requiredCount,
-                'reward_miles' => 150 * $requiredCount,
+                'reward_miles' => 80 * $requiredCount, // Mid-range: 60-100
+                'mile_min' => 60,
+                'mile_max' => 100,
             ],
             'acquire_certificate' => [
                 'key' => 'acquire_certificate',
@@ -182,7 +190,9 @@ class OnboardingService
                 'title' => '資格を取得しよう',
                 'description' => "技術系の資格を{$requiredCount}つ取得しましょう",
                 'required_count' => $requiredCount,
-                'reward_miles' => 200 * $requiredCount,
+                'reward_miles' => 115 * $requiredCount, // Mid-range: 80-150
+                'mile_min' => 80,
+                'mile_max' => 150,
             ],
         ];
 
@@ -217,9 +227,16 @@ class OnboardingService
         }
 
         if ($modifiers['is_senior']) {
-            // More challenging wording for senior engineers
-            // Miles are already scaled by requiredCount, apply additional 1.5x multiplier
-            $template['reward_miles'] = (int)($template['reward_miles'] * 1.5);
+            // Senior engineers: use upper range of miles instead of multiplier
+            if ($missionType === 'write_tech_blog') {
+                $template['reward_miles'] = 55 * $requiredCount; // Higher within 30-60 range
+            } elseif ($missionType === 'event_speaker') {
+                $template['reward_miles'] = 90 * $requiredCount; // Higher within 60-100 range
+            } elseif ($missionType === 'event_organizer') {
+                $template['reward_miles'] = 110 * $requiredCount; // Higher within 70-120 range
+            } elseif ($missionType === 'acquire_certificate') {
+                $template['reward_miles'] = 140 * $requiredCount; // Higher within 80-150 range
+            }
             
             if ($isPrimary) {
                 if ($missionType === 'write_tech_blog') {

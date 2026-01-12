@@ -19,6 +19,13 @@
             <select
                 name="mission_type"
                 class="mt-2 block w-full rounded-xl border-gray-300 bg-white text-sm shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                x-on:change="$nextTick(() => {
+                    const mileInput = document.querySelector('[name=reward_miles]');
+                    if (mileInput) {
+                        const changeEvent = new Event('change');
+                        mileInput.dispatchEvent(changeEvent);
+                    }
+                })"
             >
                 <option value="">選択してください</option>
                 <option value="write_tech_blog" @selected($missionTypeSelected === 'write_tech_blog')>
@@ -100,17 +107,33 @@
             </div>
 
             {{-- 報酬マイル --}}
-            <div>
+            <div x-data="{
+                mileRanges: {
+                    'write_tech_blog': { min: 30, max: 60 },
+                    'event_speaker': { min: 60, max: 100 },
+                    'event_organizer': { min: 70, max: 120 },
+                    'acquire_certificate': { min: 80, max: 150 }
+                },
+                selectedType: '{{ old('mission_type', $mission->key ?? '') }}',
+                get currentRange() {
+                    return this.mileRanges[this.selectedType] || { min: 0, max: 1000 };
+                }
+            }">
                 <label class="block text-sm font-medium text-gray-700">
                     報酬マイル
                 </label>
+                <p class="text-xs text-gray-500 mt-1" x-show="selectedType">
+                    <span x-text="`${currentRange.min}〜${currentRange.max}マイルの範囲で設定してください`"></span>
+                </p>
                 <div class="mt-2 relative rounded-xl shadow-sm">
                     <input
                         type="number"
                         name="reward_miles"
-                        min="0"
+                        x-bind:min="currentRange.min"
+                        x-bind:max="currentRange.max"
                         value="{{ old('reward_miles', $mission->reward_miles ?? 0) }}"
                         class="block w-full rounded-xl border-gray-300 pr-10 focus:border-indigo-500 focus:ring-indigo-500 text-sm"
+                        x-on:change="selectedType = document.querySelector('[name=mission_type]').value"
                     >
                     <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3">
                         <span class="text-gray-400 text-xs">mile</span>

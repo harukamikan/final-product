@@ -3,7 +3,26 @@
 @section('content')
 {{-- ミッション達成モーダル --}}
 @if(session('achievementData'))
-    @include('components.mission-completion-modal', ['achievementData' => session('achievementData')])
+    {{-- DEBUG: データ確認 --}}
+    @php
+        $achievementData = session('achievementData');
+        \Log::info('Achievement Data:', $achievementData);
+    @endphp
+    
+    @if(isset($achievementData['mission_completed']) && $achievementData['mission_completed'])
+        <!-- Modal should display -->
+        @include('components.mission-completion-modal', ['achievementData' => $achievementData])
+    @else
+        <!-- DEBUG: mission_completed is false or missing -->
+        <div style="position: fixed; top: 10px; right: 10px; background: red; color: white; padding: 10px; z-index: 9999;">
+            Debug: mission_completed = {{ json_encode($achievementData['mission_completed'] ?? 'NOT SET') }}
+        </div>
+    @endif
+@else
+    <!-- DEBUG: No achievementData in session -->
+    <!--<div style="position: fixed; top: 10px; right: 10px; background: orange; color: white; padding: 10px; z-index: 9999;">
+        Debug: No achievementData in session
+    </div>-->
 @endif
 
 {{-- 進捗トースト（未完了の場合） --}}

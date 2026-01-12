@@ -118,10 +118,33 @@ class MissionService
         }
 
         // ここに来たら「今ちょうど達成した」
-        $earned = (int) $mission->reward_miles;
-       
+        // Determine miles to award (AI-based or fixed)
+        $earned = 0;
+        $aiScore = null;
+        $aiReason = null;
+        $aiEncouragement = null;
+        $baseMiles = null;
+        $bonusMiles = null;
 
-        DB::transaction(function () use ($user, $mission, $userMission, $earned, $payload) {
+        if ($mission->mile_min && $mission->mile_max) {
+            // Use AI scoring
+            $mileScoringService = app(MileScoringService::class);
+            $scoreResult = $mileScoringService->scoreMission($mission, $payload);
+            
+            $earned = $scoreResult['miles'];
+            $aiScore = $scoreResult['score'];
+            $aiReason = $scoreResult['reason'];
+            $aiEncouragement = $scoreResult['encouragement'] ?? null;
+            
+            // Calculate base and bonus
+            $baseMiles = $mission->mile_min;
+            $bonusMiles = $earned - $baseMiles;
+        } else {
+            // Use fixed reward_miles (legacy behavior)
+            $earned = (int) $mission->reward_miles;
+        }
+
+        DB::transaction(function () use ($user, $mission, $userMission, $earned, $payload, $aiScore, $aiReason, $aiEncouragement) {
             // 念のためトランザクション内でも URL を反映
             if (!empty($payload['url'])) {
                 $userMission->proof_url = $payload['url'];
@@ -136,12 +159,16 @@ class MissionService
 
             // マイル履歴作成
             MileHistory::create([
-                'user_id'     => $user->id,
-                'company_id'  => $user->company_id,
-                'mission_id'  => $mission->id,
-                'miles'       => $earned,
-                'type'        => 'earn',
-                'description' => 'mission_completed',
+                'user_id'      => $user->id,
+                'company_id'   => $user->company_id,
+                'mission_id'   => $mission->id,
+                'miles'        => $earned,
+                'mile_awarded' => $earned,
+                'ai_score'     => $aiScore,
+                'ai_reason'    => $aiReason,
+                'ai_encouragement' => $aiEncouragement,
+                'type'         => 'earn',
+                'description'  => 'mission_completed',
             ]);
 
             // ユーザーの合計マイルを更新
@@ -177,6 +204,9 @@ class MissionService
 
         return [
             'earned_miles' => $earned,
+            'base_miles' => $baseMiles,
+            'bonus_miles' => $bonusMiles,
+            'ai_encouragement' => $aiEncouragement,
             'mission_completed' => true,
             'mission_title' => $mission->title,
             'progress' => [

@@ -1,10 +1,13 @@
 {{--
-    ミッション完了モーダル
+    ミッション完了モーダル - Enhanced with AI Mile Breakdown
     
     使用方法:
     @include('components.mission-completion-modal', [
         'achievementData' => [
             'earned_miles' => 150,
+            'base_miles' => 30,  // NEW
+            'bonus_miles' => 120, // NEW
+            'ai_encouragement' => 'お疲れ様です！', // NEW
             'mission_title' => 'ミッション名',
             'rank_info' => [...],
             'next_action' => [...],
@@ -14,36 +17,13 @@
 
 @if(isset($achievementData) && $achievementData['mission_completed'] ?? false)
 <div 
-    x-data="{ 
+    x-data="{
         open: true,
         earnedMiles: {{ $achievementData['earned_miles'] ?? 0 }},
-        displayedMiles: 0,
-        isPulsing: false,
-        init() {
-            // マイルのカウントアップアニメーション
-            this.$nextTick(() => {
-                const duration = 600;
-                const steps = 30;
-                const increment = this.earnedMiles / steps;
-                const stepDuration = duration / steps;
-                
-                // アニメーション開始時にパルス効果を開始
-                setTimeout(() => { this.isPulsing = true; }, 100);
-                
-                let currentStep = 0;
-                const interval = setInterval(() => {
-                    currentStep++;
-                    if (currentStep >= steps) {
-                        this.displayedMiles = this.earnedMiles;
-                        clearInterval(interval);
-                        // アニメーション終了後にパルス効果を停止
-                        setTimeout(() => { this.isPulsing = false; }, 200);
-                    } else {
-                        this.displayedMiles = Math.floor(increment * currentStep);
-                    }
-                }, stepDuration);
-            });
-        }
+        baseMiles: {{ $achievementData['base_miles'] ?? 0 }},
+        bonusMiles: {{ $achievementData['bonus_miles'] ?? 0 }},
+        encouragement: @json($achievementData['ai_encouragement'] ?? ''),
+        hasBreakdown: {{ (!empty($achievementData['base_miles']) && !empty($achievementData['bonus_miles'])) ? 'true' : 'false' }}
     }"
     x-show="open"
     x-transition:enter="transition ease-out duration-300"
@@ -54,7 +34,6 @@
     x-transition:leave-end="opacity-0"
     class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm"
     @click.self="open = false"
-    style="display: none;"
 >
     <div 
         x-show="open"
@@ -76,6 +55,12 @@
 
         {{-- コンテンツ部分 --}}
         <div class="px-6 py-6 space-y-6">
+            {{-- AI励ましメッセージ --}}
+            <div x-show="encouragement" x-transition class="bg-gradient-to-r from-purple-50 to-pink-50 border-2 border-purple-200 rounded-2xl p-4 text-center">
+                <div class="text-3xl mb-2">✨</div>
+                <p class="text-lg font-bold text-purple-800" x-text="encouragement"></p>
+            </div>
+
             {{-- 獲得マイル --}}
             <div class="text-center relative py-4">
                 {{-- パーティクルエフェクト --}}
@@ -106,17 +91,48 @@
                     </div>
                 </div>
                 
-                <p class="text-sm text-gray-500 mb-2">獲得マイル</p>
-                <div 
-                    class="relative inline-block"
-                    :class="{ 'animate-bounce-subtle': isPulsing }"
-                >
-                    <p class="text-6xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-purple-600 relative z-10">
-                        <span x-text="'+' + displayedMiles"></span>
-                    </p>
-                    <p class="text-2xl opacity-70 ml-2 text-indigo-400 inline-block">miles</p>
+                <p class="text-sm text-gray-500 mb-3">獲得マイル</p>
+                
+                {{-- AI評価あり: 内訳表示 --}}
+                <div x-show="hasBreakdown" x-transition class="space-y-3">
+                    {{-- 基本マイル --}}
+                    <div class="text-2xl text-gray-600">
+                        <span x-text="baseMiles"></span> マイル
+                        <span class="text-sm text-gray-400">(基本)</span>
+                    </div>
+                    
+                    {{-- プラス記号 --}}
+                    <div class="text-3xl font-bold text-indigo-600">
+                        <span x-show="bonusMiles > 0">+</span>
+                    </div>
+                    
+                    {{-- ボーナスマイル --}}
+                    <div 
+                        class="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-yellow-500 to-orange-500"
+                        x-show="bonusMiles > 0"
+                        x-transition
+                    >
+                        <span x-text="bonusMiles"></span> マイル
+                        <div class="text-sm text-orange-400 mt-1">(AI評価ボーナス)</div>
+                    </div>
+                    
+                    {{-- 区切り線 --}}
+                    <div class="border-t-2 border-dashed border-gray-300 my-3 mx-12"></div>
+                    
+                    {{-- 合計 --}}
+                    <div class="text-6xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-purple-600">
+                        <span x-text="'+' + earnedMiles"></span>
+                        <span class="text-2xl opacity-70 ml-2 text-indigo-400">miles</span>
+                    </div>
                 </div>
-                </p>
+                
+                {{-- AI評価なし: 従来表示 --}}
+                <div x-show="!hasBreakdown" x-transition>
+                    <div class="text-6xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-purple-600">
+                        <span x-text="'+' + earnedMiles"></span>
+                        <span class="text-2xl opacity-70 ml-2 text-indigo-400">miles</span>
+                    </div>
+                </div>
             </div>
 
             @if($achievementData['rank_info']['rank_up'] ?? false)
@@ -187,7 +203,6 @@
             <button 
                 @click="
                     open = false;
-                    // マイル表示更新イベントを発火
                     $dispatch('miles-updated', {
                         previousMiles: {{ ($achievementData['rank_info']['current_miles'] ?? 0) - ($achievementData['earned_miles'] ?? 0) }},
                         newMiles: {{ $achievementData['rank_info']['current_miles'] ?? 0 }},
@@ -201,4 +216,33 @@
         </div>
     </div>
 </div>
+
+<style>
+@keyframes sparkle {
+    0% {
+        opacity: 0;
+        transform: scale(0);
+    }
+    50% {
+        opacity: 1;
+    }
+    100% {
+        opacity: 0;
+        transform: scale(1.5);
+    }
+}
+
+@keyframes bounce-subtle {
+    0%, 100% {
+        transform: translateY(0);
+    }
+    50% {
+        transform: translateY(-10px);
+    }
+}
+
+.animate-bounce-subtle {
+    animation: bounce-subtle 0.6s ease-in-out;
+}
+</style>
 @endif

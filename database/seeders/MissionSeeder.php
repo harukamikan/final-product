@@ -17,7 +17,9 @@ class MissionSeeder extends Seeder
                 'description'    => 'Qiitaなどに技術記事を投稿し、URLを登録すると達成となります。',
                 'trigger_type'   => 'tech_blog_posted',
                 'required_count' => 1,
-                'reward_miles'   => 50,   // ★会社と相談して決める
+                'reward_miles'   => 45,  // Mid-range within 30-60
+                'mile_min'       => 30,
+                'mile_max'       => 60,
                 'repeatable'     => false,
             ]
         );
@@ -30,7 +32,9 @@ class MissionSeeder extends Seeder
                 'description'    => '技術イベントなどで登壇し、報告用のGoogleフォームURLを登録すると達成となります。',
                 'trigger_type'   => 'google_form_submitted',
                 'required_count' => 1,
-                'reward_miles'   => 150, // TODO: 適宜調整
+                'reward_miles'   => 80, // Mid-range within 60-100
+                'mile_min'       => 60,
+                'mile_max'       => 100,
                 'repeatable'     => false,
             ]
         );
@@ -43,7 +47,9 @@ class MissionSeeder extends Seeder
                 'description'    => '社内外向けのイベントを企画・開催し、報告用のGoogleフォームURLを登録すると達成となります。',
                 'trigger_type'   => 'google_form_submitted',
                 'required_count' => 1,
-                'reward_miles'   => 200, // TODO: 適宜調整
+                'reward_miles'   => 95, // Mid-range within 70-120
+                'mile_min'       => 70,
+                'mile_max'       => 120,
                 'repeatable'     => false,
             ]
         );
@@ -56,7 +62,9 @@ class MissionSeeder extends Seeder
                 'description'    => '業務やキャリアに関連する資格を取得し、報告用のGoogleフォームURLを登録すると達成となります。',
                 'trigger_type'   => 'google_form_submitted',
                 'required_count' => 1,
-                'reward_miles'   => 100, // TODO: 資格の重さで調整してもOK
+                'reward_miles'   => 115, // Mid-range within 80-150
+                'mile_min'       => 80,
+                'mile_max'       => 150,
                 'repeatable'     => false,
             ]
         );

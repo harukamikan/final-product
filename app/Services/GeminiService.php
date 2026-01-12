@@ -103,4 +103,110 @@ PROMPT;
 
         return $text ?: null;
     }
+
+    /**
+     * Score content using AI and return structured JSON response
+     * 
+     * @param string $prompt
+     * @return array|null ['score' => float, 'reason' => string, 'signals' => array]
+     */
+    public function scoreContent(string $prompt): ?array
+    {
+        $apiKey = $this->getApiKey();
+
+        if (!$apiKey) {
+            Log::warning('Gemini API key is not set for scoring.');
+            return null;
+        }
+
+        $endpoint = 'https://generativelanguage.googleapis.com/v1/models/gemini-2.5-flash:generateContent';
+
+        try {
+            $response = Http::withHeaders([
+                    'Content-Type' => 'application/json',
+                ])
+                ->timeout(30)
+                ->post($endpoint.'?key='.$apiKey, [
+                    'contents' => [
+                        [
+                            'parts' => [
+                                ['text' => $prompt],
+                            ],
+                        ],
+                    ],
+                    'generationConfig' => [
+                        'maxOutputTokens' => 1024,
+                        'temperature' => 0.3, // Lower temperature for consistent scoring
+                    ],
+                ]);
+
+            if (! $response->successful()) {
+                Log::error('Gemini API scoring error', [
+                    'status' => $response->status(),
+                    'body'   => $response->body(),
+                ]);
+                return null;
+            }
+
+            $json = $response->json();
+            $text = $json['candidates'][0]['content']['parts'][0]['text'] ?? null;
+
+            if (!$text) {
+                return null;
+            }
+
+            // Extract JSON from response (handle markdown code blocks)
+            $text = trim($text);
+            $text = preg_replace('/^```json\s*/m', '', $text);
+            $text = preg_replace('/\s*```$/m', '', $text);
+            $text = trim($text);
+
+            // Parse JSON
+            $result = json_decode($text, true);
+
+            if (json_last_error() !== JSON_ERROR_NONE) {
+                Log::error('Failed to parse Gemini scoring JSON', [
+                    'error' => json_last_error_msg(),
+                    'response' => $text,
+                ]);
+                return null;
+            }
+
+            // Validate required fields
+            if (!isset($result['score']) || !isset($result['reason'])) {
+                Log::error('Invalid Gemini scoring response structure', [
+                    'response' => $result,
+                ]);
+                return null;
+            }
+
+            // Ensure score is in valid range
+            $result['score'] = max(0.0, min(1.0, (float) $result['score']));
+
+            return $result;
+        } catch (\Exception $e) {
+            Log::error('Gemini scoring exception', [
+                'error' => $e->getMessage(),
+            ]);
+            return null;
+        }
+    }
+
+    /**
+     * Get API key for scoring (prefers api_key2, falls back to api_key)
+     * 
+     * @return string|null
+     */
+    protected function getApiKey(): ?string
+    {
+        // Prefer api_key2 for scoring if available
+        $key2 = config('services.gemini.api_key2');
+        if ($key2) {
+            return $key2;
+        }
+
+        // Fallback to original api_key
+        return config('services.gemini.api_key');
+    }
 }
+

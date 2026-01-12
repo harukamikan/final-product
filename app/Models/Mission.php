@@ -20,11 +20,15 @@ class Mission extends Model
         'trigger_type',
         'required_count',
         'reward_miles',
+        'mile_min',
+        'mile_max',
         'repeatable',
     ];
 
     protected $casts = [
         'reward_miles' => 'integer',
+        'mile_min' => 'integer',
+        'mile_max' => 'integer',
     ];
 
     /**
@@ -87,5 +91,13 @@ class Mission extends Model
     public function scopeSharedOnly($query)
     {
         return $query->whereNull('user_id');
+    }
+
+    /**
+     * Check if this mission uses AI-based scoring
+     */
+    public function usesAiScoring(): bool
+    {
+        return !is_null($this->mile_min) && !is_null($this->mile_max);
     }
 }

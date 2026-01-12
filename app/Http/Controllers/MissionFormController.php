@@ -38,7 +38,23 @@ class MissionFormController extends Controller
 
         // 2) ミッション達成処理（MissionServiceを使ってマイル付与も行う）
         $missionService = app(\App\Services\MissionService::class);
-        $achievementData = $missionService->completeManually($user, $mission);
+        
+        // Pass form data as payload for AI scoring
+        $payload = [
+            'title' => $request->title,
+            'details' => $request->details,
+            'occurred_on' => $request->occurred_on,
+            'evidence_url' => $request->evidence_url,
+            'mission_key' => $mission->key,
+            'mission_id' => $mission->id,
+        ];
+        
+        $achievementData = $missionService->handleTrigger(
+            $user,
+            $mission->trigger_type,
+            $payload
+        );
+
 
         // 3) タイムラインイベントを作成
         $timelineService = app(\App\Services\TimelineService::class);

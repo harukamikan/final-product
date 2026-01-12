@@ -16,12 +16,17 @@ class MileHistory extends Model
         'company_id',
         'mission_id',
         'miles',
+        'ai_score',
+        'ai_reason',
+        'ai_encouragement',
+        'mile_awarded',
         'type',
         'description',
     ];
 
     protected $casts = [
         'miles' => 'integer',
+        'ai_score' => 'float',
         'created_at' => 'datetime',
     ];
 

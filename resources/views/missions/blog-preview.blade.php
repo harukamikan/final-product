@@ -8,13 +8,26 @@
 
     {{-- 完了メッセージ & マイル --}}
     <div class="rounded-3xl bg-emerald-50 border border-emerald-100 px-5 py-4 flex justify-between items-center">
-        <div>
+        <div class="flex-1">
             <p class="text-sm text-emerald-700 font-medium">
                 技術ブログのURLを登録しました 🎉
             </p>
+            
+            @if(!empty($achievementData['ai_encouragement']))
+                <p class="text-sm text-purple-700 font-bold mt-2">
+                    ✨ {{ $achievementData['ai_encouragement'] }}
+                </p>
+            @endif
+            
             @if (($achievementData['earned_miles'] ?? 0) > 0)
-                <p class="text-xs text-emerald-700 mt-1">
-                    このミッションで <span class="font-bold">{{ $achievementData['earned_miles'] }} mile</span> を獲得しました。
+                <p class="text-xs text-emerald-700 mt-2">
+                    @if(!empty($achievementData['base_miles']) && !empty($achievementData['bonus_miles']))
+                        基本 <span class="font-bold">{{ $achievementData['base_miles'] }}マイル</span> + 
+                        AI評価ボーナス <span class="font-bold text-orange-600">{{ $achievementData['bonus_miles'] }}マイル</span> = 
+                        合計 <span class="font-bold text-lg">{{ $achievementData['earned_miles'] }}マイル</span> を獲得！
+                    @else
+                        このミッションで <span class="font-bold">{{ $achievementData['earned_miles'] }} マイル</span> を獲得しました。
+                    @endif
                 </p>
             @endif
         </div>

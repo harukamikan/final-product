@@ -50,6 +50,7 @@ return [
 
     'gemini' => [
         'api_key' => env('GEMINI_API_KEY'),
-            ],
+        'api_key2' => env('GEMINI_API_KEY2'),
+    ],
 
 ];
