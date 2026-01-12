@@ -77,7 +77,7 @@ class MissionService
         }
 
         // 現在のマイル数（ランク計算用）
-        $previousMiles = $user->total_miles ?? MileHistory::where('user_id', $user->id)->sum('miles');
+        $previousMiles = MileHistory::where('user_id', $user->id)->sum('miles');
 
         // すでにクリア済みで、repeatable じゃない場合は何もしない
         if ($userMission->isCompleted() && !$mission->repeatable) {
@@ -246,8 +246,8 @@ class MissionService
     {
         $slackService = app(SlackService::class);
 
-        $oldRank = $rankInfo['old_rank'];
-        $newRank = $rankInfo['new_rank'];
+        $oldRank = $rankInfo['previous_rank'];
+        $newRank = $rankInfo['current_rank'];
         $currentMiles = $rankInfo['current_miles'];
 
         $oldEmoji = $oldRank == 'ゴールド' ? '🥇' : ($oldRank == 'シルバー' ? '🥈' : '🥉');
