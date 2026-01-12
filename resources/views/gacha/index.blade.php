@@ -6,22 +6,23 @@
         class="w-full max-w-md bg-white rounded-3xl shadow-xl p-8 space-y-6 text-center relative">
 
         {{-- 📜 報酬履歴（右上・アニメーション付き） --}}
-        <a
-            href="{{ route('rewards.history') }}"
+        <button
+            type="button"
+            @click="window.location.href = '{{ route('rewards.history') }}'"
             class="absolute top-4 right-4
-                   inline-flex items-center gap-1
-                   px-4 py-2 text-xs font-bold
-                   text-indigo-600
-                   bg-white/90 backdrop-blur
-                   border border-indigo-200
-                   rounded-full shadow-md
+           inline-flex items-center gap-1
+           px-4 py-2 text-xs font-bold
+           text-indigo-600
+           bg-white/90 backdrop-blur
+           border border-indigo-200
+           rounded-full shadow-md
 
-                   transition-all duration-300 ease-out
-                   hover:-translate-y-1 hover:shadow-lg hover:bg-indigo-50
+           transition-all duration-300 ease-out
+           hover:-translate-y-1 hover:shadow-lg hover:bg-indigo-50
 
-                   animate-fade-in">
+           animate-fade-in">
             📜 履歴
-        </a>
+        </button>
 
         {{-- 🎰 タイトル --}}
         <h1 class="text-3xl font-extrabold text-indigo-600 tracking-wide">

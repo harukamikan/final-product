@@ -248,21 +248,24 @@
         </div>
 
         {{-- ＋ボタン（右上） --}}
-        <a href="{{ route('goals.create') }}"
+        <button
+            type="button"
             @mouseenter="open = true"
             @mouseleave="open = false"
             @click="
-                if (window.innerWidth < 640 && !open) {
-                    open = true;
-                    $event.preventDefault();
-                }
-                "
+        if (window.innerWidth < 640 && !open) {
+            open = true;
+        } else {
+            window.location.href = '{{ route('goals.create') }}';
+        }
+    "
             class="absolute top-4 right-4
-                  w-10 h-10 flex items-center justify-center
-                  rounded-full bg-indigo-500 text-white text-xl font-bold
-                  hover:bg-indigo-600 active:scale-95 transition shadow-md">
+           w-10 h-10 flex items-center justify-center
+           rounded-full bg-indigo-500 text-white text-xl font-bold
+           hover:bg-indigo-600 active:scale-95 transition shadow-md">
             +
-        </a>
+        </button>
+
 
         <h3 class="text-lg font-semibold text-slate-800 mb-4">
             📝 最近の記録
@@ -321,14 +324,10 @@
     new Chart(ctx, {
         type: 'bar',
         data: {
-            labels: {
-                !!json_encode($weeklyLabels) !!
-            },
+            labels: {!!json_encode($weeklyLabels) !!},
             datasets: [{
                 label: '活動件数',
-                data: {
-                    !!json_encode($weeklyData) !!
-                },
+                data: {!!json_encode($weeklyData) !!},
                 backgroundColor: 'rgba(79, 70, 229, 0.8)',
                 borderColor: 'rgba(79, 70, 229, 1)',
                 borderWidth: 1
