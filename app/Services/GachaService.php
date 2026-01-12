@@ -6,17 +6,11 @@ use App\Models\RewardDistribution;
 use App\Models\RewardHistory;
 use App\Models\MileHistory;
 use App\Models\User;
-use App\Models\UserReward;
 use Illuminate\Support\Facades\DB;
 
 class GachaService
 {
     public const COST = 100;
-
-    public function cost(): int
-    {
-        return self::COST;
-    }
 
     public function draw(int $userId, int $companyId)
     {
@@ -24,8 +18,8 @@ class GachaService
 
             $user = User::lockForUpdate()->findOrFail($userId);
 
+            // 現在のマイル確認
             $currentMiles = $user->mileHistories()->sum('miles');
-
             if ($currentMiles < self::COST) {
                 return null;
             }
@@ -36,23 +30,23 @@ class GachaService
                 'company_id' => $companyId,
                 'miles'      => -self::COST,
                 'type'       => 'gacha',
-                'memo'       => 'gacha 消費',
+                'memo'       => 'ガチャ消費',
             ]);
 
-            // 配布プール
+            // ガチャ配布プール
             $pool = RewardDistribution::where('company_id', $companyId)
                 ->where('is_active', true)
                 ->where(function ($q) {
                     $q->whereNull('starts_at')
-                        ->orWhere('starts_at', '<=', now());
+                      ->orWhere('starts_at', '<=', now());
                 })
                 ->where(function ($q) {
                     $q->whereNull('ends_at')
-                        ->orWhere('ends_at', '>=', now());
+                      ->orWhere('ends_at', '>=', now());
                 })
                 ->where(function ($q) {
                     $q->whereNull('quantity')
-                        ->orWhere('quantity', '>', 0);
+                      ->orWhere('quantity', '>', 0);
                 })
                 ->lockForUpdate()
                 ->get();
@@ -63,27 +57,20 @@ class GachaService
 
             $selected = $pool->random();
 
+            // 数量管理
             if (!is_null($selected->quantity)) {
                 $selected->decrement('quantity');
-
                 if ($selected->quantity <= 0) {
                     $selected->update(['is_active' => false]);
                 }
             }
 
+            // 履歴保存（ガチャ）
             RewardHistory::create([
-                'user_id'   => $userId,
-                'reward_id' => $selected->reward_id,
-                'via'       => 'gacha',
+                'user_id'    => $userId,
+                'reward_id'  => $selected->reward_id,
+                'via'        => 'gacha',
                 'expires_at' => $selected->reward_expires_at,
-            ]);
-
-            UserReward::create([
-                'user_id'     => $userId,
-                'reward_id'   => $selected->reward_id,
-                'company_id'  => $companyId,
-                'acquired_at' => now(),
-                'expires_at'  => $selected->reward_expires_at,
             ]);
 
             return $selected->reward;
