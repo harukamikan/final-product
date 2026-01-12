@@ -19,13 +19,7 @@
                     <div class="font-semibold text-lg">
                         {{ $ur->reward->name }}
                     </div>
-
-                    @if($ur->reward->description)
-                        <p class="text-sm text-gray-600">
-                            {{ $ur->reward->description }}
-                        </p>
-                    @endif
-
+                    
                     {{-- 有効期限 --}}
                     @if($ur->expires_at)
                         <p class="text-sm text-gray-500">
