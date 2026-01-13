@@ -58,6 +58,31 @@
                                 value="{{ old('email', optional($setting)->email) }}"
                                 class="mt-1 block w-full rounded-md border-gray-300 shadow-sm">
                         </div>
+                        {{-- 個人ミッション編集期間 --}}
+                        <div class="mb-6 p-4 bg-gray-50 rounded-lg">
+                            <h3 class="text-lg font-semibold mb-4">📝 個人ミッション編集期間</h3>
+                            <p class="text-sm text-gray-500 mb-4">
+                                この期間内のみ、ユーザーは個人ミッションを編集・削除できます。
+                            </p>
+                            <div class="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label for="personal_mission_edit_start" class="block text-sm font-medium text-gray-700">
+                                        開始日
+                                    </label>
+                                    <input type="date" name="personal_mission_edit_start" id="personal_mission_edit_start"
+                                        value="{{ old('personal_mission_edit_start', optional($setting)->personal_mission_edit_start?->format('Y-m-d')) }}"
+                                        class="mt-1 block w-full rounded-md border-gray-300 shadow-sm">
+                                </div>
+                                <div>
+                                    <label for="personal_mission_edit_end" class="block text-sm font-medium text-gray-700">
+                                        終了日
+                                    </label>
+                                    <input type="date" name="personal_mission_edit_end" id="personal_mission_edit_end"
+                                        value="{{ old('personal_mission_edit_end', optional($setting)->personal_mission_edit_end?->format('Y-m-d')) }}"
+                                        class="mt-1 block w-full rounded-md border-gray-300 shadow-sm">
+                                </div>
+                            </div>
+                        </div>
 
                         <button type="submit"
                             class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">

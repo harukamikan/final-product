@@ -99,7 +99,12 @@
                 $actionLabel = getMissionActionLabel($type);
                 $colors = getMissionColorClasses($type);
                 
-                $canManage = $mission->user_id && $mission->created_at->addDays(10)->isFuture();
+                $adminSetting = \App\Models\AdminSetting::first();
+                $canManage = $mission->user_id && 
+                    $adminSetting && 
+                    $adminSetting->personal_mission_edit_start && 
+                    $adminSetting->personal_mission_edit_end &&
+                    now()->between($adminSetting->personal_mission_edit_start, $adminSetting->personal_mission_edit_end);
             @endphp
 
             <div class="rounded-3xl border-l-4 {{ $colors['border'] }} bg-white px-5 py-6 shadow-sm space-y-4">
