@@ -133,7 +133,7 @@ if (!function_exists('getMissionUrl')) {
     {
         // PersonalMission の場合は編集ページへ
         if ($mission instanceof \App\Models\PersonalMission) {
-            return route('missions.personal.edit', $mission->id);
+            return route('personal-missions.edit', $mission->id);
         }
 
         // Mission の trigger_type に応じて分岐
