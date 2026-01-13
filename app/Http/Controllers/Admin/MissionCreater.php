@@ -11,9 +11,50 @@ class MissionCreater extends Controller
    public function index()
     {
         // 企業ミッション（user_id が null）のみ取得
-        $missions = Mission::whereNull('user_id')->orderBy('id')->paginate(20);
+        $query = Mission::whereNull('user_id');
+        
+        // 検索・フィルタ適用
+        if (request('q')) {
+            $query->where(function ($q) {
+                $q->where('title', 'like', '%' . request('q') . '%')
+                  ->orWhere('key', 'like', '%' . request('q') . '%');
+            });
+        }
+        
+        if (request('trigger_type')) {
+            $query->where('trigger_type', request('trigger_type'));
+        }
+        
+        if (request('repeatable') !== null && request('repeatable') !== '') {
+            $query->where('repeatable', request('repeatable'));
+        }
+        
+        $missions = $query->orderBy('id', 'desc')->paginate(20);
+        
+        // 統計情報の計算（フィルタ適用後のデータに基づく）
+        $allMissions = Mission::whereNull('user_id');
+        
+        // 検索条件を統計にも適用
+        if (request('q')) {
+            $allMissions->where(function ($q) {
+                $q->where('title', 'like', '%' . request('q') . '%')
+                  ->orWhere('key', 'like', '%' . request('q') . '%');
+            });
+        }
+        
+        if (request('trigger_type')) {
+            $allMissions->where('trigger_type', request('trigger_type'));
+        }
+        
+        if (request('repeatable') !== null && request('repeatable') !== '') {
+            $allMissions->where('repeatable', request('repeatable'));
+        }
+        
+        $repeatableCount = (clone $allMissions)->where('repeatable', true)->count();
+        $avgRewardMiles = (clone $allMissions)->avg('reward_miles') ?? 0;
+        $avgRewardMiles = round($avgRewardMiles);
 
-        return view('admin.missions.index', compact('missions'));
+        return view('admin.missions.index', compact('missions', 'repeatableCount', 'avgRewardMiles'));
     }
 
     public function create()
