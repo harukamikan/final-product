@@ -40,12 +40,12 @@
     $brightness = ($r * 299 + $g * 587 + $b * 114) / 1000;
 
     // 明るい背景なら暗いナビゲーション、暗い背景なら明るいナビゲーション
-    $navText = $brightness > 155 ? 'text-white' : 'text-gray-900';
-    $navBorder = $brightness > 155 ? 'border-gray-700' : 'border-gray-200';
-    $hoverText = $brightness > 155 ? 'hover:text-gray-300' : 'hover:text-gray-700';
+   $navText = $brightness > 155 ? 'text-gray-900' : 'text-white';
+    $navBorder = $brightness > 155 ? 'border-gray-200' : 'border-gray-700';
+    $hoverText = $brightness > 155 ? 'hover:text-gray-700' : 'hover:text-gray-300';
     @endphp
 
-    <nav class="backdrop-blur border-b {{ $navBorder }} shadow-sm" x-data="{ mobileMenuOpen: false }">
+   <nav class="fixed top-0 left-0 right-0 z-50 backdrop-blur border-b {{ $navBorder }} shadow-sm" x-data="{ mobileMenuOpen: false }">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between items-center h-16">
 
@@ -297,7 +297,7 @@
 
 
     {{-- メインコンテンツ --}}
-    <main class="min-h-screen px-6 py-6">
+    <main class="min-h-screen px-6 py-6 pt-20">
         @yield('content')
     </main>
 
