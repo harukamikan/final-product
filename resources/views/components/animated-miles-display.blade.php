@@ -21,14 +21,22 @@
 @endphp
 
 <div 
+    class="relative"
     x-data="animatedMiles"
     x-init="init({{ $currentMiles ?? 0 }})"
     @miles-updated.window="onMilesUpdated($event.detail)"
 >
-    <p class="text-sm opacity-90">{{ $label ?? '現在のマイル残高' }}</p>
-    <div class="flex items-center gap-3">
+    {{-- アイコンを右上角に配置 --}}
+    @if($showIcon ?? true)
+        <div class="absolute top-0 right-0 text-5xl opacity-80" :class="{ 'animate-bounce': isPulsing }">
+            {{ $icon ?? '🎯' }}
+        </div>
+    @endif
+    
+    <div>
+        <p class="text-sm font-medium opacity-90">{{ $label ?? '現在のマイル残高' }}</p>
         <div 
-            class="relative"
+            class="relative mt-2"
             :class="{ 'animate-bounce-subtle': isPulsing }"
         >
             {{-- グローエフェクト --}}
@@ -43,10 +51,7 @@
                 <span class="text-xl opacity-70 ml-1">mile</span>
             </p>
         </div>
-        
-        @if($showIcon ?? true)
-            <div class="text-5xl" :class="{ 'animate-bounce': isPulsing }">{{ $icon ?? '🎯' }}</div>
-        @endif
+        <p class="text-xs opacity-75 mt-1">ミッション達成で獲得</p>
     </div>
 </div>
 

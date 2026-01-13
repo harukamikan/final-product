@@ -13,25 +13,28 @@
 
 <div class="max-w-5xl mx-auto px-4 py-8 space-y-8">
 
-    {{-- ----- マイル残高カード ----- --}}
-    <div class="bg-gradient-to-r from-indigo-500 to-indigo-600 text-white rounded-3xl p-6 shadow-md">
-        @include('components.animated-miles-display', [
-            'currentMiles' => $totalMiles,
-            'size' => 'medium',
-            'showIcon' => true,
-            'icon' => '🎯',
-            'label' => '現在のマイル残高'
-        ])
-    </div>
-    {{-- ----- スクラッチポイントカード ----- --}}
-    <div class="bg-gradient-to-r from-amber-400 to-amber-500 text-white rounded-3xl p-6 shadow-md">
-        <div class="flex items-center justify-between">
-            <div>
-                <p class="text-sm font-medium opacity-90">スクラッチポイント</p>
-                <p class="text-4xl font-bold mt-2">{{ Auth::user()->personal_mission_points ?? 0 }}</p>
-                <p class="text-xs opacity-75 mt-1">個人ミッション達成で獲得</p>
+    {{-- ----- マイル残高 & スクラッチポイントカード（2カラム） ----- --}}
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {{-- マイル残高カード --}}
+        <div class="bg-gradient-to-r from-indigo-500 to-indigo-600 text-white rounded-3xl p-5 shadow-md">
+            @include('components.animated-miles-display', [
+                'currentMiles' => $totalMiles,
+                'size' => 'medium',
+                'showIcon' => true,
+                'icon' => '🎯',
+                'label' => '現在のマイル残高'
+            ])
+        </div>
+        {{-- スクラッチポイントカード --}}
+        <div class="bg-gradient-to-r from-amber-400 to-amber-500 text-white rounded-3xl p-5 shadow-md">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-sm font-medium opacity-90">スクラッチポイント</p>
+                    <p class="text-4xl font-bold mt-2">{{ Auth::user()->personal_mission_points ?? 0 }}</p>
+                    <p class="text-xs opacity-75 mt-1">個人ミッション達成で獲得</p>
+                </div>
+                <div class="text-6xl opacity-80">🎟️</div>
             </div>
-            <div class="text-6xl opacity-80">🎟️</div>
         </div>
     </div>
 
@@ -83,52 +86,57 @@
 
 
     {{-- ----- ミッションカード一覧 ----- --}}
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         @foreach ($missions as $mission)
             @php
-                $userMission = $mission->userMissions->first();
                 $progress = $mission->progress_count ?? 0;
                 $required = $mission->required_count;
                 $ratio = min(100, intval($progress / max(1, $required) * 100));
+                
+                // ミッション種別を取得
+                $type = getMissionType($mission);
+                $icon = getMissionIcon($type);
+                $actionLabel = getMissionActionLabel($type);
+                $colors = getMissionColorClasses($type);
+                
+                $canManage = $mission->user_id && $mission->created_at->addDays(10)->isFuture();
             @endphp
 
-            <div class="rounded-3xl border bg-white px-5 py-6 shadow-sm space-y-4">
-
-                {{-- タイトル + マイル --}}
-                <div class="flex justify-between items-start">
-                    <div>
-                        <h2 class="text-lg font-semibold text-gray-900">{{ $mission->title }}</h2>
-                        <p class="text-xs text-gray-500 mt-1">{{ $mission->description }}</p>
+            <div class="rounded-3xl border-l-4 {{ $colors['border'] }} bg-white px-5 py-6 shadow-sm space-y-4">
+                {{-- タイトルエリア + 円形プログレス --}}
+                <div class="flex justify-between items-start gap-4">
+                    {{-- 左側: アイコン + タイトル --}}
+                    <div class="flex-1 min-w-0">
+                        <div class="flex items-center gap-2 mb-2">
+                            <span class="text-3xl leading-none">{{ $icon }}</span>
+                            <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold {{ $colors['badge'] }}">
+                                {{ $actionLabel }}
+                            </span>
+                        </div>
+                        <h2 class="text-lg font-semibold text-gray-900 line-clamp-2">{{ $mission->title }}</h2>
+                        @if($mission->description)
+                            <p class="text-xs text-gray-500 mt-1 line-clamp-2">{{ $mission->description }}</p>
+                        @endif
                     </div>
 
-                    <div class="text-right">
-                        <p class="text-xs text-gray-500">報酬</p>
-                        <p class="text-lg font-bold text-indigo-600">{{ $mission->reward_miles }} mile</p>
+                    {{-- 右側: 円形プログレス --}}
+                    <div class="flex-shrink-0">
+                        @include('components.circular_progress', [
+                            'current' => $progress,
+                            'required' => $required,
+                            'colorClass' => $colors['ring'],
+                            'size' => 64
+                        ])
                     </div>
                 </div>
 
-                {{-- 進捗バー --}}
-                <div>
-                    <div class="flex justify-between text-xs text-gray-500 mb-1">
-                        <span>進捗</span>
-                        <span>{{ $progress }} / {{ $required }}</span>
-                    </div>
-                    <div class="w-full h-2 bg-gray-200 rounded-full overflow-hidden">
-                        <div class="h-full bg-indigo-500 rounded-full transition-all" style="width: {{ $ratio }}%;"></div>
-                    </div>
-                </div>
-
-                
-                    {{-- ボタン --}}
+                {{-- 下部エリア: ボタン --}}
                 <div class="pt-3 border-t flex justify-between items-center">
                     <div class="flex gap-2">
-                        @php
-                            $canManage = $mission->user_id && $mission->created_at->addDays(10)->isFuture();
-                        @endphp
-                        
                         @if ($canManage)
                             <a href="{{ route('personal-missions.edit', $mission) }}"
-                            class="px-3 py-1 rounded-lg bg-amber-500 text-white text-xs font-medium hover:bg-amber-600 transition">
+                               onclick="event.stopPropagation()"
+                               class="px-3 py-1 rounded-lg bg-amber-500 text-white text-xs font-medium hover:bg-amber-600 transition">
                                 ✏️ 編集
                             </a>
                             
@@ -136,7 +144,7 @@
                                 @csrf
                                 @method('DELETE')
                                 <button type="submit"
-                                        onclick="return confirm('削除してもいいですか？')"
+                                        onclick="event.stopPropagation(); return confirm('削除してもいいですか？')"
                                         class="px-3 py-1 rounded-lg bg-red-500 text-white text-xs font-medium hover:bg-red-600 transition">
                                     🗑️ 削除
                                 </button>
@@ -150,7 +158,8 @@
                             <form action="{{ route('personal-missions.complete', $mission) }}" method="POST">
                                 @csrf
                                 <button type="submit"
-                                        class="px-4 py-2 rounded-xl bg-indigo-600 text-white text-sm font-medium hover:bg-indigo-700 transition">
+                                        onclick="event.stopPropagation()"
+                                        class="px-4 py-2 rounded-xl bg-gradient-to-r from-indigo-600 to-indigo-700 text-white text-sm font-medium hover:from-indigo-700 hover:to-indigo-800 transition shadow-sm">
                                     完了 +1
                                 </button>
                             </form>
