@@ -16,10 +16,10 @@
     @if(auth()->user()->background_type === 'gradient')
     style="background: {{ auth()->user()->background_value }};"
     @else
-    style="background-color: {{ auth()->user()->background_value ?? '#f3f4f6' }};"
+    style="background-color: {{ auth()->user()->background_value ?? config('app.default_background_color') }};"
     @endif
     @else
-    style="background-color: #f3f4f6;"
+    style="background-color: {{ config('app.default_background_color') }};"
     @endauth
     >
     {{-- ナビゲーション --}}
