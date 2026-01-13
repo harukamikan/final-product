@@ -5,9 +5,24 @@
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
 
         {{-- ===== ページタイトル ===== --}}
-        <h2 class="text-2xl font-bold text-slate-800">
-            📊 統計
-        </h2>
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <h2 class="text-2xl font-bold text-slate-800">
+                📊 統計
+            </h2>
+            
+            {{-- 半期選択ドロップダウン --}}
+            <form method="GET" action="{{ route('stats.index') }}">
+                <select name="semester_id" onchange="this.form.submit()" 
+                    class="rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                    @foreach($semesters as $semester)
+                        <option value="{{ $semester->id }}" 
+                            {{ $currentSemester->id == $semester->id ? 'selected' : '' }}>
+                            {{ $semester->start_date->format('Y/m/d') }} 〜 {{ $semester->end_date->format('Y/m/d') }}
+                        </option>
+                    @endforeach
+                </select>
+            </form>
+        </div>
 
         {{-- ===== 統計サマリー ===== --}}
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">

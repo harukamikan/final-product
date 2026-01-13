@@ -144,6 +144,7 @@ class MissionService
                 'user_id'     => $user->id,
                 'company_id'  => $user->company_id,
                 'mission_id'  => $mission->id,
+                'semester_id' => \App\Models\SemesterSetting::current()->id,
                 'miles'       => $earned,
                 'type'        => 'earn',
                 'description' => 'mission_completed',

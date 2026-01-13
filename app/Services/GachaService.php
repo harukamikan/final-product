@@ -28,6 +28,7 @@ class GachaService
             MileHistory::create([
                 'user_id'    => $userId,
                 'company_id' => $companyId,
+                'semester_id' => \App\Models\SemesterSetting::current()->id,
                 'miles'      => -self::COST,
                 'type'       => 'gacha',
                 'memo'       => 'ガチャ消費',

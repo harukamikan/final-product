@@ -4,6 +4,7 @@ namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
 use App\Models\User;
+use App\Models\SemesterSetting;
 use App\Services\SlackService;
 
 class ResetSemester extends Command
@@ -15,15 +16,24 @@ class ResetSemester extends Command
     {
         \Log::info('=== Semester Reset started ===');
         
-        // 1. 全ユーザーのマイルをリセット
-        $userCount = User::count();
-        \Log::info("Total users to reset: {$userCount}");
+        // 1. completed_missions だけリセット（total_milesはアクセサなので不要）
+        User::query()->update([
+            'completed_missions' => 0,
+        ]);
         
-        // mile_histories の合計でマイルを計算している場合は
-        // ユーザーテーブルにマイルカラムがあればリセット
-        // User::query()->update(['total_miles' => 0]);
+        \Log::info("All users reset: completed_missions=0");
         
-        // 2. Slack通知を送信
+        // 2. 新しい半期を作成
+        $oldSemester = SemesterSetting::current();
+        $newSemester = SemesterSetting::create([
+            'start_date' => now(),
+            'end_date' => now()->addMonths(6),
+            'auto_reset_enabled' => $oldSemester->auto_reset_enabled,
+        ]);
+        
+        \Log::info("New semester created: ID={$newSemester->id}");
+        
+        // 3. Slack通知を送信
         $slackService = app(SlackService::class);
         $users = User::whereNotNull('slack_id')->get();
         
@@ -40,5 +50,7 @@ class ResetSemester extends Command
         
         $this->info('Semester reset completed successfully!');
         \Log::info('=== Semester Reset finished ===');
+        
+        return Command::SUCCESS;
     }
 }
