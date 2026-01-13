@@ -94,10 +94,14 @@ class SendReminders extends Command
             $shouldSend = false;
             
             if ($user->reminder_frequency === 'daily') {
-                $shouldSend = ($now->hour == $user->reminder_hour);
+                // 時間が一致 かつ 0〜29分の間のみ送信
+                $shouldSend = ($now->hour == $user->reminder_hour && $now->minute < 30);
             } else {
                 $reminderDays = json_decode($user->reminder_days, true) ?? [];
-                $shouldSend = in_array($now->dayOfWeek, $reminderDays) && ($now->hour == $user->reminder_hour);
+                // 曜日・時間が一致 かつ 0〜29分の間のみ送信
+                $shouldSend = in_array($now->dayOfWeek, $reminderDays) 
+                            && ($now->hour == $user->reminder_hour) 
+                            && ($now->minute < 30);
             }
             
             \Log::info("shouldSend: " . ($shouldSend ? 'true' : 'false'));
