@@ -81,9 +81,9 @@ class OnboardingController extends Controller
             $user->save();
 
             return redirect()
-                ->route('missions.index')
-                ->with('success', sprintf(
-                    'ようこそ！あなた専用のミッション %d 件を用意しました。まずはチャレンジしてみましょう！',
+                ->route('dashboard')
+                ->with('onboarding_completed', sprintf(
+                    'あなた専用のミッション %d 件を用意しました。まずはミッション画面に行ってチャレンジしてみましょう！',
                     count($missions)
                 ));
         } catch (\Exception $e) {
