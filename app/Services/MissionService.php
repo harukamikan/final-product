@@ -134,6 +134,13 @@ class MissionService
             $userMission->completed_at = Carbon::now();
             $userMission->save();
             
+            // ★ repeatable なら completed_at と progress_count をリセット（また完了できるように）
+            if ($mission->repeatable) {
+                $userMission->completed_at = null;
+                $userMission->progress_count = 0;
+                $userMission->save();
+            }
+            
             // 個人ミッション（user_id がある）なら、ポイント加算
             if ($mission->user_id) {
                 $user->increment('personal_mission_points', 1);
