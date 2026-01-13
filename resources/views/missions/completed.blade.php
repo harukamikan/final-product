@@ -174,6 +174,9 @@
                             bg-emerald-50 text-emerald-700
                             text-sm font-medium">
                     🎉 達成済み
+                    @if($mission->repeatable && $userMission && $userMission->completion_count > 1)
+                        <span class="ml-2 text-amber-600 font-bold">（{{ $userMission->completion_count }}回達成！）</span>
+                    @endif
                 </span>
             </div>
         </div>

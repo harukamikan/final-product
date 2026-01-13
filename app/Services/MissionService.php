@@ -65,6 +65,11 @@ class MissionService
      */
     protected function progressMission(User $user, Mission $mission, array $payload = []): array
     {
+        \Log::info('★ progressMission called', [
+            'user_id' => $user->id,
+            'mission_id' => $mission->id,
+            'mission_title' => $mission->title,
+        ]);
         // ユーザーのミッション状態レコードを取得 or 作成
         $userMission = UserMission::firstOrCreate(
             ['user_id' => $user->id, 'mission_id' => $mission->id],
@@ -132,8 +137,9 @@ class MissionService
             }
 
             $userMission->completed_at = Carbon::now();
+            $userMission->completion_count += 1;  // ★ 完了回数を加算
             $userMission->save();
-            
+
             // ★ repeatable なら completed_at と progress_count をリセット（また完了できるように）
             if ($mission->repeatable) {
                 $userMission->completed_at = null;
