@@ -32,30 +32,6 @@
         </form>
         @endif
 
-
-        {{-- ================= 回答期限 ================= --}}
-        @if($company)
-        <form method="POST" action="{{ route('admin.rewards.deadline') }}" class="mb-6">
-            @csrf
-            <div class="flex items-end gap-4">
-                <div>
-                    <label class="block text-sm font-medium text-gray-700">
-                        回答期限
-                    </label>
-                    <input
-                        type="date"
-                        name="end_at"
-                        value="{{ $activeSurvey?->end_at?->format('Y-m-d') }}">
-                </div>
-
-                <button
-                    class="px-4 py-2 rounded-lg bg-gray-800 text-white text-sm font-semibold hover:bg-gray-900">
-                    期限を設定
-                </button>
-            </div>
-        </form>
-        @endif
-
         {{-- ================= メインカード ================= --}}
         <div class="bg-white overflow-hidden shadow-2xl card-shadow sm:rounded-lg mt-8">
             <div class="p-6">
