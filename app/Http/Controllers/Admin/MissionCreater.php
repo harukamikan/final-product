@@ -86,13 +86,26 @@ class MissionCreater extends Controller
 
     private function validateData(Request $request, ?int $id = null): array
     {
+        // まずmission_typeを取得してkeyに変換
+        $missionType = $request->input('mission_type');
+        
+        if (!$missionType) {
+            // mission_typeがない場合は先に基本バリデーションを実行
+            return $request->validate([
+                'mission_type' => ['required', 'in:write_tech_blog,event_speaker,event_organizer,acquire_certificate'],
+            ]);
+        }
+        
+        $config = $this->resolveMissionConfig($missionType);
+        $missionKey = $config['key'];
+        
         return $request->validate([
-        'mission_type'   => ['required', 'in:write_tech_blog,event_speaker,event_organizer,acquire_certificate'],
-        'title'          => ['required', 'string', 'max:255'],
-        'description'    => ['nullable', 'string'],
-        'required_count' => ['required', 'integer', 'min:1'],
-        'reward_miles'   => ['required', 'integer', 'min:0'],
-        'repeatable'     => ['required', 'boolean'],
+            'mission_type'   => ['required', 'in:write_tech_blog,event_speaker,event_organizer,acquire_certificate'],
+            'title'          => ['required', 'string', 'max:255'],
+            'description'    => ['nullable', 'string'],
+            'required_count' => ['required', 'integer', 'min:1'],
+            'reward_miles'   => ['required', 'integer', 'min:0', new \App\Rules\MissionMilesRule($missionKey)],
+            'repeatable'     => ['required', 'boolean'],
         ]);
     }
 

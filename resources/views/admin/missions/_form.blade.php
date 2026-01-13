@@ -104,10 +104,14 @@
                 <label class="block text-sm font-medium text-gray-700">
                     報酬マイル
                 </label>
+                <p class="text-xs text-gray-500 mt-1" id="miles-hint">
+                    範囲: <span id="miles-range" class="font-medium text-indigo-600">ミッション種別を選択してください</span>
+                </p>
                 <div class="mt-2 relative rounded-xl shadow-sm">
                     <input
                         type="number"
                         name="reward_miles"
+                        id="reward_miles"
                         min="0"
                         value="{{ old('reward_miles', $mission->reward_miles ?? 0) }}"
                         class="block w-full rounded-xl border-gray-300 pr-10 focus:border-indigo-500 focus:ring-indigo-500 text-sm"
@@ -159,3 +163,40 @@
     </div>
 
 </div>
+
+<script>
+    // ミッション範囲定義をBladeからJavaScriptに渡す
+    const missionLimits = @json(config('mission_limits'));
+    
+    // mission_type選択時のハンドラー
+    const missionTypeSelect = document.querySelector('[name="mission_type"]');
+    const rangeSpan = document.getElementById('miles-range');
+    const rewardInput = document.getElementById('reward_miles');
+    
+    if (missionTypeSelect) {
+        missionTypeSelect.addEventListener('change', function(e) {
+            const missionType = e.target.value;
+            
+            if (!missionType || !missionLimits[missionType]) {
+                rangeSpan.textContent = 'ミッション種別を選択してください';
+                rewardInput.removeAttribute('min');
+                rewardInput.removeAttribute('max');
+                return;
+            }
+            
+            const limits = missionLimits[missionType];
+            
+            // 範囲表示を更新
+            rangeSpan.textContent = `${limits.min_miles} 〜 ${limits.max_miles} マイル`;
+            
+            // HTML5バリデーション属性を設定
+            rewardInput.setAttribute('min', limits.min_miles);
+            rewardInput.setAttribute('max', limits.max_miles);
+        });
+        
+        // 初期表示時（編集画面など）にも実行
+        if (missionTypeSelect.value) {
+            missionTypeSelect.dispatchEvent(new Event('change'));
+        }
+    }
+</script>
