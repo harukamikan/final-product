@@ -122,6 +122,26 @@
                         @if($mission->description)
                             <p class="text-xs text-gray-500 mt-1 line-clamp-2">{{ $mission->description }}</p>
                         @endif
+                        {{-- サイクル表示 --}}
+                        @if($mission->cycle_type === 'weekly')
+                            <div class="mt-2">
+                                <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-700">
+                                    🔄 週間目標
+                                    @if($mission->cycle_streak > 0)
+                                        <span class="ml-1 font-bold">{{ $mission->cycle_streak }}週達成中！</span>
+                                    @endif
+                                </span>
+                            </div>
+                        @elseif($mission->cycle_type === 'monthly')
+                            <div class="mt-2">
+                                <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-purple-100 text-purple-700">
+                                    📅 月間目標
+                                    @if($mission->cycle_streak > 0)
+                                        <span class="ml-1 font-bold">{{ $mission->cycle_streak }}ヶ月達成中！</span>
+                                    @endif
+                                </span>
+                            </div>
+                        @endif
                     </div>
 
                     {{-- 右側: 円形プログレス --}}
