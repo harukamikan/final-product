@@ -145,11 +145,52 @@
                 $userMission = $mission->userMissions->first();
             @endphp
 
+<<<<<<< HEAD
             @include('missions._mission_card', [
                 'mission' => $mission,
                 'userMission' => $userMission,
                 'isCompleted' => true
             ])
+=======
+        <div class="rounded-3xl border bg-white px-5 py-6 shadow-sm space-y-4">
+            <div class="flex justify-between items-start">
+                <div>
+                    <h2 class="text-lg font-semibold text-gray-900">
+                        {{ $mission->title }}
+                    </h2>
+
+                    <p class="text-xs text-gray-500 mt-1">
+                        {{ $mission->description }}
+                    </p>
+
+                    @if($userMission && $userMission->completed_at)
+                    <p class="text-xs text-gray-400 mt-2">
+                        🗓 獲得日：
+                        {{ $userMission->completed_at->format('Y年m月d日') }}
+                    </p>
+                    @endif
+                </div>
+
+                <div class="text-right">
+                    <p class="text-xs text-gray-500">獲得マイル</p>
+                    <p class="text-lg font-bold text-emerald-600">
+                        +{{ $mission->reward_miles }} mile
+                    </p>
+                </div>
+            </div>
+
+            <div class="pt-3 border-t">
+                <span class="inline-flex items-center px-3 py-1 rounded-full
+                            bg-emerald-50 text-emerald-700
+                            text-sm font-medium">
+                    🎉 達成済み
+                    @if($mission->repeatable && $userMission && $userMission->completion_count > 1)
+                        <span class="ml-2 text-amber-600 font-bold">（{{ $userMission->completion_count }}回達成！）</span>
+                    @endif
+                </span>
+            </div>
+        </div>
+>>>>>>> feature/repeatable/haruka
         @endforeach
 
         {{-- 個人ミッション --}}

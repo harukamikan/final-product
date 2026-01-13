@@ -72,10 +72,13 @@ class MissionListController extends Controller
         
         // 完了済みの企業ミッション
         $companyMissions = Mission::availableForUser($user->id)
-            ->with(['userMissions' => function ($q) use ($user) {
-                $q->where('user_id', $user->id)
-                ->whereNotNull('completed_at');
-            }])
+        ->with(['userMissions' => function ($q) use ($user) {
+            $q->where('user_id', $user->id)
+            ->where(function ($query) {
+                $query->whereNotNull('completed_at')
+                    ->orWhere('completion_count', '>=', 1);
+            });
+        }])
             ->orderBy('id')
             ->get()
             ->filter(fn ($mission) => $mission->userMissions->isNotEmpty());
