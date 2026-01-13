@@ -145,13 +145,6 @@
                 $userMission = $mission->userMissions->first();
             @endphp
 
-<<<<<<< HEAD
-            @include('missions._mission_card', [
-                'mission' => $mission,
-                'userMission' => $userMission,
-                'isCompleted' => true
-            ])
-=======
         <div class="rounded-3xl border bg-white px-5 py-6 shadow-sm space-y-4">
             <div class="flex justify-between items-start">
                 <div>
@@ -190,7 +183,6 @@
                 </span>
             </div>
         </div>
->>>>>>> feature/repeatable/haruka
         @endforeach
 
         {{-- 個人ミッション --}}
