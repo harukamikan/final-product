@@ -113,6 +113,8 @@ Route::middleware(['auth'])->group(function () {
     // ===== 所有報酬一覧 =====
     Route::get('/rewards/my', [UserRewardController::class, 'index'])
         ->name('rewards.my');
+    Route::post('/rewards/{id}/use', [UserRewardController::class, 'use'])
+        ->name('rewards.use');
 });
 
 

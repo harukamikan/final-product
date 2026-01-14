@@ -112,8 +112,9 @@ class GoalAiUploadController extends Controller
                     if ($adminUser && $adminSetting->slack_id) {
                         \App\Models\Notification::create([
                             'user_id' => $adminUser->id,
+                            'title' => '⚠️ 同姓同名検出',
                             'type' => 'admin_duplicate_name',
-                            'message' => "⚠️ 同姓同名を検出しました。入力名: {$originalInput}",
+                            'message' => "入力名: {$originalInput}",
                         ]);
                     }
                 }
@@ -133,8 +134,9 @@ class GoalAiUploadController extends Controller
                         // Web通知を保存
                         \App\Models\Notification::create([
                             'user_id' => $user->id,
+                            'title' => '⚠️ 半期目標の登録失敗',
                             'type' => 'duplicate_name',
-                            'message' => '⚠️ 半期目標の登録に失敗しました。同姓同名のため、次回から社員番号やメールアドレスも記入してください。',
+                            'message' => '同姓同名のため、次回から社員番号やメールアドレスも記入してください。',
                         ]);
                     }
                 }
