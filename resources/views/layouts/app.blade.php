@@ -199,6 +199,10 @@
                                 class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
                                 プロフィール
                             </a>
+                            <a href="{{ route('documents.specification') }}"
+                                class="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                                仕様書📥︎
+                            </a>
 
                             <a href="/logout"
                                 onclick="event.preventDefault(); document.getElementById('logout-form').submit();"
