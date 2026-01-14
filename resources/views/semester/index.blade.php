@@ -14,6 +14,12 @@
                         </div>
                     @endif
 
+                    @if (session('error'))
+                        <div class="mb-4 p-4 bg-red-100 text-red-700 rounded">
+                            {{ session('error') }}
+                        </div>
+                    @endif
+
                     <form method="POST" action="{{ route('admin.semester.update') }}">
                         @csrf
 
@@ -82,6 +88,73 @@
 
                 </div>
             </div>
+
+            <!-- 今すぐリセットボタン -->
+            <div class="mt-6 bg-white overflow-hidden shadow-2xl card-shadow sm:rounded-lg">
+                <div class="p-6">
+                    <h3 class="text-lg font-bold text-gray-900 mb-4">🔄 手動リセット</h3>
+                    <p class="text-sm text-gray-600 mb-4">
+                        現在の半期を終了し、新しい半期を開始します。全ユーザーのマイルとランクがリセットされます。
+                    </p>
+                    <form method="POST" action="{{ route('admin.semester.reset') }}" onsubmit="return confirm('本当にリセットしますか？この操作は取り消せません。');">
+                        @csrf
+                        <button 
+                            type="submit"
+                            class="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2"
+                        >
+                            今すぐリセット
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- 半期一覧 -->
+            <div class="mt-6 bg-white overflow-hidden shadow-2xl card-shadow sm:rounded-lg">
+                <div class="p-6">
+                    <h3 class="text-lg font-bold text-gray-900 mb-4">📋 半期一覧</h3>
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead>
+                            <tr>
+                                <th class="px-4 py-2 text-left text-sm font-medium text-gray-500">ID</th>
+                                <th class="px-4 py-2 text-left text-sm font-medium text-gray-500">期間</th>
+                                <th class="px-4 py-2 text-left text-sm font-medium text-gray-500">状態</th>
+                                <th class="px-4 py-2 text-left text-sm font-medium text-gray-500">操作</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-200">
+                            @foreach($semesters as $semester)
+                                <tr>
+                                    <td class="px-4 py-2 text-sm text-gray-900">{{ $semester->id }}</td>
+                                    <td class="px-4 py-2 text-sm text-gray-900">
+                                        {{ $semester->start_date->format('Y/m/d') }} 〜 {{ $semester->end_date->format('Y/m/d') }}
+                                    </td>
+                                    <td class="px-4 py-2 text-sm">
+                                        @if($semester->id === $setting->id)
+                                            <span class="px-2 py-1 bg-green-100 text-green-800 rounded-full text-xs">現在</span>
+                                        @else
+                                            <span class="px-2 py-1 bg-gray-100 text-gray-600 rounded-full text-xs">過去</span>
+                                        @endif
+                                    </td>
+                                    <td class="px-4 py-2 text-sm">
+                                        @if($semester->id !== $setting->id)
+                                            <form method="POST" action="{{ route('admin.semester.destroy', $semester) }}" class="inline" onsubmit="return confirm('この半期を削除しますか？関連するマイル履歴も削除されます。');">
+                                                @csrf
+                                                @method('DELETE')
+                                                <button type="submit" class="text-red-600 hover:text-red-800 text-sm">
+                                                    削除
+                                                </button>
+                                            </form>
+                                        @else
+                                            <span class="text-gray-400 text-sm">-</span>
+                                        @endif
+                                    </td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
         </div>
     </div>
 
