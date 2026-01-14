@@ -16,21 +16,22 @@
     @if(auth()->user()->background_type === 'gradient')
     style="background: {{ auth()->user()->background_value }};"
     @else
-    style="background-color: {{ auth()->user()->background_value ?? '#f3f4f6' }};"
+    style="background-color: {{ auth()->user()->background_value ?? config('app.default_background_color') }};"
     @endif
     @else
-    style="background-color: #f3f4f6;"
+    style="background-color: {{ config('app.default_background_color') }};"
     @endauth
     >
     {{-- ナビゲーション --}}
 
     @php
-    $bgValue = auth()->user()->background_value ?? '#f3f4f6';
+    $bgValue = auth()->user()->background_value
+    ?? config('app.default_background_color');
 
     // グラデーションの場合は最初の色を取得
     if (auth()->check() && auth()->user()->background_type === 'gradient') {
     preg_match('/#[0-9A-Fa-f]{6}/', $bgValue, $matches);
-    $bgValue = $matches[0] ?? '#f3f4f6';
+    $bgValue = $matches[0] ?? config('app.default_background_color');
     }
 
     // 明るさを計算（RGB → 0-255）
@@ -40,12 +41,12 @@
     $brightness = ($r * 299 + $g * 587 + $b * 114) / 1000;
 
     // 明るい背景なら暗いナビゲーション、暗い背景なら明るいナビゲーション
-    $navText = $brightness > 155 ? 'text-white' : 'text-gray-900';
-    $navBorder = $brightness > 155 ? 'border-gray-700' : 'border-gray-200';
-    $hoverText = $brightness > 155 ? 'hover:text-gray-300' : 'hover:text-gray-700';
+    $navText = $brightness > 155 ? 'text-gray-900' : 'text-white';
+    $navBorder = $brightness > 155 ? 'border-gray-200' : 'border-gray-700';
+    $hoverText = $brightness > 155 ? 'hover:text-gray-700' : 'hover:text-gray-300';
     @endphp
 
-    <nav class="backdrop-blur border-b {{ $navBorder }} shadow-sm" x-data="{ mobileMenuOpen: false }">
+    <nav class="fixed top-0 left-0 right-0 z-50 backdrop-blur border-b {{ $navBorder }} shadow-sm" x-data="{ mobileMenuOpen: false }">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between items-center h-16">
 
@@ -107,7 +108,7 @@
                     {{-- 🎁 有効報酬 --}}
                     <a href="{{ route('rewards.my') }}"
                         class="inline-flex items-center px-1 pt-1 text-sm font-medium {{ $navText }}
-   {{ request()->is('rewards/my*') ? 'border-b-2 border-indigo-500' : $hoverText }}">
+                        {{ request()->is('rewards/my*') ? 'border-b-2 border-indigo-500' : $hoverText }}">
                         有効報酬
                     </a>
                 </div>
@@ -118,20 +119,9 @@
                     {{-- 通知ベル --}}
                     <div class="relative" x-data="{ open: false }">
                         <button @click="
-                        open = !open;
-                        if (open) {
-                                fetch('{{ route('notifications.mark-all-read') }}', {
-                                    method: 'POST',
-                                    headers: {
-                                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                                        'Content-Type': 'application/json'
-                                    }
-                                }).then(() => {
-                                    setTimeout(() => location.reload(), 500);
-                                });
-                            }
-                        "
-                            class="relative {{ $navText }} {{ $hoverText }} focus:outline-none">
+                        open = !open">
+                        
+                            <class="relative {{ $navText }} {{ $hoverText }} focus:outline-none">
                             <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                     d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
@@ -162,13 +152,31 @@
                             ->get();
                             @endphp
 
-                            @if($notifications->isEmpty())
+                           @if($notifications->isEmpty())
                             <p class="px-4 py-3 text-sm text-gray-500 text-center">
                                 通知はありません
                             </p>
                             @else
+                            <div class="px-4 py-2 border-b border-gray-200 flex justify-end">
+                                <button 
+                                    @click="fetch('{{ route('notifications.mark-all-read') }}', {
+                                        method: 'POST',
+                                        headers: {
+                                            'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                                            'Content-Type': 'application/json'
+                                        }
+                                    }).then(() => location.reload())"
+                                    class="text-xs text-blue-600 hover:text-blue-800">
+                                    すべて既読にする
+                                </button>
+                            </div>
                             @foreach($notifications as $notification)
                             <div class="px-4 py-3 border-b border-gray-100 hover:bg-gray-50">
+                                @if($notification->title)
+                                <p class="text-sm font-semibold text-gray-800">
+                                    {{ $notification->title }}
+                                </p>
+                                @endif
                                 <p class="text-sm text-gray-700">
                                     {{ $notification->message }}
                                 </p>
@@ -198,6 +206,10 @@
                             <a href="{{ route('profile.edit') }}"
                                 class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
                                 プロフィール
+                            </a>
+                            <a href="{{ route('documents.specification') }}"
+                                class="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                                仕様書📥︎
                             </a>
 
                             <a href="/logout"
@@ -297,7 +309,7 @@
 
 
     {{-- メインコンテンツ --}}
-    <main class="min-h-screen px-6 py-6">
+    <main class="min-h-screen px-6 py-6 pt-20">
         @yield('content')
     </main>
 

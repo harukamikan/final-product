@@ -18,6 +18,7 @@ class UserMission extends Model
         'mission_id',
         'proof_url',
         'progress_count',
+        'completion_count',
         'completed_at',
         'related_personal_mission_id',
     ];

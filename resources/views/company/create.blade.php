@@ -126,7 +126,7 @@
                             type="text"
                             name="name"
                             value="{{ old('name') }}"
-                            placeholder="例）Fusic / ○○開発部"
+                            placeholder="例）HalfWay / ○○開発部"
                             class="mt-2 w-full rounded-2xl border-gray-200 focus:border-indigo-500 focus:ring-indigo-500"
                             required
                         >

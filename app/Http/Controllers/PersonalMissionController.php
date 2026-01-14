@@ -45,11 +45,12 @@ class PersonalMissionController extends Controller
     {
         $user = auth()->user();
         
-        $request->validate([
+       $request->validate([
             'title' => 'required|string|max:255',
             'description' => 'nullable|string',
             'required_count' => 'required|integer|min:1',
             'linked_category' => 'nullable|string|in:write_tech_blog,acquire_certificate,event_speaker,event_organizer',
+            'cycle_type' => 'nullable|string|in:none,weekly,monthly',
         ]);
         
         // 制限チェック
@@ -74,6 +75,7 @@ class PersonalMissionController extends Controller
             'required_count' => $request->required_count,
             'reward_miles' => 0,
             'repeatable' => false,
+            'cycle_type' => $request->cycle_type ?? 'none',
         ]);
         
         return redirect()->route('missions.personal')

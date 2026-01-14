@@ -103,6 +103,24 @@ class OnboardingService
         // Pass the full survey data to getMissionTemplate for calculation
         $template = $this->getMissionTemplate($missionType, $modifiers, $isPrimary);
         
+        // マイル範囲チェック（自動生成の場合は範囲内に補正）
+        $limitsService = app(\App\Services\MissionLimitsService::class);
+        if (!$limitsService->isWithinRange($template['key'], $template['reward_miles'])) {
+            // ログ出力
+            \Log::warning('Auto-generated mission miles out of range, clamping to valid range', [
+                'key' => $template['key'],
+                'attempted_miles' => $template['reward_miles'],
+                'limits' => $limitsService->getLimits($template['key']),
+            ]);
+            
+            // 範囲内に補正（clamp）
+            $limits = $limitsService->getLimits($template['key']);
+            $template['reward_miles'] = max(
+                $limits['min_miles'],
+                min($limits['max_miles'], $template['reward_miles'])
+            );
+        }
+        
         return Mission::create([
             'user_id' => $user->id,
             'company_id' => $user->company_id,

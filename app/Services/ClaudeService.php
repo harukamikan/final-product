@@ -186,6 +186,12 @@ PROMPT;
 - 数値がある（○本、○回、○個など）
 - 例: ブログ5本、資格2個取得、登壇3回
 
+**サイクル（cycle）の判定:**
+- 「毎日」「日課」「daily」が含まれる → "weekly"（週間扱い）
+- 「毎週」「週に」「週間」が含まれる → "weekly"
+- 「毎月」「月に」「月間」が含まれる → "monthly"
+- 上記以外 → "none"
+
 【入力テキスト】
 {$text}
 
@@ -198,8 +204,10 @@ PROMPT;
     "name": "正確なユーザー名",
     "semester_goal": "定性的な目標",
     "missions": [
-      {"category": "ブログ", "title": "ブログ投稿", "count": 5},
-      {"category": "資格", "title": "一陸技取得", "count": 1}
+      {"category": "ブログ", "title": "毎週ブログを書く", "count": 1, "cycle": "weekly"},
+      {"category": "資格", "title": "月に1冊本を読む", "count": 1, "cycle": "monthly"},
+      {"category": "資格", "title": "一陸技取得", "count": 1, "cycle": "none"}
+      
     ]
   }
 ]

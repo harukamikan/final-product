@@ -13,25 +13,28 @@
 
 <div class="max-w-5xl mx-auto px-4 py-8 space-y-8">
 
-    {{-- ----- マイル残高カード ----- --}}
-    <div class="bg-gradient-to-r from-indigo-500 to-indigo-600 text-white rounded-3xl p-6 shadow-md">
-        @include('components.animated-miles-display', [
-            'currentMiles' => $totalMiles,
-            'size' => 'medium',
-            'showIcon' => true,
-            'icon' => '🎯',
-            'label' => '現在のマイル残高'
-        ])
-    </div>
-    {{-- ----- スクラッチポイントカード ----- --}}
-    <div class="bg-gradient-to-r from-amber-400 to-amber-500 text-white rounded-3xl p-6 shadow-md">
-        <div class="flex items-center justify-between">
-            <div>
-                <p class="text-sm font-medium opacity-90">スクラッチポイント</p>
-                <p class="text-4xl font-bold mt-2">{{ Auth::user()->personal_mission_points ?? 0 }}</p>
-                <p class="text-xs opacity-75 mt-1">個人ミッション達成で獲得</p>
+    {{-- ----- マイル残高 & スクラッチポイントカード（2カラム） ----- --}}
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {{-- マイル残高カード --}}
+        <div class="bg-gradient-to-r from-indigo-500 to-indigo-600 text-white rounded-3xl p-5 shadow-md">
+            @include('components.animated-miles-display', [
+                'currentMiles' => $totalMiles,
+                'size' => 'medium',
+                'showIcon' => true,
+                'icon' => '🎯',
+                'label' => '現在のマイル残高'
+            ])
+        </div>
+        {{-- スクラッチポイントカード --}}
+        <div class="bg-gradient-to-r from-amber-400 to-amber-500 text-white rounded-3xl p-5 shadow-md">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-sm font-medium opacity-90">スクラッチポイント</p>
+                    <p class="text-4xl font-bold mt-2">{{ Auth::user()->personal_mission_points ?? 0 }}</p>
+                    <p class="text-xs opacity-75 mt-1">個人ミッション達成で獲得</p>
+                </div>
+                <div class="text-6xl opacity-80">🎟️</div>
             </div>
-            <div class="text-6xl opacity-80">🎟️</div>
         </div>
     </div>
 
@@ -74,57 +77,19 @@
     @endif
 
 
+
     {{-- ----- ミッションカード一覧 ----- --}}
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         @foreach ($missions as $mission)
             @php
                 $userMission = $mission->userMissions->first();
-                $progress = $userMission->progress_count ?? 0;
-                $required = $mission->required_count;
-                $ratio = min(100, intval($progress / max(1, $required) * 100));
             @endphp
 
-            <div class="rounded-3xl border bg-white px-5 py-6 shadow-sm space-y-4">
-
-                {{-- タイトル + マイル --}}
-                <div class="flex justify-between items-start">
-                    <div>
-                        <h2 class="text-lg font-semibold text-gray-900">{{ $mission->title }}</h2>
-                        <p class="text-xs text-gray-500 mt-1">{{ $mission->description }}</p>
-                    </div>
-
-                    <div class="text-right">
-                        <p class="text-xs text-gray-500">報酬</p>
-                        <p class="text-lg font-bold text-indigo-600">{{ $mission->reward_miles }} mile</p>
-                    </div>
-                </div>
-
-                {{-- 進捗バー --}}
-                <div>
-                    <div class="flex justify-between text-xs text-gray-500 mb-1">
-                        <span>進捗</span>
-                        <span>{{ $progress }} / {{ $required }}</span>
-                    </div>
-                    <div class="w-full h-2 bg-gray-200 rounded-full overflow-hidden">
-                        <div class="h-full bg-indigo-500 rounded-full transition-all" style="width: {{ $ratio }}%;"></div>
-                    </div>
-                </div>
-
-                {{-- ボタン --}}
-                <div class="pt-3 border-t flex justify-end">
-                    @if ($mission->trigger_type === 'tech_blog_posted')
-                        <a href="{{ route('missions.blog-url.form') }}"
-                           class="px-4 py-2 rounded-xl bg-indigo-600 text-white text-sm font-medium hover:bg-indigo-700 transition">
-                            技術ブログのURLを送信
-                        </a>
-                    @elseif ($mission->trigger_type === 'google_form_submitted')
-                        <a href="{{ route('missions.form.create', ['mission' => $mission->id]) }}"
-                           class="px-4 py-2 rounded-xl bg-indigo-600 text-white text-sm font-medium hover:bg-indigo-700 transition">
-                            GoogleフォームのURLを送信
-                        </a>
-                    @endif
-                </div>
-            </div>
+            @include('missions._mission_card', [
+                'mission' => $mission,
+                'userMission' => $userMission,
+                'isCompleted' => false
+            ])
         @endforeach
     </div>
 </div>

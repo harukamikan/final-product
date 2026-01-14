@@ -112,8 +112,9 @@ class GoalAiUploadController extends Controller
                     if ($adminUser && $adminSetting->slack_id) {
                         \App\Models\Notification::create([
                             'user_id' => $adminUser->id,
+                            'title' => '⚠️ 同姓同名検出',
                             'type' => 'admin_duplicate_name',
-                            'message' => "⚠️ 同姓同名を検出しました。入力名: {$originalInput}",
+                            'message' => "入力名: {$originalInput}",
                         ]);
                     }
                 }
@@ -133,8 +134,9 @@ class GoalAiUploadController extends Controller
                         // Web通知を保存
                         \App\Models\Notification::create([
                             'user_id' => $user->id,
+                            'title' => '⚠️ 半期目標の登録失敗',
                             'type' => 'duplicate_name',
-                            'message' => '⚠️ 半期目標の登録に失敗しました。同姓同名のため、次回から社員番号やメールアドレスも記入してください。',
+                            'message' => '同姓同名のため、次回から社員番号やメールアドレスも記入してください。',
                         ]);
                     }
                 }
@@ -192,6 +194,18 @@ class GoalAiUploadController extends Controller
            // 2. missions 登録（定量的な目標）
         if (isset($userData['missions']) && is_array($userData['missions'])) {
             foreach ($userData['missions'] as $mission) {
+                // サイクルタイプの判定（AIの結果を優先、なければタイトルから判定）
+                $cycleType = $mission['cycle'] ?? 'none';
+                if ($cycleType === 'none') {
+                    $missionTitle = $mission['title'] ?? '';
+                    if (preg_match('/毎日|日課|daily|1日/i', $missionTitle)) {
+                        $cycleType = 'weekly';  // 毎日は週間扱い
+                    } elseif (preg_match('/毎週|週に|週間|weekly/i', $missionTitle)) {
+                        $cycleType = 'weekly';
+                    } elseif (preg_match('/毎月|月に|月間|monthly/i', $missionTitle)) {
+                        $cycleType = 'monthly';
+                    }
+                }
                 // 個人ミッション作成
                 $newPersonalMission = \App\Models\PersonalMission::create([
                     'user_id' => $user->id,
@@ -203,6 +217,7 @@ class GoalAiUploadController extends Controller
                     'required_count' => $mission['count'] ?? 1,
                     'reward_miles' => 0,
                     'repeatable' => false,
+                    'cycle_type' => $cycleType,
                 ]);
 
                 // 【新規追加】対応する企業ミッションを探して紐付け

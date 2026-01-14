@@ -4,7 +4,7 @@
 
         {{-- 左側 --}}
         <div class="md:w-1/2 w-full h-1/3 md:h-full
-                    bg-gradient-to-br from-blue-400 to-red-400
+                    bg-gradient-to-br from-blue-500 via-sky-400 to-yellow-400
                     flex items-center justify-center px-6">
             <div class="text-center md:text-left">
                 <h1 class="text-white text-4xl md:text-6xl font-bold mb-4 drop-shadow-lg">

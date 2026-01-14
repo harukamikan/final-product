@@ -123,8 +123,6 @@ return [
         'store' => env('APP_MAINTENANCE_STORE', 'database'),
     ],
 
-    // config/app.php
     'default_background_color' => '#667eea',
-
 
 ];

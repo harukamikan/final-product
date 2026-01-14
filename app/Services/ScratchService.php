@@ -55,6 +55,7 @@ class ScratchService
                 MileHistory::create([
                     'user_id'    => $user->id,
                     'company_id' => $user->company_id,
+                    'semester_id' => \App\Models\SemesterSetting::current()->id,
                     'miles'      => $miles,
                     'type'       => 'scratch',
                     'memo'       => 'スクラッチ獲得',

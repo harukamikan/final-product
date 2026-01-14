@@ -1,9 +1,6 @@
 <?php
-
 namespace App\Models;
-
 use Illuminate\Database\Eloquent\Model;
-
 class PersonalMission extends Model
 {
     protected $fillable = [
@@ -15,14 +12,17 @@ class PersonalMission extends Model
         'description',
         'trigger_type',
         'required_count',
-        'progress_count',   
-        'completed_at', 
+        'progress_count',
+        'completed_at',
         'reward_miles',
         'repeatable',
+        'cycle_type',
+        'cycle_streak',
+        'cycle_last_completed_at',
     ];
-
     protected $casts = [
         'completed_at' => 'datetime',
+        'cycle_last_completed_at' => 'date',
     ];
     /**
      * ユーザーとのリレーション
@@ -31,7 +31,6 @@ class PersonalMission extends Model
     {
         return $this->belongsTo(User::class);
     }
-
     /**
      * 会社とのリレーション
      */
@@ -39,7 +38,6 @@ class PersonalMission extends Model
     {
         return $this->belongsTo(Company::class);
     }
-
     /**
      * ユーザー別の進捗
      */
