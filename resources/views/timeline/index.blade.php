@@ -56,52 +56,157 @@
     }
 </style>
 
-<div class="timeline-container max-w-7xl mx-auto px-4 py-8 space-y-8">
+<div class="timeline-container max-w-7xl mx-auto px-4 py-6 space-y-4" x-data="{ showFilters: {{ ($keyword || $userId) ? 'true' : 'false' }} }">
 
-    {{-- ヘッダー --}}
-    <div class="flex items-center justify-between">
-        <div>
-            <h1 class="text-3xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
-                タイムライン
-            </h1>
-            <p class="text-sm text-gray-500 mt-2">
-                メンバーの活動を時系列で確認
-            </p>
+    {{-- コンパクトヘッダー --}}
+    <div class="flex items-center justify-between mb-2">
+        <div class="flex items-center gap-4">
+            <div>
+                <h1 class="text-3xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
+                    タイムライン
+                </h1>
+                <p class="text-xs text-gray-500 mt-1">
+                    メンバーの活動を時系列で確認
+                </p>
+            </div>
+            
+            {{-- アクティブフィルターバッジ --}}
+            @if($keyword || $userId)
+                <div class="flex gap-2 items-center">
+                    @if($keyword)
+                        <span class="inline-flex items-center gap-1 px-2 py-1 bg-indigo-100 text-indigo-700 rounded-lg text-xs font-medium">
+                            🔍 {{ Str::limit($keyword, 15) }}
+                        </span>
+                    @endif
+                    @if($userId)
+                        @php
+                            $selectedUser = $companyUsers->find($userId);
+                        @endphp
+                        @if($selectedUser)
+                            <span class="inline-flex items-center gap-1 px-2 py-1 bg-purple-100 text-purple-700 rounded-lg text-xs font-medium">
+                                👤 {{ $selectedUser->name }}
+                            </span>
+                        @endif
+                    @endif
+                </div>
+            @endif
         </div>
-        <div class="text-4xl">🚀</div>
+        
+        {{-- 絞り込みトグルボタン --}}
+        <button 
+            @click="showFilters = !showFilters"
+            type="button"
+            class="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold transition-all duration-200"
+            :class="showFilters ? 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-lg' : 'bg-white text-gray-700 border border-gray-200 hover:bg-gray-50'"
+        >
+            <span>🔍</span>
+            <span>絞り込み</span>
+        </button>
     </div>
+
+    {{-- 検索フォーム（アコーディオン） --}}
+    <div 
+        x-show="showFilters" 
+        x-collapse
+        @click.away="showFilters = false"
+        class="bg-white/60 backdrop-blur-xl rounded-2xl border border-gray-200 shadow-md p-4"
+    >
+        <form method="GET" action="{{ route('timeline.index') }}" class="space-y-3">
+            {{-- Type パラメータを保持 --}}
+            <input type="hidden" name="type" value="{{ $type }}">
+            
+            {{-- 縦積みレイアウト --}}
+            <div class="space-y-3">
+                {{-- キーワード検索 --}}
+                <div>
+                    <label for="keyword" class="block text-xs font-semibold text-gray-700 mb-1">
+                        🔍 キーワード
+                    </label>
+                    <input 
+                        type="text" 
+                        id="keyword" 
+                        name="keyword" 
+                        value="{{ $keyword ?? '' }}"
+                        placeholder="タイトル、詳細、URLで検索..."
+                        class="w-full px-3 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all text-sm"
+                    >
+                </div>
+
+                {{-- ユーザーフィルター --}}
+                <div>
+                    <label for="user_id" class="block text-xs font-semibold text-gray-700 mb-1">
+                        👤 メンバー
+                    </label>
+                    <select 
+                        id="user_id" 
+                        name="user_id"
+                        class="w-full px-3 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all text-sm"
+                    >
+                        <option value="">すべてのメンバー</option>
+                        @foreach($companyUsers as $user)
+                            <option value="{{ $user->id }}" {{ ($userId == $user->id) ? 'selected' : '' }}>
+                                {{ $user->name }}
+                            </option>
+                        @endforeach
+                    </select>
+                </div>
+            </div>
+
+            {{-- アクションボタン --}}
+            <div class="flex gap-2 pt-1">
+                <button 
+                    type="submit"
+                    class="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-semibold rounded-lg hover:shadow-lg transition-all duration-200 text-sm"
+                >
+                    <span>🔍</span>
+                    検索
+                </button>
+                
+                @if($keyword || $userId)
+                    <a 
+                        href="{{ route('timeline.index', ['type' => $type]) }}"
+                        class="inline-flex items-center gap-2 px-4 py-2 bg-gray-100 text-gray-700 font-semibold rounded-lg hover:bg-gray-200 transition-all duration-200 text-sm"
+                    >
+                        <span>✕</span>
+                        クリア
+                    </a>
+                @endif
+            </div>
+        </form>
+    </div>
+
 
     {{-- タイプ切り替えタブ --}}
     @php
         $currentType = $type ?? 'all';
     @endphp
-    <div class="flex flex-wrap gap-2">
-        <a href="{{ route('timeline.index', ['type' => 'all']) }}" 
-           class="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold transition-all duration-200 
+    <div class="flex flex-wrap gap-2 mb-3">
+        <a href="{{ route('timeline.index', ['type' => 'all', 'keyword' => $keyword, 'user_id' => $userId]) }}" 
+           class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all duration-200 
                   {{ ($currentType === 'all' || $currentType === '') ? 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-lg' : 'bg-white text-gray-700 hover:bg-gray-50 border border-gray-200' }}">
             <span>🌟</span>
             すべて
         </a>
-        <a href="{{ route('timeline.index', ['type' => 'qiita']) }}" 
-           class="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold transition-all duration-200 
+        <a href="{{ route('timeline.index', ['type' => 'qiita', 'keyword' => $keyword, 'user_id' => $userId]) }}" 
+           class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all duration-200 
                   {{ $currentType === 'qiita' ? 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-lg' : 'bg-white text-gray-700 hover:bg-gray-50 border border-gray-200' }}">
             <span>📝</span>
             技術ブログ
         </a>
-        <a href="{{ route('timeline.index', ['type' => 'event_hosting']) }}" 
-           class="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold transition-all duration-200 
+        <a href="{{ route('timeline.index', ['type' => 'event_hosting', 'keyword' => $keyword, 'user_id' => $userId]) }}" 
+           class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all duration-200 
                   {{ $currentType === 'event_hosting' ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-lg' : 'bg-white text-gray-700 hover:bg-gray-50 border border-gray-200' }}">
             <span>🎉</span>
             イベント企画
         </a>
-        <a href="{{ route('timeline.index', ['type' => 'event_speaking']) }}" 
-           class="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold transition-all duration-200 
+        <a href="{{ route('timeline.index', ['type' => 'event_speaking', 'keyword' => $keyword, 'user_id' => $userId]) }}" 
+           class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all duration-200 
                   {{ $currentType === 'event_speaking' ? 'bg-gradient-to-r from-pink-600 to-rose-600 text-white shadow-lg' : 'bg-white text-gray-700 hover:bg-gray-50 border border-gray-200' }}">
             <span>🎤</span>
             イベント登壇
         </a>
-        <a href="{{ route('timeline.index', ['type' => 'certification']) }}" 
-           class="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold transition-all duration-200 
+        <a href="{{ route('timeline.index', ['type' => 'certification', 'keyword' => $keyword, 'user_id' => $userId]) }}" 
+           class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all duration-200 
                   {{ $currentType === 'certification' ? 'bg-gradient-to-r from-amber-600 to-orange-600 text-white shadow-lg' : 'bg-white text-gray-700 hover:bg-gray-50 border border-gray-200' }}">
             <span>🏆</span>
             資格取得
@@ -111,14 +216,14 @@
     {{-- タイムライン --}}
     @forelse ($groupedEvents as $timeGroup => $eventsInGroup)
         {{-- 時間グループヘッダー --}}
-        <div class="sticky top-0 z-10 -mx-4 px-4 py-3 backdrop-blur-md bg-white/70 border-b border-gray-200">
-            <h2 class="text-lg font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
+        <div class="sticky top-0 z-10 -mx-4 px-4 py-1.5 backdrop-blur-md bg-white/70 border-b border-gray-200">
+            <h2 class="text-sm font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
                 {{ $timeGroup }}
             </h2>
         </div>
 
         {{-- イベントカードグリッド --}}
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-3 mb-4">
             @foreach ($eventsInGroup as $index => $event)
                 @php
                     // イベントタイプごとの設定
@@ -141,13 +246,13 @@
                     <div class="absolute inset-0 bg-white/60 backdrop-blur-xl rounded-2xl"></div>
                     
                     {{-- カード内容 --}}
-                    <div class="relative p-5 space-y-3">
+                    <div class="relative p-3 space-y-2">
                         
                         {{-- ヘッダー：アバター + メタ情報 --}}
-                        <div class="flex items-start gap-3">
+                        <div class="flex items-start gap-2">
                             {{-- アバター --}}
                             <div class="shrink-0 relative">
-                                <div class="w-12 h-12 rounded-full flex items-center justify-center text-white text-sm font-bold shadow-lg"
+                                <div class="w-10 h-10 rounded-full flex items-center justify-center text-white text-xs font-bold shadow-lg"
                                      style="background: linear-gradient(135deg, hsl({{ $hue }}, 70%, 50%) 0%, hsl({{ ($hue + 60) % 360 }}, 70%, 60%) 100%)">
                                     {{ mb_substr($event->user->name, 0, 2) }}
                                 </div>
@@ -155,7 +260,7 @@
                             
                             {{-- メタ情報 --}}
                             <div class="flex-1 min-w-0">
-                                <p class="font-semibold text-gray-900 truncate">{{ $event->user->name }}</p>
+                                <p class="font-semibold text-gray-900 truncate text-sm">{{ $event->user->name }}</p>
                                 <div class="flex items-center gap-2 text-xs text-gray-500 mt-0.5">
                                     <span class="inline-flex items-center gap-1">
                                         <span>{{ $typeConfig['icon'] }}</span>
@@ -187,7 +292,7 @@
 
     {{-- ページネーション --}}
     <div class="mt-8">
-        {{ $events->appends(['type' => $type])->links() }}
+        {{ $events->appends(['type' => $type, 'keyword' => $keyword, 'user_id' => $userId])->links() }}
     </div>
 
 </div>
