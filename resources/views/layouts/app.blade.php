@@ -25,12 +25,13 @@
     {{-- ナビゲーション --}}
 
     @php
-    $bgValue = auth()->user()->background_value ?? '#f3f4f6';
+    $bgValue = auth()->user()->background_value
+    ?? config('app.default_background_color');
 
     // グラデーションの場合は最初の色を取得
     if (auth()->check() && auth()->user()->background_type === 'gradient') {
     preg_match('/#[0-9A-Fa-f]{6}/', $bgValue, $matches);
-    $bgValue = $matches[0] ?? '#f3f4f6';
+    $bgValue = $matches[0] ?? config('app.default_background_color');
     }
 
     // 明るさを計算（RGB → 0-255）
@@ -40,12 +41,12 @@
     $brightness = ($r * 299 + $g * 587 + $b * 114) / 1000;
 
     // 明るい背景なら暗いナビゲーション、暗い背景なら明るいナビゲーション
-   $navText = $brightness > 155 ? 'text-gray-900' : 'text-white';
+    $navText = $brightness > 155 ? 'text-gray-900' : 'text-white';
     $navBorder = $brightness > 155 ? 'border-gray-200' : 'border-gray-700';
     $hoverText = $brightness > 155 ? 'hover:text-gray-700' : 'hover:text-gray-300';
     @endphp
 
-   <nav class="fixed top-0 left-0 right-0 z-50 backdrop-blur border-b {{ $navBorder }} shadow-sm" x-data="{ mobileMenuOpen: false }">
+    <nav class="fixed top-0 left-0 right-0 z-50 backdrop-blur border-b {{ $navBorder }} shadow-sm" x-data="{ mobileMenuOpen: false }">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between items-center h-16">
 
