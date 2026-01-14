@@ -23,7 +23,19 @@ class SemesterSetting extends Model
      */
     public static function current()
     {
-        return self::first() ?? self::create([
+        // 今日の日付が含まれる半期を探す
+        $today = now()->toDateString();
+        $current = self::where('start_date', '<=', $today)
+            ->where('end_date', '>=', $today)
+            ->first();
+        
+        // なければ最新の半期を返す
+        if (!$current) {
+            $current = self::orderBy('start_date', 'desc')->first();
+        }
+        
+        // それもなければ新規作成
+        return $current ?? self::create([
             'start_date' => now(),
             'end_date' => now()->addMonths(6),
             'auto_reset_enabled' => true,
