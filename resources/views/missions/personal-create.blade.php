@@ -96,6 +96,25 @@
                     <p class="text-red-600 text-sm mt-1">{{ $message }}</p>
                 @enderror
             </div>
+            {{-- サイクルタイプ --}}
+            <div>
+                <label for="cycle_type" class="block text-sm font-medium text-gray-700 mb-2">
+                    目標のサイクル
+                </label>
+                <select
+                    id="cycle_type"
+                    name="cycle_type"
+                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent">
+                    <option value="none" {{ old('cycle_type') == 'none' ? 'selected' : '' }}>サイクルなし（通常）</option>
+                    <option value="weekly" {{ old('cycle_type') == 'weekly' ? 'selected' : '' }}>週間（毎週日曜にリセット）</option>
+                    <option value="monthly" {{ old('cycle_type') == 'monthly' ? 'selected' : '' }}>月間（毎月1日にリセット）</option>
+                </select>
+                <p class="text-gray-500 text-sm mt-1">週間・月間を選ぶと、サイクルごとに進捗がリセットされます</p>
+                @error('cycle_type')
+                    <p class="text-red-600 text-sm mt-1">{{ $message }}</p>
+                @enderror
+            </div>
+
 
             {{-- ボタン --}}
             <div class="flex gap-4">
