@@ -95,15 +95,19 @@ class ProfileController extends Controller
 
     public function destroy(Request $request): RedirectResponse
     {
-        $request->validate([
-            'password' => ['required', 'current_password'],
-        ]);
-
         $user = $request->user();
-
+        
+        $request->validate([
+            'confirm_name' => ['required'],
+        ]);
+        
+        // 入力された名前が一致するか確認
+        if ($request->confirm_name !== $user->name) {
+            return back()->withErrors(['confirm_name' => '名前が一致しません']);
+        }
+        
         Auth::logout();
         $user->delete();
-
         $request->session()->invalidate();
         $request->session()->regenerateToken();
 
