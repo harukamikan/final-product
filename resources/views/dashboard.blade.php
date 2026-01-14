@@ -173,7 +173,7 @@
                 {{ $totalMiles }}
             </p>
             <p class="text-base text-slate-500">
-                累計獲得マイル
+                今期獲得マイル
             </p>
         </div>
 
