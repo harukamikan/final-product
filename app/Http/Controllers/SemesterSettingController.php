@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use App\Models\SemesterSetting;
 use App\Models\User;
-use App\Services\SlackService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Artisan;
 
@@ -15,8 +14,11 @@ class SemesterSettingController extends Controller
      */
     public function index()
     {
-        $setting = SemesterSetting::current();
-        $semesters = SemesterSetting::orderBy('start_date', 'desc')->get();
+        $companyId = auth()->user()->company_id;
+        $setting = SemesterSetting::current($companyId);
+        $semesters = SemesterSetting::where('company_id', $companyId)
+            ->orderBy('start_date', 'desc')
+            ->get();
         
         return view('semester.index', compact('setting', 'semesters'));
     }
@@ -32,7 +34,8 @@ class SemesterSettingController extends Controller
             'auto_reset_enabled' => 'boolean',
         ]);
 
-        $setting = SemesterSetting::current();
+        $companyId = auth()->user()->company_id;
+        $setting = SemesterSetting::current($companyId);
         $setting->update([
             'start_date' => $validated['start_date'],
             'end_date' => $validated['end_date'],
@@ -48,8 +51,10 @@ class SemesterSettingController extends Controller
      */
     public function reset()
     {
-        // Artisanコマンドを実行
-        Artisan::call('semester:reset');
+        $companyId = auth()->user()->company_id;
+        
+        // Artisanコマンドを実行（会社IDを渡す）
+        Artisan::call('semester:reset', ['company_id' => $companyId]);
         
         return redirect()->route('admin.semester.index')
             ->with('success', '半期リセットを実行しました。新しい半期が開始されました。');
@@ -60,7 +65,15 @@ class SemesterSettingController extends Controller
      */
     public function destroy(SemesterSetting $semester)
     {
-        $currentSemester = SemesterSetting::current();
+        $companyId = auth()->user()->company_id;
+        
+        // 自社の半期以外は削除できない
+        if ($semester->company_id !== $companyId) {
+            return redirect()->route('admin.semester.index')
+                ->with('error', 'この半期は削除できません');
+        }
+        
+        $currentSemester = SemesterSetting::current($companyId);
         
         // 現在の半期は削除できない
         if ($semester->id === $currentSemester->id) {

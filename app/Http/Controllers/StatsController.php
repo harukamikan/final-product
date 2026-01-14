@@ -14,8 +14,11 @@ class StatsController extends Controller
     {
         $userId = auth()->id();
         
-        // 全ての半期を取得（ドロップダウン用）
-        $semesters = SemesterSetting::orderBy('start_date', 'desc')->get();
+        // 自社の半期を取得（ドロップダウン用）
+        $companyId = auth()->user()->company_id;
+        $semesters = SemesterSetting::where('company_id', $companyId)
+            ->orderBy('start_date', 'desc')
+            ->get();
         
         // 選択された半期（なければ現在の半期）
         $selectedSemesterId = $request->get('semester_id');
