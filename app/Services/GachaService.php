@@ -1,9 +1,9 @@
 <?php
-
 namespace App\Services;
 
 use App\Models\RewardDistribution;
 use App\Models\RewardHistory;
+use App\Models\UserReward;
 use App\Models\MileHistory;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
@@ -15,7 +15,6 @@ class GachaService
     public function draw(int $userId, int $companyId)
     {
         return DB::transaction(function () use ($userId, $companyId) {
-
             $user = User::lockForUpdate()->findOrFail($userId);
 
             // 現在のマイル確認
@@ -72,6 +71,15 @@ class GachaService
                 'reward_id'  => $selected->reward_id,
                 'via'        => 'gacha',
                 'expires_at' => $selected->reward_expires_at,
+            ]);
+
+            // 所持報酬に追加
+            UserReward::create([
+                'user_id'     => $userId,
+                'reward_id'   => $selected->reward_id,
+                'company_id'  => $companyId,
+                'acquired_at' => now(),
+                'expires_at'  => $selected->reward_expires_at,
             ]);
 
             return $selected->reward;

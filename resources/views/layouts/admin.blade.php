@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Goal App</title>
+    <title>Halfway</title>
 
     {{-- Vite（Tailwind + Alpine + JS） --}}
     @vite(['resources/css/app.css', 'resources/js/app.js'])
@@ -16,21 +16,22 @@
     @if(auth()->user()->background_type === 'gradient')
     style="background: {{ auth()->user()->background_value }};"
     @else
-    style="background-color: {{ auth()->user()->background_value ?? '#f3f4f6' }};"
+    style="background-color: {{ auth()->user()->background_value ?? config('app.default_background_color') }};"
     @endif
     @else
-    style="background-color: #f3f4f6;"
+    style="background-color: {{ config('app.default_background_color') }};"
     @endauth
     >
     {{-- ナビゲーション --}}
 
     @php
-    $bgValue = auth()->user()->background_value ?? '#f3f4f6';
+    $bgValue = auth()->user()->background_value
+    ?? config('app.default_background_color');
 
     // グラデーションの場合は最初の色を取得
     if (auth()->check() && auth()->user()->background_type === 'gradient') {
     preg_match('/#[0-9A-Fa-f]{6}/', $bgValue, $matches);
-    $bgValue = $matches[0] ?? '#f3f4f6';
+    $bgValue = $matches[0] ?? config('app.default_background_color');
     }
 
     // 明るさを計算（RGB → 0-255）
@@ -50,10 +51,10 @@
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between items-center h-16">
 
-            {{-- ハンバーガーボタン（スマホのみ表示） --}}
+                {{-- ハンバーガーボタン（スマホのみ表示） --}}
                 <button @click="mobileMenuOpen = !mobileMenuOpen" class="md:hidden {{ $navText }} focus:outline-none">
                     <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
                     </svg>
                 </button>
 
@@ -107,7 +108,7 @@
                     {{ request()->is('admin/settings') ? 'border-b-2 border-indigo-500' : $hoverText }}">
                         ⚙️ 設定
                     </a>
-                    
+
 
                     <a href="/dashboard"
                         class="inline-flex items-center px-1 pt-1 text-sm font-medium {{ $navText }} {{ $hoverText }}">
@@ -156,14 +157,14 @@
 
         {{-- モバイルメニュー --}}
         <div x-show="mobileMenuOpen"
-             x-transition:enter="transition ease-out duration-200"
-             x-transition:enter-start="-translate-x-full"
-             x-transition:enter-end="translate-x-0"
-             x-transition:leave="transition ease-in duration-150"
-             x-transition:leave-start="translate-x-0"
-             x-transition:leave-end="-translate-x-full"
-             @click.away="mobileMenuOpen = false"
-             class="md:hidden fixed top-0 left-0 h-screen w-64 @if($brightness > 155) bg-gray-800 @else bg-white @endif border-r {{ $navBorder }} shadow-xl z-50 overflow-y-auto">
+            x-transition:enter="transition ease-out duration-200"
+            x-transition:enter-start="-translate-x-full"
+            x-transition:enter-end="translate-x-0"
+            x-transition:leave="transition ease-in duration-150"
+            x-transition:leave-start="translate-x-0"
+            x-transition:leave-end="-translate-x-full"
+            @click.away="mobileMenuOpen = false"
+            class="md:hidden fixed top-0 left-0 h-screen w-64 @if($brightness > 155) bg-gray-800 @else bg-white @endif border-r {{ $navBorder }} shadow-xl z-50 overflow-y-auto">
             <div class="px-2 pt-2 pb-3 space-y-1 @if($brightness > 155) bg-gray-800 @else bg-white @endif">
                 <a href="{{ route('admin.dashboard') }}"
                     class="block px-3 py-2 rounded-md text-base font-medium @if($brightness > 155) text-white hover:bg-gray-700 @else text-gray-900 hover:bg-gray-100 @endif

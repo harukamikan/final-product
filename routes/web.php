@@ -28,6 +28,7 @@ use App\Http\Controllers\{
     RewardSurveyController,
     UserRewardController,
     PersonalMissionController,
+    DocumentController,
 };
 
 use App\Http\Controllers\Admin\{
@@ -112,6 +113,8 @@ Route::middleware(['auth'])->group(function () {
     // ===== 所有報酬一覧 =====
     Route::get('/rewards/my', [UserRewardController::class, 'index'])
         ->name('rewards.my');
+    Route::post('/rewards/{id}/use', [UserRewardController::class, 'use'])
+        ->name('rewards.use');
 });
 
 
@@ -128,6 +131,14 @@ Route::middleware(['auth', 'company'])->group(function () {
     */
     Route::get('/dashboard', [DashboardController::class, 'index'])
         ->name('dashboard');
+
+        /*
+        |--------------------------------------------------------------------------
+        | Document Routes
+        |--------------------------------------------------------------------------
+        */
+       Route::get('/documents/specification', [DocumentController::class, 'downloadSpecification'])
+                ->name('documents.specification');
 
     /*
     | Notifications
@@ -418,6 +429,7 @@ Route::middleware(['auth', 'company'])
                 \App\Models\User::all(['id', 'name', 'email', 'slack_id', 'company_id'])
             );
         });
+        
 
         // 🧪 テスト用マイル付与
         Route::post('/add-miles', [DebugController::class, 'addMiles'])

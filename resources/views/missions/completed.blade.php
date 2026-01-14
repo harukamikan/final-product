@@ -87,25 +87,28 @@
         </form>
     </div>
 
-    {{-- ================= マイル残高カード ================= --}}
-    <div class="bg-gradient-to-r from-indigo-500 to-indigo-600 text-white rounded-3xl p-6 shadow-md">
-        @include('components.animated-miles-display', [
-            'currentMiles' => $totalMiles,
-            'size' => 'medium',
-            'showIcon' => true,
-            'icon' => '🏆',
-            'label' => '現在のマイル残高'
-        ])
-    </div>
-    {{-- ----- スクラッチポイントカード ----- --}}
-    <div class="bg-gradient-to-r from-amber-400 to-amber-500 text-white rounded-3xl p-6 shadow-md">
-        <div class="flex items-center justify-between">
-            <div>
-                <p class="text-sm font-medium opacity-90">スクラッチポイント</p>
-                <p class="text-4xl font-bold mt-2">{{ Auth::user()->personal_mission_points ?? 0 }}</p>
-                <p class="text-xs opacity-75 mt-1">個人ミッション達成で獲得</p>
+    {{-- ================= マイル残高 & スクラッチポイントカード（2カラム） ================= --}}
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {{-- マイル残高カード --}}
+        <div class="bg-gradient-to-r from-indigo-500 to-indigo-600 text-white rounded-3xl p-5 shadow-md">
+            @include('components.animated-miles-display', [
+                'currentMiles' => $totalMiles,
+                'size' => 'medium',
+                'showIcon' => true,
+                'icon' => '🏆',
+                'label' => '現在のマイル残高'
+            ])
+        </div>
+        {{-- スクラッチポイントカード --}}
+        <div class="bg-gradient-to-r from-amber-400 to-amber-500 text-white rounded-3xl p-5 shadow-md">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-sm font-medium opacity-90">スクラッチポイント</p>
+                    <p class="text-4xl font-bold mt-2">{{ Auth::user()->personal_mission_points ?? 0 }}</p>
+                    <p class="text-xs opacity-75 mt-1">個人ミッション達成で獲得</p>
+                </div>
+                <div class="text-6xl opacity-80">🎟️</div>
             </div>
-            <div class="text-6xl opacity-80">🎟️</div>
         </div>
     </div>
 
@@ -135,12 +138,12 @@
         <p class="text-gray-500 mt-2">進行中のミッションを達成していきましょう！</p>
     </div>
     @else
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {{-- 企業ミッション --}}
         @foreach ($missions as $mission)
-        @php
-        $userMission = $mission->userMissions->first();
-        @endphp
+            @php
+                $userMission = $mission->userMissions->first();
+            @endphp
 
         <div class="rounded-3xl border bg-white px-5 py-6 shadow-sm space-y-4">
             <div class="flex justify-between items-start">
@@ -174,6 +177,9 @@
                             bg-emerald-50 text-emerald-700
                             text-sm font-medium">
                     🎉 達成済み
+                    @if($mission->repeatable && $userMission && $userMission->completion_count > 1)
+                        <span class="ml-2 text-amber-600 font-bold">（{{ $userMission->completion_count }}回達成！）</span>
+                    @endif
                 </span>
             </div>
         </div>
@@ -181,41 +187,11 @@
 
         {{-- 個人ミッション --}}
         @foreach ($personalMissions as $mission)
-        <div class="rounded-3xl border bg-white px-5 py-6 shadow-sm space-y-4">
-            <div class="flex justify-between items-start">
-                <div>
-                    <h2 class="text-lg font-semibold text-gray-900">
-                        {{ $mission->title }}
-                    </h2>
-
-                    <p class="text-xs text-gray-500 mt-1">
-                        {{ $mission->description }}
-                    </p>
-
-                    @if($mission->completed_at)
-                    <p class="text-xs text-gray-400 mt-2">
-                        🗓 達成日：
-                        {{ $mission->completed_at->format('Y年m月d日') }}
-                    </p>
-                    @endif
-                </div>
-
-                <div class="text-right">
-                    <p class="text-xs text-gray-500">進捗</p>
-                    <p class="text-lg font-bold text-emerald-600">
-                        {{ $mission->progress_count }}/{{ $mission->required_count }}
-                    </p>
-                </div>
-            </div>
-
-            <div class="pt-3 border-t">
-                <span class="inline-flex items-center px-3 py-1 rounded-full
-                            bg-amber-50 text-amber-700
-                            text-sm font-medium">
-                    🎯 個人ミッション達成
-                </span>
-            </div>
-        </div>
+            @include('missions._mission_card', [
+                'mission' => $mission,
+                'userMission' => null,
+                'isCompleted' => true
+            ])
         @endforeach
     </div>
     @endif
