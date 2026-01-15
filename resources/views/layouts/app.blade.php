@@ -147,14 +147,18 @@
                     </div>
 
                     {{-- 👤 ユーザー名（長押しでコマンドパレット） --}}
-                    <div class="relative" x-data="{ open: false }">
+                    <div
+                        class="relative"
+                        x-data="{
+        open: false,
+        ...longPressAdmin()
+    }">
                         <button
                             class="flex items-center text-sm font-medium {{ $navText }} {{ $hoverText }}
-                   focus:outline-none select-none"
+               focus:outline-none select-none"
                             @click="open = !open"
 
                             @can('admin')
-                            x-data="longPressAdmin()"
                             @pointerdown.prevent.stop="start"
                             @pointerup.stop="cancel"
                             @pointerleave.stop="cancel"
@@ -165,36 +169,21 @@
                             <span>{{ auth()->user()->name }}</span>
                             <svg class="ml-2 h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
                                 <path fill-rule="evenodd"
-                                    d="M5.293 7.293a1 1 0 011.414 0
-                       L10 10.586l3.293-3.293
-                       a1 1 0 111.414 1.414l-4 4
-                       a1 1 0 01-1.414 0l-4-4
-                       a1 1 0 010-1.414z"
+                                    d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
                                     clip-rule="evenodd" />
                             </svg>
                         </button>
 
-                        {{-- ユーザードロップダウン --}}
+                        <!-- ユーザードロップダウン -->
                         <div
                             x-show="open"
                             @click.away="open = false"
-                            class="absolute right-0 mt-2 w-48 bg-white rounded-md
-                   shadow-lg py-1 z-10">
-                            <a href="{{ route('profile.edit') }}"
-                                class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
-                                プロフィール
-                            </a>
-
-                            <a href="{{ route('documents.specification') }}"
-                                class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
-                                仕様書📥︎
-                            </a>
-
+                            class="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-10">
+                            <a href="{{ route('profile.edit') }}" class="block px-4 py-2 text-sm hover:bg-gray-100">プロフィール</a>
+                            <a href="{{ route('documents.specification') }}" class="block px-4 py-2 text-sm hover:bg-gray-100">仕様書📥︎</a>
                             <a href="/logout"
                                 onclick="event.preventDefault(); document.getElementById('logout-form').submit();"
-                                class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
-                                ログアウト
-                            </a>
+                                class="block px-4 py-2 text-sm hover:bg-gray-100">ログアウト</a>
                         </div>
                     </div>
 
