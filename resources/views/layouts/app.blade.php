@@ -195,7 +195,7 @@
                         <button
                             x-data="longPressAdmin()"
 
-                            {{-- iOS 26 / Safari 対応：pointer events --}}
+                            {{-- iOS 26 / Safari 対応 --}}
                             @pointerdown.prevent="start"
                             @pointerup="cancel"
                             @pointerleave="cancel"
@@ -205,7 +205,7 @@
                             @click="open = !open"
 
                             class="flex items-center text-sm font-medium {{ $navText }} {{ $hoverText }} focus:outline-none select-none"
-                            style="-webkit-touch-callout: none;">
+                            style="-webkit-touch-callout: none; touch-action: none;">
                             @else
                             <button
                                 @click="open = !open"
