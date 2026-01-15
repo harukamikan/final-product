@@ -16,12 +16,19 @@ return new class extends Migration
         });
 
         // 既存データに対して、ユーザーのcompany_idを設定
-        DB::statement('
-            UPDATE semester_goals sg
-            INNER JOIN users u ON sg.user_id = u.id
-            SET sg.company_id = u.company_id
-            WHERE sg.company_id IS NULL
-        ');
+        // SQLite互換の書き方に変更
+        $semesterGoals = DB::table('semester_goals')
+            ->whereNull('company_id')
+            ->get();
+
+        foreach ($semesterGoals as $goal) {
+            $user = DB::table('users')->find($goal->user_id);
+            if ($user) {
+                DB::table('semester_goals')
+                    ->where('id', $goal->id)
+                    ->update(['company_id' => $user->company_id]);
+            }
+        }
 
         // NOT NULL制約と外部キー制約を追加
         Schema::table('semester_goals', function (Blueprint $table) {
