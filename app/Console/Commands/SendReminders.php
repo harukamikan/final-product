@@ -179,13 +179,14 @@ class SendReminders extends Command
         $nextMiles = $rank == 'ブロンズ' ? 200 : ($rank == 'シルバー' ? 500 : 500);
         $remaining = max(0, $nextMiles - $totalMiles);
         
-        // 最もマイルが高い未完了ミッション取得
-        $topMission = \App\Models\Mission::whereNotIn('id', function($query) use ($user) {
-            $query->select('mission_id')
-                ->from('user_missions')
-                ->where('user_id', $user->id)
-                ->whereNotNull('completed_at');
-        })->orderBy('reward_miles', 'desc')->first();
+        // 最もマイルが高い未完了ミッション取得（自社のミッションのみ）
+        $topMission = \App\Models\Mission::where('company_id', $user->company_id)
+            ->whereNotIn('id', function($query) use ($user) {
+                $query->select('mission_id')
+                    ->from('user_missions')
+                    ->where('user_id', $user->id)
+                    ->whereNotNull('completed_at');
+            })->orderBy('reward_miles', 'desc')->first();
         
         // メッセージ作成
         $message = "📊 今週の進捗レポート\n\n";
