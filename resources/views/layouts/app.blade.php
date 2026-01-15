@@ -191,39 +191,30 @@
     {{-- ================= コマンドパレット ================= --}}
     <div
         x-data="{
-    open:false,
-    search:'',
-    checkCommand() {
-        const s = this.search.trim().toLowerCase();
-        if (s === 'admin') {
-            window.location.href = '/admin/dashboard';
-        }
-    },
-    init() {
-        document.addEventListener('keydown',(e)=>{
-            if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') {
-                e.preventDefault();
+        open: false,
+        search: '',
+        checkCommand() {
+            const s = this.search.trim().toLowerCase();
+            if (s === 'admin') {
+                setTimeout(() => {
+                    window.location.href = '/admin/dashboard';
+                }, 0);
+            }
+        },
+        init() {
+            window.addEventListener('open-command-palette', () => {
                 this.open = true;
-                this.$nextTick(()=>this.$refs.search.focus());
-            }
-            if (e.key === 'Escape') {
-                this.open = false;
-                this.search = '';
-            }
-        });
-
-        window.addEventListener('open-command-palette',()=>{
-            this.open = true;
-            this.$nextTick(()=>this.$refs.search.focus());
-        });
-    }
-}"
+                this.$nextTick(() => this.$refs.search.focus());
+            });
+        }
+    }"
         x-init="init()"
         x-show="open"
         x-cloak
         x-teleport="body"
         class="fixed inset-0 z-[100] flex items-center justify-center bg-black bg-opacity-50"
-        @click.self="open=false;search='';">
+        @click.self="open=false; search='';">
+        
         <div class="bg-white rounded-lg shadow-xl w-full max-w-lg p-6">
             <input
                 x-ref="search"
@@ -256,6 +247,15 @@
                 }
             }
         }
+    </script>
+
+    <script>
+        document.addEventListener('keydown', (e) => {
+            if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') {
+                e.preventDefault();
+                window.dispatchEvent(new Event('open-command-palette'));
+            }
+        });
     </script>
 
 </body>
