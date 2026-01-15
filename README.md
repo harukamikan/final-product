@@ -1,93 +1,123 @@
-# 🚀 OutputHub
+# 🚀 Half Way
 
-エンジニア組織のアウトプット活動を促進・可視化する社内向けWebアプリケーション。ミッション達成でマイルを獲得し、ランクや進捗をチーム全体で可視化できます。
+Half Way は、エンジニア組織における「目標管理の形骸化」と「アウトプット継続の難しさ」を解決するために開発された、社内向けWebアプリケーションです。  
+半期目標と日々の行動を結びつけ、エンジニアの成長とナレッジ共有を自然に促進します。
 
-技術ブログの投稿、イベント企画・登壇、資格取得など、エンジニアの成長につながるアウトプットを習慣化し、組織全体のナレッジ共有を活性化します。
+本プロダクトでは、特に次の2つの課題に着目しました。
+
+1. **Excelによる半期目標管理のしづらさ**  
+半期目標がExcelで管理されていることで、日常業務の中で目に触れる機会が少なく、  
+振り返りのタイミングでしか確認されない状態になっています。  
+その結果、目標と日々の行動が分断されているという課題があります。
+
+2. **経験をナレッジ化するモチベーションの低さ**  
+技術ブログ執筆やイベント登壇などのアウトプット文化はあるものの、  
+成果が可視化されにくく、評価や達成感を得にくいため、継続につながりにくい状況があります。
+
+
+### 対象ユーザー
+主に、以下のような悩みを抱える若手エンジニアを想定しています。
+
+- 半期目標と日々の行動が結びついていない
+- 技術ブログを書きたいと思いつつ、継続できていない
+- イベント登壇に興味はあるが、経験がなく不安がある
+- 他チームのノウハウや取り組みにアクセスしづらい
 
 ---
 
 ## 🔗 リンク
 
-- **デプロイURL**: `https://your-app.railway.app` （本番環境のURLに差し替え）
+- **デプロイURL**: `https://final-product-production.up.railway.app/login` 
+- **仕様書**: `https://docs.google.com/spreadsheets/d/1V4f1-4k_600-600/edit?gid=0#gid=0`(実際のpdfを添付)
 - **デモ動画**: `https://youtu.be/your-demo-video` （デモ動画URLに差し替え）
-- **Figmaデザイン**: `https://figma.com/file/your-design` （FigmaリンクURLに差し替え）
+- **Figmaデザイン**: `https://www.figma.com/board/4sVcqJ3m8NI0KfBO1vVmsM/phase04_Fusic?node-id=0-1&p=f` 
 
 ---
 
-## ✨ 機能一覧 (MVP)
+## ✨ 機能一覧(まとめ)
 
 ### 会社管理（マルチテナント）
-- ✅ 会社作成・参加機能
-- ✅ 自動生成された招待リンクによる招待（招待コード入力UIは廃止）
-- ✅ プロフィールからいつでも招待リンクをコピー可能
+-  会社作成・参加機能
+-  自動生成された招待リンクによる招待（招待コード入力UIは廃止）
+-  プロフィールからいつでも招待リンクをコピー可能
 
 ### オンボーディング
-- ✅ 新規登録 → 会社選択/作成 → アンケート → ユーザー分類（segment）
-- ✅ アンケート項目：ロール / やりたいアウトプット / 現在の忙しさ / 経験年数
-- ✅ 回答内容に基づく初期ミッション自動生成（パーソナライズ）
+-  新規登録 → 会社選択/作成 → アンケート → ユーザー分類（segment）
+-  アンケート項目：ロール / やりたいアウトプット / 現在の忙しさ / 経験年数
+-  回答内容に基づく初期ミッション自動生成（パーソナライズ）
 
 ### ミッション管理（4種類）
-- ✅ **技術ブログ（Qiita）**: URL送信で完了
-- ✅ **イベント企画・開催**: フォーム送信で完了
-- ✅ **イベント登壇**: フォーム送信で完了
-- ✅ **資格取得**: フォーム送信で完了
-- ✅ `required_count` / `current_count` による必要回数管理（例：上級Tech Leadはブログ3本）
+-  **技術ブログ（Qiita）**: URL送信で完了
+-  **イベント企画・開催**: フォーム送信で完了
+-  **イベント登壇**: フォーム送信で完了
+-  **資格取得**: フォーム送信で完了
+-  `required_count` / `current_count` による必要回数管理（例：上級Tech Leadはブログ3本）
 
-### ダッシュボード
-- ✅ 総マイル、ランク、今月の活動表示
-- ✅ マイル獲得グラフの表示（/stats の Chart.js グラフをダッシュボードにも統合）
+### ダッシュボード画面
+-  総マイル、ランク、今月の活動表示
+-  マイル獲得グラフの表示（/stats の Chart.js グラフをダッシュボードにも統合）
 
-### Qiitaタイムライン
-- ✅ メンバーが登録したQiita記事を一覧表示
-- ✅ AI要約表示（Gemini API使用）
-- ✅ カードグリッドUI（2カラムレイアウト）
+### ミッション一覧画面
+-  会社ミッション・個人ミッションの進捗確認
+-  ミッション完了画面
+-  完了済みミッション画面
+-  ブログURL送信、または各種フォーム送信で達成報告
+
+### タイムライン画面
+-  メンバーが登録した記事を一覧表示
+-  AI要約表示（Gemini API使用）
+-  カードグリッドUI（2カラムレイアウト）
+
+### 統計画面
+-  マイル獲得の推移グラフ（Chart.js）
+
+### 活動履歴画面
+-  会社ミッション・個人ミッションの進捗確認
+-  過去の半期目標を表示
+
+### ランキング画面
+-  会社内のマイルランキング表示
+
+### ガチャ画面
+-  マイルを使ってガチャを引く
+
+### プロフィール画面
+-  基本情報（ユーザー名、メールアドレス、所属会社、Slack User ID、ニックネーム）を表示
+-  通知設定
+-  表示設定
+-  招待リンク生成・再生成
+-  セキュリティ設定
+  - アカウント削除
+  - パスワード変更
+
+### 管理者画面
+-  ユーザー管理
+-  ミッション管理
+-  報酬決定
+-  報酬配布管理
+-  半期目標一括アップロード
+-  AI自動抽出アップロード
+-  半期設定
+-  管理者設定
 
 ### Slack連携
-- ✅ Slackログイン / Slackユーザー紐付け（`slack_id`）
-- 🔧 Slash Command `/mission` でミッション完了機能（実装中・不具合対応中）
+-  Slackログイン / Slackユーザー紐付け（`slack_id`）
+-  Slash Command `/mission` でミッション完了機能（実装中・不具合対応中）
+-  リマインド機能
 
----
-
-## 機能一覧（まとめ）
-
-### 一般ユーザー向け
-
-| 画面 | 説明 |
-|------|------|
-| **ダッシュボード** | 総マイル、ランク、今月の活動、マイル獲得グラフを表示 |
-| **ミッション一覧** | 自分専用ミッション・共有ミッションの進捗確認 |
-| **ミッション完了** | ブログURL送信、または各種フォーム送信で達成報告 |
-| **完了済みミッション** | 過去の達成履歴とマイル獲得履歴を確認 |
-| **Qiitaタイムライン** | チームメンバーのQiita記事をAI要約付きで一覧表示 |
-| **プロフィール** | 個人情報編集、招待リンク生成・再生成 |
-| **ランキング** | 会社内のマイルランキング表示 |
-| **統計（Stats）** | マイル獲得の推移グラフ（Chart.js） |
-| **アクティビティ** | 会社全体の活動ログを時系列で表示 |
-
-### 管理者向け
-
-| 画面 | 説明 |
-|------|------|
-| **管理ダッシュボード** | 会社全体の活動状況・統計を確認 |
-| **ミッション作成** | 新規ミッション・課題の作成・編集 |
-| **目標アップロード** | CSV一括インポート、AI解析によるアップロード |
-| **報酬管理** | 報酬の有効化・締め切り設定・配布管理 |
-| **設定** | システム全般の設定変更 |
-
----
 
 ## 🛠️ 技術スタック
 
 | カテゴリ | 技術 |
 |----------|------|
-| **Backend** | Laravel 12.x (PHP 8.4) |
-| **Database** | MySQL (Laravel Sail / Docker) |
-| **Frontend** | Blade, Tailwind CSS, Alpine.js, Chart.js |
-| **Authentication** | Laravel Breeze, Laravel Socialite |
-| **Infrastructure** | Docker, Laravel Sail (開発環境) |
-| **Deploy** | Railway（本番環境） |
-| **Integrations** | Slack API（OAuth、Slash Command）、Qiita API（記事取得）、Gemini API（AI要約） |
-| **Dependencies** | Laravel Excel（CSV処理）、SocialiteProviders/Slack |
+| **Backend** | Laravel |
+| **Database** | MySQL |
+| **Frontend** | Blade / Tailwind CSS / Alpine.js / Chart.js |
+| **Authentication** | Laravel Breeze / Laravel Socialite |
+| **Infrastructure** | Docker / Laravel Sail |
+| **Deploy** | Railway |
+| **Integrations** | Slack API / Qiita API / Gemini API / Claude API |
+| **Dependencies** | Laravel Excel / SocialiteProviders/Slack |
 
 ---
 
@@ -96,7 +126,7 @@
 ### 必要な環境
 - Docker Desktop
 - Git
-- Composer（任意：ローカルにインストールされていなくても Sail 経由で実行可能）
+- Composer
 
 ### セットアップ手順
 
@@ -251,120 +281,3 @@ SLACK_BOT_TOKEN=xoxb-your-slack-bot-token
 2. OAuth & Permissions から `SLACK_CLIENT_ID` / `SLACK_CLIENT_SECRET` を取得
 3. Basic Information から `SLACK_SIGNING_SECRET` を取得
 4. Install App から `SLACK_BOT_TOKEN` を取得
-
-### Qiita API（記事取得）
-
-```env
-QIITA_ACCESS_TOKEN=your_qiita_access_token
-```
-
-**取得方法**:
-1. [Qiita 設定ページ](https://qiita.com/settings/tokens) にアクセス
-2. 「個人用アクセストークン」を発行
-
-### Gemini API（AI要約）
-
-```env
-GEMINI_API_KEY=your_gemini_api_key
-```
-
-**取得方法**:
-1. [Google AI Studio](https://makersuite.google.com/app/apikey) にアクセス
-2. API キーを発行
-
----
-
-## 📁 ディレクトリ構成
-
-```
-final-product/
-├── app/
-│   ├── Http/
-│   │   ├── Controllers/          # コントローラー
-│   │   │   ├── Admin/            # 管理者用コントローラー
-│   │   │   ├── DashboardController.php
-│   │   │   ├── MissionController.php
-│   │   │   ├── QiitaArticleController.php
-│   │   │   ├── SlackController.php
-│   │   │   └── ...
-│   │   └── Middleware/           # カスタムミドルウェア
-│   ├── Models/                   # Eloquentモデル
-│   │   ├── Company.php
-│   │   ├── Mission.php
-│   │   ├── User.php
-│   │   ├── QiitaArticle.php
-│   │   └── ...
-│   ├── Helpers/                  # ヘルパー関数
-│   │   └── RankHelper.php        # ランク計算ロジック
-│   └── Services/                 # ビジネスロジック
-│
-├── database/
-│   ├── migrations/               # マイグレーションファイル
-│   ├── seeders/                  # シーダーファイル
-│   └── factories/                # モデルファクトリ
-│
-├── resources/
-│   ├── views/                    # Bladeテンプレート
-│   │   ├── dashboard.blade.php
-│   │   ├── missions/
-│   │   ├── qiita/
-│   │   ├── profile/
-│   │   └── admin/
-│   └── css/                      # スタイルシート
-│
-├── routes/
-│   ├── web.php                   # Webルート定義
-│   └── api.php                   # APIルート定義（Slack等）
-│
-├── config/                       # 設定ファイル
-├── public/                       # 公開ディレクトリ
-├── storage/                      # ログ、キャッシュ等
-├── tests/                        # テストファイル
-├── compose.yaml                  # Docker Compose設定（Sail）
-└── .env.example                  # 環境変数テンプレート
-```
-
----
-
-## 📝 開発メモ
-
-### ミッション管理の設計思想
-
-- **個人ミッション**: `missions.user_id` に値があるミッションは、そのユーザー専用
-- **共有ミッション**: `missions.user_id` が NULL のミッションは、会社全体で共有
-- **進捗管理**: `user_missions` テーブルで各ユーザーの進捗（`current_count` / `required_count`）を管理
-
-### マイルとランクの仕組み
-
-- ミッション完了時に `reward_miles` が `users.miles` に加算される
-- ランク判定は `RankHelper::getRank($miles)` で計算（Bronze → Silver → Gold → Platinum など）
-- ダッシュボードや統計画面で可視化
-
-### Slack連携の現状
-
-- **実装済み**: Slackログイン（OAuth）、ユーザー紐付け（`slack_id`）
-- **実装中**: Slash Command `/mission` によるミッション完了機能
-  - `/api/slack/commands` でリクエストを受信
-  - 現在、`dispatch_failed` エラーの対応中
-
----
-
-## 🤝 コントリビューション
-
-1. このリポジトリをフォーク
-2. フィーチャーブランチを作成 (`git checkout -b feature/amazing-feature`)
-3. 変更をコミット (`git commit -m 'Add some amazing feature'`)
-4. ブランチにプッシュ (`git push origin feature/amazing-feature`)
-5. プルリクエストを作成
-
----
-
-## 📄 ライセンス
-
-MIT License
-
----
-
-## 📧 お問い合わせ
-
-プロジェクトに関する質問や提案は、Issueまたは社内Slackチャンネルまでお願いします。
