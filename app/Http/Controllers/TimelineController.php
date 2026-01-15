@@ -11,7 +11,15 @@ class TimelineController extends Controller
     {
         // クエリパラメータ ?type={qiita|event_hosting|event_speaking|certification|all}
         $type = $request->query('type', 'all');
+        $keyword = $request->query('keyword');
+        $userId = $request->query('user_id');
+        
         $companyId = auth()->user()->company_id;
+        
+        // 同じ会社のユーザー一覧を取得（ユーザーフィルター用）
+        $companyUsers = \App\Models\User::where('company_id', $companyId)
+            ->orderBy('name')
+            ->get(['id', 'name']);
         
         // TimelineEventをcompany_idで絞り込み、typeでフィルタリング
         $query = TimelineEvent::with('user')
@@ -23,8 +31,18 @@ class TimelineController extends Controller
             $query->byType($type);
         }
         
+        // キーワード検索
+        if ($keyword) {
+            $query->searchKeyword($keyword);
+        }
+        
+        // ユーザーフィルター
+        if ($userId) {
+            $query->forUser($userId);
+        }
+        
         $events = $query->paginate(20);
         
-        return view('timeline.index', compact('events', 'type'));
+        return view('timeline.index', compact('events', 'type', 'keyword', 'userId', 'companyUsers'));
     }
 }

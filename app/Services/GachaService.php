@@ -35,19 +35,7 @@ class GachaService
 
             // ガチャ配布プール
             $pool = RewardDistribution::where('company_id', $companyId)
-                ->where('is_active', true)
-                ->where(function ($q) {
-                    $q->whereNull('starts_at')
-                      ->orWhere('starts_at', '<=', now());
-                })
-                ->where(function ($q) {
-                    $q->whereNull('ends_at')
-                      ->orWhere('ends_at', '>=', now());
-                })
-                ->where(function ($q) {
-                    $q->whereNull('quantity')
-                      ->orWhere('quantity', '>', 0);
-                })
+                ->available()
                 ->lockForUpdate()
                 ->get();
 

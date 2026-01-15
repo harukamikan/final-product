@@ -175,18 +175,18 @@
                     <select
                         name="reminder_days_before"
                         class="rounded-md border-gray-300 text-sm">
-                        <option value="1" {{ old('reminder_days_before', $user->reminder_days_before) == 1 ? 'selected' : '' }}>
-                            1日前
-                        </option>
-                        <option value="3" {{ old('reminder_days_before', $user->reminder_days_before) == 3 ? 'selected' : '' }}>
+                        <option value="3" {{ old('reminder_days_before', $user->reminder_days_before) == 7 ? 'selected' : '' }}>
                             3日前
                         </option>
-                        <option value="7" {{ old('reminder_days_before', $user->reminder_days_before) == 7 ? 'selected' : '' }}>
+                        <option value="5" {{ old('reminder_days_before', $user->reminder_days_before) == 5 ? 'selected' : '' }}>
+                            5日前
+                        </option>
+                        <option value="7" {{ old('reminder_days_before', $user->reminder_days_before) == 3 ? 'selected' : '' }}>
                             7日前
                         </option>
                     </select>
                     <p class="mt-1 text-xs text-gray-500">
-                        半期目標の期限から何日前に通知を受け取るか選択できます
+                        半期目標の期限から何日前に通知を受け取るか選択できます（月初めと1日前は自動で届きます）
                     </p>
                 </div>
 

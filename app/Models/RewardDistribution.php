@@ -3,7 +3,6 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Carbon;
 
 class RewardDistribution extends Model
 {
@@ -46,5 +45,35 @@ class RewardDistribution extends Model
         }
 
         return false;
+    }
+
+    public function scopeAvailable($query)
+    {
+        return $query
+            ->where('is_active', true)
+
+            // 配布開始
+            ->where(function ($q) {
+                $q->whereNull('starts_at')
+                    ->orWhere('starts_at', '<=', now());
+            })
+
+            // 配布終了
+            ->where(function ($q) {
+                $q->whereNull('ends_at')
+                    ->orWhere('ends_at', '>=', now());
+            })
+
+            // 期限切れ報酬を除外
+            ->where(function ($q) {
+                $q->whereNull('reward_expires_at')
+                    ->orWhere('reward_expires_at', '>', now());
+            })
+
+            // 数量
+            ->where(function ($q) {
+                $q->whereNull('quantity')
+                    ->orWhere('quantity', '>', 0);
+            });
     }
 }
