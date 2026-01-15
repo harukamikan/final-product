@@ -194,14 +194,15 @@
                         @can('admin')
                         <button
                             x-data="longPressAdmin()"
-                            @touchstart="start"
+                            @touchstart.prevent="start"
                             @touchend="cancel"
                             @touchmove="cancel"
                             @touchcancel="cancel"
                             @mousedown="start"
                             @mouseup="cancel"
                             @click="open = !open"
-                            class="flex items-center text-sm font-medium {{ $navText }} {{ $hoverText }} focus:outline-none">
+                            class="flex items-center text-sm font-medium {{ $navText }} {{ $hoverText }} focus:outline-none select-none"
+                            style="-webkit-touch-callout: none;">
                             @else
                             <button
                                 @click="open = !open"
