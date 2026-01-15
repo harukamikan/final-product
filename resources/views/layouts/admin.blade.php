@@ -244,22 +244,27 @@
     </main>
 
     <!-- コマンドパレット -->
-    <div x-data="{ 
-                open: false, 
-                search: '',
-                init() {
-                    document.addEventListener('keydown', (e) => {
-                        if (e.ctrlKey && e.key === 'k') {
-                            e.preventDefault();
-                            this.open = true;
-                        }
-                        if (e.key === 'Escape') {
-                            this.open = false;
-                            this.search = '';
-                        }
-                    });
+    <div
+        x-data="{
+        open: false,
+        search: '',
+        init() {
+            document.addEventListener('keydown', (e) => {
+                // Ctrl + / または Cmd + /
+                if ((e.ctrlKey || e.metaKey) && e.key === '/') {
+                    e.preventDefault();
+                    this.open = true;
+                    this.$nextTick(() => this.$refs.searchInput.focus());
                 }
-            }"
+
+                if (e.key === 'Escape') {
+                    this.open = false;
+                    this.search = '';
+                }
+            });
+        }
+    }"
+        x-init="init()"
         x-show="open"
         x-cloak
         class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50"
@@ -267,16 +272,16 @@
         <div class="bg-white rounded-lg shadow-xl w-full max-w-lg p-6">
             <input
                 type="text"
+                x-ref="searchInput"
                 x-model="search"
                 @input="
-                            if (search.toLowerCase() === 'admin') {
-                                window.location.href = '/admin/dashboard';
-                            }
-                        "
-                placeholder="コマンドを入力..."
-                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                x-ref="searchInput"
-                @click.away="open = false; search = ''">
+                if (search.trim().toLowerCase() === 'admin') {
+                    window.location.href = '/admin/dashboard';
+                }
+            "
+                placeholder="コマンドを入力...（例：admin）"
+                class="w-full px-4 py-3 border border-gray-300 rounded-lg
+                   focus:outline-none focus:ring-2 focus:ring-indigo-500">
         </div>
     </div>
 
