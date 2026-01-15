@@ -195,21 +195,17 @@
                         <button
                             x-data="longPressAdmin()"
 
-                            {{-- iOS Safari 完全対策 --}}
-                            @touchstart.prevent="start"
-                            @touchend="cancel"
-                            @touchmove="cancel"
-                            @touchcancel="cancel"
+                            {{-- iOS 26 / Safari 対応 --}}
+                            @pointerdown.prevent="start"
+                            @pointerup="cancel"
+                            @pointerleave="cancel"
+                            @pointercancel="cancel"
                             @contextmenu.prevent
-
-                            {{-- PC用 --}}
-                            @mousedown="start"
-                            @mouseup="cancel"
 
                             @click="open = !open"
 
                             class="flex items-center text-sm font-medium {{ $navText }} {{ $hoverText }} focus:outline-none select-none"
-                            style="-webkit-touch-callout: none;">
+                            style="-webkit-touch-callout: none; touch-action: none;">
                             @else
                             <button
                                 @click="open = !open"
