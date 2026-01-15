@@ -200,16 +200,23 @@
         init(){
             document.addEventListener('keydown',(e)=>{
                 if((e.ctrlKey||e.metaKey)&&e.key==='k'){
-                    e.preventDefault();this.open=true;
+                    e.preventDefault();
+                    this.open=true;
+                    this.$nextTick(()=>this.$refs.search.focus());
                 }
-                if(e.key==='Escape'){this.open=false;this.search='';}
+                if(e.key==='Escape'){
+                    this.open=false;
+                    this.search='';
+                }
             });
+
             window.addEventListener('open-command-palette',()=>{
-                this.open=true;
+                this.open = true;
                 this.$nextTick(()=>this.$refs.search.focus());
             });
         }
     }"
+        x-init="init()"
         x-show="open"
         x-cloak
         class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50"
@@ -218,11 +225,11 @@
             <input
                 x-ref="search"
                 x-model="search"
-                @input="if(search.toLowerCase()==='admin'){window.location.href='/admin/dashboard'}"
                 placeholder="コマンドを入力..."
                 class="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-indigo-500">
         </div>
     </div>
+
 
     <style>
         [x-cloak] {
