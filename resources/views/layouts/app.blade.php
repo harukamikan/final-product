@@ -4,7 +4,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Goal App</title>
+    <title>Halfway</title>
+    <link rel="icon" href="/favicon.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
 
     {{-- Vite（Tailwind + Alpine + JS） --}}
     @vite(['resources/css/app.css', 'resources/js/app.js'])
@@ -189,8 +191,32 @@
                         </div>
                     </div>
                     <div class="relative" x-data="{ open: false }">
-                        <button @click="open = !open"
+                        @can('admin')
+                        <button
+                            x-data="longPressAdmin()"
+
+                            {{-- iOS Safari 完全対策 --}}
+                            @touchstart.prevent="start"
+                            @touchend="cancel"
+                            @touchmove="cancel"
+                            @touchcancel="cancel"
+                            @contextmenu.prevent
+
+                            {{-- PC用 --}}
+                            @mousedown="start"
+                            @mouseup="cancel"
+
+                            @click="open = !open"
+
+                            class="flex items-center text-sm font-medium {{ $navText }} {{ $hoverText }} focus:outline-none select-none"
+                            style="-webkit-touch-callout: none;"
+                            >
+                            @else
+                            <button
+                            @click="open = !open"
                             class="flex items-center text-sm font-medium {{ $navText }} {{ $hoverText }} focus:outline-none">
+                            @endcan
+
                             <span>{{ auth()->user()->name }}</span>
                             <svg class="ml-2 h-4 w-4" xmlns="http://www.w3.org/2000/svg"
                                 viewBox="0 0 20 20" fill="currentColor">
@@ -240,7 +266,7 @@
             class="md:hidden fixed top-0 left-0 h-screen w-64 @if($brightness > 155) bg-gray-800 @else bg-white @endif border-r {{ $navBorder }} shadow-xl z-50 overflow-y-auto">
             <div class="h-full px-2 pt-2 pb-3 space-y-1 @if($brightness > 155) bg-gray-800 @else bg-white @endif">
                 <a href="/dashboard"
-                    class="block px-3 py-2 rounded-md text-base font-medium {{ $navText }} {{ $hoverText }}
+                    class="block px-3 py-2 rounded-md text-base font-medium @if($brightness > 155) text-white hover:bg-gray-700 @else text-gray-900 hover:bg-gray-100 @endif
                            {{ request()->is('dashboard') ? 'bg-indigo-500 bg-opacity-20' : '' }}">
                     ホーム
                 </a>
@@ -314,22 +340,28 @@
     </main>
 
     <!-- コマンドパレット -->
-    <div x-data="{ 
-                open: false, 
-                search: '',
-                init() {
-                    document.addEventListener('keydown', (e) => {
-                        if (e.ctrlKey && e.key === 'k') {
-                            e.preventDefault();
-                            this.open = true;
-                        }
-                        if (e.key === 'Escape') {
-                            this.open = false;
-                            this.search = '';
-                        }
-                    });
+    <div
+        x-data="{ 
+        open: false, 
+        search: '',
+        init() {
+            document.addEventListener('keydown', (e) => {
+                if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+                    e.preventDefault();
+                    this.open = true;
                 }
-            }"
+                if (e.key === 'Escape') {
+                    this.open = false;
+                    this.search = '';
+                }
+            });
+
+            window.addEventListener('open-command-palette', () => {
+                this.open = true;
+                this.$nextTick(() => this.$refs.searchInput?.focus());
+            });
+        }
+    }"
         x-show="open"
         x-cloak
         class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50"
@@ -355,6 +387,23 @@
             display: none !important;
         }
     </style>
+
+    <script>
+        function longPressAdmin() {
+            let timer = null;
+
+            return {
+                start() {
+                    timer = setTimeout(() => {
+                        window.dispatchEvent(new Event('open-command-palette'));
+                    }, 600); // 0.6秒
+                },
+                cancel() {
+                    clearTimeout(timer);
+                }
+            };
+        }
+    </script>
 
 </body>
 

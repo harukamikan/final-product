@@ -6,7 +6,7 @@
 
     <div>
         <h1 class="text-xl font-semibold text-gray-900">技術ブログURLの送信</h1>
-        <p class="text-sm text-gray-500 mt-1">
+        <p class="text-sm text-gray-900 mt-1 font-medium">
             Qiitaなどに投稿した技術系ブログの記事URLを入力してください。送信するとミッションの進捗が更新されます。
         </p>
     </div>
@@ -32,7 +32,7 @@
 
         <div class="flex justify-between items-center">
             <a href="{{ route('missions.index') }}"
-               class="text-xs text-gray-500 hover:underline">
+               class="text-xs text-gray-900 hover:underline font-medium">
                 ← ミッション一覧に戻る
             </a>
 

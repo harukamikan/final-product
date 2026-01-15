@@ -45,4 +45,34 @@ class TimelineEvent extends Model
     {
         return $query->where('event_type', $type);
     }
+
+    /**
+     * キーワードで検索（payload内のタイトル、詳細、URLなど）
+     */
+    public function scopeSearchKeyword($query, $keyword)
+    {
+        if (empty($keyword)) {
+            return $query;
+        }
+
+        return $query->where(function ($q) use ($keyword) {
+            // JSON検索: payload->title, payload->details, payload->url, payload->summary
+            $q->whereRaw("JSON_EXTRACT(payload, '$.title') LIKE ?", ["%{$keyword}%"])
+              ->orWhereRaw("JSON_EXTRACT(payload, '$.details') LIKE ?", ["%{$keyword}%"])
+              ->orWhereRaw("JSON_EXTRACT(payload, '$.url') LIKE ?", ["%{$keyword}%"])
+              ->orWhereRaw("JSON_EXTRACT(payload, '$.summary') LIKE ?", ["%{$keyword}%"]);
+        });
+    }
+
+    /**
+     * 特定のユーザーでフィルタリング
+     */
+    public function scopeForUser($query, $userId)
+    {
+        if (empty($userId)) {
+            return $query;
+        }
+
+        return $query->where('user_id', $userId);
+    }
 }
