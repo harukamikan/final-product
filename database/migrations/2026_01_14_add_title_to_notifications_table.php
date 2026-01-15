@@ -8,15 +8,17 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::table('user_rewards', function (Blueprint $table) {
-            $table->timestamp('resolved_at')->nullable()->after('used_at');
-        });
+        if (!Schema::hasColumn('notifications', 'title')) {
+            Schema::table('notifications', function (Blueprint $table) {
+                $table->string('title')->nullable()->after('user_id');
+            });
+        }
     }
 
     public function down(): void
     {
-        Schema::table('user_rewards', function (Blueprint $table) {
-            $table->dropColumn('resolved_at');
+        Schema::table('notifications', function (Blueprint $table) {
+            $table->dropColumn('title');
         });
     }
 };
