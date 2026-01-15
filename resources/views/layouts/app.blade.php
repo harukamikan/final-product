@@ -214,12 +214,11 @@
         x-teleport="body"
         class="fixed inset-0 z-[100] flex items-center justify-center bg-black bg-opacity-50"
         @click.self="open=false; search='';">
-        
+
         <div class="bg-white rounded-lg shadow-xl w-full max-w-lg p-6">
             <input
                 x-ref="search"
                 x-model="search"
-                @input="checkCommand()"
                 @compositionend="checkCommand()"
                 placeholder="コマンドを入力..."
                 class="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-indigo-500">
@@ -248,16 +247,6 @@
             }
         }
     </script>
-
-    <script>
-        document.addEventListener('keydown', (e) => {
-            if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') {
-                e.preventDefault();
-                window.dispatchEvent(new Event('open-command-palette'));
-            }
-        });
-    </script>
-
 </body>
 
 </html>
