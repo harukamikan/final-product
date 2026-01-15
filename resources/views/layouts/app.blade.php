@@ -195,16 +195,12 @@
                         <button
                             x-data="longPressAdmin()"
 
-                            {{-- iOS Safari 完全対策 --}}
-                            @touchstart.prevent="start"
-                            @touchend="cancel"
-                            @touchmove="cancel"
-                            @touchcancel="cancel"
+                            {{-- iOS 26 / Safari 対応：pointer events --}}
+                            @pointerdown.prevent="start"
+                            @pointerup="cancel"
+                            @pointerleave="cancel"
+                            @pointercancel="cancel"
                             @contextmenu.prevent
-
-                            {{-- PC用 --}}
-                            @mousedown="start"
-                            @mouseup="cancel"
 
                             @click="open = !open"
 
