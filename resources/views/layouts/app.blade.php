@@ -212,7 +212,6 @@
         x-init="init()"
         x-show="open"
         x-cloak
-        x-teleport="body"
         class="fixed inset-0 z-[100] flex items-center justify-center bg-black bg-opacity-50"
         @click.self="open=false; search='';">
 
