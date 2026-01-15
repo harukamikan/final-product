@@ -93,6 +93,109 @@
 
     </div>
 </div>
+{{-- ================= 報酬使用申請一覧 ================= --}}
+        <div class="bg-white overflow-hidden shadow-2xl card-shadow sm:rounded-lg mt-8">
+            <div class="p-6">
+
+                <h3 class="font-semibold text-lg text-gray-800 mb-4">
+                    📝 ユーザー報酬一覧
+                </h3>
+
+                @php
+                    $userRewards = \App\Models\UserReward::with(['user', 'reward'])
+                        ->where('company_id', auth()->user()->company_id)
+                        ->orderBy('used_at', 'desc')
+                        ->orderBy('created_at', 'desc')
+                        ->get();
+                @endphp
+
+                @if($userRewards->isEmpty())
+                    <p class="text-sm text-gray-500">
+                        獲得された報酬はまだありません。
+                    </p>
+                @else
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full divide-y divide-gray-200">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">ユーザー</th>
+                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">報酬</th>
+                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">使用状況</th>
+                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">対応状況</th>
+                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">操作</th>
+                                </tr>
+                            </thead>
+                            <tbody class="bg-white divide-y divide-gray-200">
+                                @foreach($userRewards as $ur)
+                                    <tr class="{{ $ur->resolved_at ? 'bg-gray-50' : '' }}">
+                                        <td class="px-4 py-3 whitespace-nowrap text-sm font-medium text-gray-900">
+                                            {{ $ur->user->name }}
+                                        </td>
+                                        <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-900">
+                                            {{ $ur->reward->name }}
+                                        </td>
+                                        <td class="px-4 py-3 whitespace-nowrap">
+                                            @if($ur->used_at)
+                                                <span class="px-2 py-1 text-xs font-semibold rounded-full bg-blue-100 text-blue-800">
+                                                    🎉 使用済み
+                                                </span>
+                                                <div class="text-xs text-gray-400 mt-1">
+                                                    {{ $ur->used_at->format('Y/m/d H:i') }}
+                                                </div>
+                                            @else
+                                                <span class="px-2 py-1 text-xs font-semibold rounded-full bg-gray-100 text-gray-600">
+                                                    未使用
+                                                </span>
+                                            @endif
+                                        </td>
+                                        <td class="px-4 py-3 whitespace-nowrap">
+                                            @if($ur->used_at)
+                                                @if($ur->resolved_at)
+                                                    <span class="px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800">
+                                                        ✅ 対応済み
+                                                    </span>
+                                                    <div class="text-xs text-gray-400 mt-1">
+                                                        {{ $ur->resolved_at->format('Y/m/d H:i') }}
+                                                    </div>
+                                                @else
+                                                    <span class="px-2 py-1 text-xs font-semibold rounded-full bg-yellow-100 text-yellow-800">
+                                                        ⏳ 未対応
+                                                    </span>
+                                                @endif
+                                            @else
+                                                <span class="text-xs text-gray-400">-</span>
+                                            @endif
+                                        </td>
+                                        <td class="px-4 py-3 whitespace-nowrap text-sm">
+                                            @if($ur->used_at)
+                                                @if($ur->resolved_at)
+                                                    <form method="POST" action="{{ route('admin.rewards.unresolve', $ur->id) }}">
+                                                        @csrf
+                                                        <button type="submit" class="text-gray-600 hover:text-gray-800 text-xs">
+                                                            未対応に戻す
+                                                        </button>
+                                                    </form>
+                                                @else
+                                                    <form method="POST" action="{{ route('admin.rewards.resolve', $ur->id) }}">
+                                                        @csrf
+                                                        <button type="submit" class="bg-green-500 hover:bg-green-600 text-white px-3 py-1 rounded text-xs">
+                                                            対応済み
+                                                        </button>
+                                                    </form>
+                                                @endif
+                                            @else
+                                                <span class="text-xs text-gray-400">-</span>
+                                            @endif
+                                        </td>
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>
+                @endif
+
+            </div>
+        </div>
 
 <style>
     .card-shadow {
