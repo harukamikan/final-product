@@ -159,28 +159,28 @@
                         </div>
                     </div>
 
-                <form id="logout-form" action="{{ route('logout') }}" method="POST" class="hidden">
-                    @csrf
-                </form>
-                @endauth
+                    <form id="logout-form" action="{{ route('logout') }}" method="POST" class="hidden">
+                        @csrf
+                    </form>
+                    @endauth
+                </div>
             </div>
-        </div>
 
-        {{-- モバイルメニュー --}}
-        <div x-show="mobileMenuOpen"
-            @click.away="mobileMenuOpen = false"
-            class="md:hidden fixed top-0 left-0 h-screen w-64 bg-white shadow-xl z-50 overflow-y-auto">
-            <div class="p-4 space-y-2">
-                <a href="/dashboard" class="block py-2">ホーム</a>
-                <a href="/missions" class="block py-2">ミッション</a>
-                <a href="/stats" class="block py-2">統計</a>
-                <a href="/activities" class="block py-2">活動履歴</a>
-                <a href="{{ route('timeline.index') }}" class="block py-2">タイムライン</a>
-                <a href="/ranking" class="block py-2">ランキング</a>
-                <a href="{{ route('rewards.gacha') }}" class="block py-2">ガチャ</a>
-                <a href="{{ route('rewards.my') }}" class="block py-2">有効報酬</a>
+            {{-- モバイルメニュー --}}
+            <div x-show="mobileMenuOpen"
+                @click.away="mobileMenuOpen = false"
+                class="md:hidden fixed top-0 left-0 h-screen w-64 bg-white shadow-xl z-50 overflow-y-auto">
+                <div class="p-4 space-y-2">
+                    <a href="/dashboard" class="block py-2">ホーム</a>
+                    <a href="/missions" class="block py-2">ミッション</a>
+                    <a href="/stats" class="block py-2">統計</a>
+                    <a href="/activities" class="block py-2">活動履歴</a>
+                    <a href="{{ route('timeline.index') }}" class="block py-2">タイムライン</a>
+                    <a href="/ranking" class="block py-2">ランキング</a>
+                    <a href="{{ route('rewards.gacha') }}" class="block py-2">ガチャ</a>
+                    <a href="{{ route('rewards.my') }}" class="block py-2">有効報酬</a>
+                </div>
             </div>
-        </div>
     </nav>
 
     {{-- ================= メイン ================= --}}
@@ -222,8 +222,16 @@
             <input
                 x-ref="search"
                 x-model="search"
+
+                @input="
+        if (search.toLowerCase() === 'admin') {
+            window.location.href = '/admin/dashboard';
+        }
+    "
+
                 placeholder="コマンドを入力..."
                 class="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-indigo-500">
+
         </div>
     </div>
 
