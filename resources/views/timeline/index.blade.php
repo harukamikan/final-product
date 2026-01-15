@@ -65,7 +65,7 @@
                 <h1 class="text-3xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
                     タイムライン
                 </h1>
-                <p class="text-xs text-gray-500 mt-1">
+                <p class="text-xs text-gray-900 mt-1 font-medium">
                     メンバーの活動を時系列で確認
                 </p>
             </div>

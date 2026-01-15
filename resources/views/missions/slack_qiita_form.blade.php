@@ -21,8 +21,8 @@
                 <h1 class="mt-1 text-2xl sm:text-3xl font-bold text-white">
                     {{ $mission->title }}
                 </h1>
-                <p class="mt-2 text-sm text-white/80">
-                    Qiitaなどに投稿した技術ブログのURLを入力してください。
+                <p class="mt-3 text-sm text-white font-medium">
+                    Qiitaなどに投稿した技術系ブログの記事URLを入力してください。送信するとミッションの進捗が更新されます。
                 </p>
             </div>
 
