@@ -175,13 +175,13 @@
                     <select
                         name="reminder_days_before"
                         class="rounded-md border-gray-300 text-sm">
-                        <option value="3" {{ old('reminder_days_before', $user->reminder_days_before) == 7 ? 'selected' : '' }}>
+                        <option value="3" {{ old('reminder_days_before', $user->reminder_days_before) == 3 ? 'selected' : '' }}>
                             3日前
                         </option>
                         <option value="5" {{ old('reminder_days_before', $user->reminder_days_before) == 5 ? 'selected' : '' }}>
                             5日前
                         </option>
-                        <option value="7" {{ old('reminder_days_before', $user->reminder_days_before) == 3 ? 'selected' : '' }}>
+                        <option value="7" {{ old('reminder_days_before', $user->reminder_days_before) == 7 ? 'selected' : '' }}>
                             7日前
                         </option>
                     </select>
