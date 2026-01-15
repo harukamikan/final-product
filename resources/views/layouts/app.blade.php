@@ -191,23 +191,24 @@
     {{-- ================= コマンドパレット ================= --}}
     <div
         x-data="{
-        open: false,
-        search: '',
-        checkCommand() {
-            const s = this.search.trim().toLowerCase();
-            if (s === 'admin') {
-                setTimeout(() => {
-                    window.location.href = '/admin/dashboard';
-                }, 0);
-            }
-        },
-        init() {
-            window.addEventListener('open-command-palette', () => {
-                this.open = true;
-                this.$nextTick(() => this.$refs.search.focus());
-            });
+    open: false,
+    search: '',
+    composing: false,
+    checkCommand() {
+        if (this.composing) return;
+
+        const s = this.search.trim().toLowerCase();
+        if (s === 'admin') {
+            window.location.href = '/admin/dashboard';
         }
-    }"
+    },
+    init() {
+        window.addEventListener('open-command-palette', () => {
+            this.open = true;
+            this.$nextTick(() => this.$refs.search.focus());
+        });
+    }
+}"
         x-init="init()"
         x-show="open"
         x-cloak
@@ -219,7 +220,11 @@
             <input
                 x-ref="search"
                 x-model="search"
-                @compositionend="checkCommand()"
+
+                @compositionstart="composing = true"
+                @compositionend="composing = false; checkCommand()"
+                @input="checkCommand()"
+
                 placeholder="コマンドを入力..."
                 class="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-indigo-500">
         </div>
