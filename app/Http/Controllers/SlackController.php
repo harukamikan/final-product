@@ -57,6 +57,146 @@ class SlackController extends Controller
 
         return redirect('/dashboard');
     }
+    /**
+     * 個人ミッションの進捗確認
+     */
+    public function myMissions(Request $request)
+    {
+        if (!$this->verifySlackSignature($request)) {
+            abort(401, 'Invalid Slack signature');
+        }
+
+        $slackUserId = (string) $request->input('user_id');
+        $user = User::where('slack_id', $slackUserId)->first();
+
+        if (!$user) {
+            return response()->json([
+                "response_type" => "ephemeral",
+                "text" => "ユーザー連携が見つかりませんでした。\nまずWebアプリでSlackログインしてください: " . config('app.url')
+            ]);
+        }
+
+        // 個人ミッション取得
+        $personalMissions = \App\Models\PersonalMission::where('user_id', $user->id)
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        if ($personalMissions->isEmpty()) {
+            return response()->json([
+                "response_type" => "ephemeral",
+                "text" => "📋 個人ミッションはまだ登録されていません。\n\nWebアプリから登録できます: " . config('app.url') . "/personal-missions"
+            ]);
+        }
+
+        // 進行中と完了を分ける
+        $inProgress = $personalMissions->whereNull('completed_at');
+        $completed = $personalMissions->whereNotNull('completed_at');
+
+        $message = "📋 *あなたの個人ミッション*\n\n";
+
+        if ($inProgress->isNotEmpty()) {
+            $message .= "*🔥 進行中*\n";
+            foreach ($inProgress as $pm) {
+                $progress = $pm->progress_count ?? 0;
+                $required = $pm->required_count ?? 1;
+                $message .= "• {$pm->title} ({$progress}/{$required})\n";
+            }
+            $message .= "\n";
+        }
+
+        if ($completed->isNotEmpty()) {
+            $message .= "*✅ 完了済み* ({$completed->count()}件)\n";
+            foreach ($completed->take(5) as $pm) {
+                $message .= "• {$pm->title}\n";
+            }
+            if ($completed->count() > 5) {
+                $message .= "...他 " . ($completed->count() - 5) . " 件\n";
+            }
+        }
+
+        $message .= "\n📱 詳細はWebアプリで: " . config('app.url') . "/personal-missions";
+
+        return response()->json([
+            "response_type" => "ephemeral",
+            "text" => $message
+        ]);
+    }
+    /**
+     * 持ってる報酬一覧
+     */
+    public function myRewards(Request $request)
+    {
+        if (!$this->verifySlackSignature($request)) {
+            abort(401, 'Invalid Slack signature');
+        }
+
+        $slackUserId = (string) $request->input('user_id');
+        $user = User::where('slack_id', $slackUserId)->first();
+
+        if (!$user) {
+            return response()->json([
+                "response_type" => "ephemeral",
+                "text" => "ユーザー連携が見つかりませんでした。\nまずWebアプリでSlackログインしてください: " . config('app.url')
+            ]);
+        }
+
+        // 有効な報酬を取得
+        $userRewards = \App\Models\UserReward::with('reward')
+            ->where('user_id', $user->id)
+            ->whereNull('used_at')
+            ->where(function ($q) {
+                $q->whereNull('expires_at')
+                    ->orWhere('expires_at', '>=', now());
+            })
+            ->get();
+
+        if ($userRewards->isEmpty()) {
+            return response()->json([
+                "response_type" => "ephemeral",
+                "text" => "🎁 現在使用可能な報酬はありません。\n\nガチャで報酬をゲットしよう！: " . config('app.url') . "/rewards/gacha"
+            ]);
+        }
+
+        $message = "🎁 *あなたの報酬一覧*\n\n";
+
+        foreach ($userRewards as $ur) {
+            $message .= "• {$ur->reward->name}";
+            if ($ur->expires_at) {
+                $message .= " (期限: {$ur->expires_at->format('Y/m/d')})";
+            }
+            $message .= "\n";
+        }
+
+        $message .= "\n📱 使用はWebアプリから: " . config('app.url') . "/rewards/my";
+
+        return response()->json([
+            "response_type" => "ephemeral",
+            "text" => $message
+        ]);
+    }
+
+    /**
+     * リンク集（Webアプリ＋仕様書）
+     */
+    public function links(Request $request)
+    {
+        if (!$this->verifySlackSignature($request)) {
+            abort(401, 'Invalid Slack signature');
+        }
+
+        $appUrl = config('app.url');
+
+        $message = "🔗 *リンク集*\n\n";
+        $message .= "📱 *Webアプリ*\n";
+        $message .= "{$appUrl}\n\n";
+        $message .= "📄 *仕様書*\n";
+        $message .= "{$appUrl}/documents/specification\n";
+
+        return response()->json([
+            "response_type" => "ephemeral",
+            "text" => $message
+        ]);
+    }
 
     public function commands(Request $request)
     {
