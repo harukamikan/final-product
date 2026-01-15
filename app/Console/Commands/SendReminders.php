@@ -53,16 +53,13 @@ class SendReminders extends Command
     
     protected function checkDeadlineReminders($now)
     {
-<<<<<<< HEAD
         \Log::info('=== checkDeadlineReminders ===');
 
-=======
         // 朝9時以外は何もしない
         if ($now->hour != 9) {
             return;
         }
         
->>>>>>> feature/remind2/ryouta
         // 期限リマインドONのユーザーを取得
         $users = \App\Models\User::where('reminder_enabled', true)
             ->where('reminder_deadline_enabled', true)
