@@ -191,27 +191,33 @@
     {{-- ================= コマンドパレット ================= --}}
     <div
         x-data="{
-        open:false,
-        search:'',
-        init(){
-            document.addEventListener('keydown',(e)=>{
-                if((e.ctrlKey||e.metaKey)&&e.key==='k'){
-                    e.preventDefault();
-                    this.open=true;
-                    this.$nextTick(()=>this.$refs.search.focus());
-                }
-                if(e.key==='Escape'){
-                    this.open=false;
-                    this.search='';
-                }
-            });
-
-            window.addEventListener('open-command-palette',()=>{
+    open:false,
+    search:'',
+    checkCommand() {
+        const s = this.search.trim().toLowerCase();
+        if (s === 'admin') {
+            window.location.href = '/admin/dashboard';
+        }
+    },
+    init() {
+        document.addEventListener('keydown',(e)=>{
+            if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') {
+                e.preventDefault();
                 this.open = true;
                 this.$nextTick(()=>this.$refs.search.focus());
-            });
-        }
-    }"
+            }
+            if (e.key === 'Escape') {
+                this.open = false;
+                this.search = '';
+            }
+        });
+
+        window.addEventListener('open-command-palette',()=>{
+            this.open = true;
+            this.$nextTick(()=>this.$refs.search.focus());
+        });
+    }
+}"
         x-init="init()"
         x-show="open"
         x-cloak
@@ -222,22 +228,10 @@
             <input
                 x-ref="search"
                 x-model="search"
-
-                @input="
-        if (search.trim().toLowerCase() === 'admin') {
-            window.location.href = '/admin/dashboard';
-        }
-    "
-
-                @compositionend="
-        if (search.trim().toLowerCase() === 'admin') {
-            window.location.href = '/admin/dashboard';
-        }
-    "
-
+                @input="checkCommand()"
+                @compositionend="checkCommand()"
                 placeholder="コマンドを入力..."
                 class="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-indigo-500">
-
         </div>
     </div>
 
