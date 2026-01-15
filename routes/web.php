@@ -200,6 +200,13 @@ Route::middleware(['auth', 'company'])->group(function () {
     Route::post('/missions/blog-url', [MissionController::class, 'submitBlogUrl'])
         ->name('missions.blog-url.submit');
 
+    // Connpass URL 入力・送信
+    Route::get('/missions/connpass-url', [MissionController::class, 'showConnpassUrlForm'])
+        ->name('missions.connpass-url.form');
+
+    Route::post('/missions/connpass-url', [MissionController::class, 'submitConnpassUrl'])
+        ->name('missions.connpass-url.submit');
+
     // アプリ内フォーム提出
     Route::get('/missions/{mission}/form', [MissionFormController::class, 'create'])
         ->name('missions.form.create');

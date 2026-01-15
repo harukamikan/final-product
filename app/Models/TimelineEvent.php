@@ -13,6 +13,8 @@ class TimelineEvent extends Model
         'company_id',
         'user_id',
         'event_type',
+        'source',
+        'external_id',
         'occurred_at',
         'payload',
     ];

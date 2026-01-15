@@ -165,6 +165,89 @@ class MissionController extends Controller
     }
 
     /**
+     * Connpass イベント URL 入力画面
+     */
+    public function showConnpassUrlForm(Request $request)
+    {
+        $missionKey = $request->query('mission_key');
+
+        if (!$missionKey || !in_array($missionKey, ['event_speaker', 'event_organizer'])) {
+            abort(404, '不正なミッションです');
+        }
+
+        $mission = Mission::where('key', $missionKey)->firstOrFail();
+        return view('missions.connpass_url', compact('mission'));
+    }
+
+    /**
+     * Connpass イベント URL 送信処理
+     */
+    public function submitConnpassUrl(
+        Request $request,
+        MissionService $missionService,
+        \App\Services\ConnpassService $connpassService,
+        \App\Services\TimelineService $timelineService
+    ) {
+        $request->validate([
+            'mission_key' => ['required', 'in:event_speaker,event_organizer'],
+            'url' => ['required', 'url'],
+        ]);
+
+        $user       = $request->user();
+        $url        = $request->input('url');
+        $missionKey = $request->input('mission_key');
+        $mission    = Mission::where('key', $missionKey)->firstOrFail();
+
+        // 1) Connpass API からイベント情報を取得
+        try {
+            $eventData = $connpassService->fetchEventFromUrl($url);
+
+            if (!$eventData) {
+                return back()
+                    ->withInput()
+                    ->withErrors([
+                        'url' => 'Connpass APIからイベント情報を取得できませんでした。URLを確認して再度お試しください。',
+                    ]);
+            }
+        } catch (\Throwable $e) {
+            Log::warning('Connpass fetch failed', [
+                'url' => $url,
+                'error' => $e->getMessage(),
+            ]);
+
+            return back()
+                ->withInput()
+                ->withErrors([
+                    'url' => 'Connpassイベントの取得に失敗しました。URLを確認して再度お試しください。',
+                ]);
+        }
+
+        // 2) ミッション進捗 & マイル付与
+        $achievementData = $missionService->handleTrigger(
+            $user,
+            $missionKey === 'event_speaker' ? 'event_speaking_completed' : 'event_hosting_completed',
+            [
+                'mission_id' => $mission->id,
+                'url'        => $eventData['url'] ?? $url,
+            ]
+        );
+
+        // 3) タイムラインイベントを作成（event_speaking / event_hosting に統一）
+        if ($missionKey === 'event_speaker') {
+            $timelineService->createEventSpeakingEvent($user, $eventData);
+        } else {
+            $timelineService->createEventHostingEvent($user, $eventData);
+        }
+
+        // 4) プレビュー表示
+        return view('missions.connpass-preview', [
+            'mission' => $mission,
+            'eventData' => $eventData,
+            'achievementData' => $achievementData,
+        ]);
+    }
+
+    /**
      * ミッション詳細 or 適切な入力画面へリダイレクト
      */
     public function show(Mission $mission)

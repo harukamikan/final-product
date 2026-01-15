@@ -50,6 +50,11 @@ return [
 
     'gemini' => [
         'api_key' => env('GEMINI_API_KEY'),
-            ],
+    ],
+
+    'connpass' => [
+        'api_key' => env('CONNPASS_API_KEY'),
+    ],
 
 ];
+

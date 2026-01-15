@@ -33,39 +33,91 @@ class TimelineService
 
     /**
      * イベント企画・開催のタイムラインイベントを作成
+     * 
+     * @param User $user
+     * @param MissionForm|array $data MissionFormインスタンスまたは共通フォーマット配列
+     * @return TimelineEvent
      */
-    public function createEventHostingEvent(User $user, MissionForm $form): TimelineEvent
+    public function createEventHostingEvent(User $user, $data): TimelineEvent
     {
+        // MissionFormインスタンスの場合は共通フォーマットに変換
+        if ($data instanceof MissionForm) {
+            $payload = [
+                'source' => 'form',
+                'external_id' => null,
+                'title' => $data->title,
+                'description' => $data->details,
+                'started_at' => $data->occurred_on . ' 00:00:00',
+                'ended_at' => null,
+                'place' => null,
+                'address' => null,
+                'url' => $data->evidence_url,
+                'owner' => null,
+            ];
+            $source = 'form';
+            $externalId = null;
+            $occurredAt = $data->occurred_on . ' 00:00:00';
+        } else {
+            // 共通フォーマット配列の場合はそのまま使用
+            $payload = $data;
+            $source = $data['source'] ?? 'form';
+            $externalId = $data['external_id'] ?? null;
+            $occurredAt = $data['started_at'] ?? now();
+        }
+
         return TimelineEvent::create([
             'company_id' => $user->company_id,
             'user_id' => $user->id,
             'event_type' => 'event_hosting',
-            'occurred_at' => $form->occurred_on . ' 00:00:00',
-            'payload' => [
-                'title' => $form->title,
-                'occurred_on' => $form->occurred_on,
-                'details' => $form->details,
-                'evidence_url' => $form->evidence_url,
-            ],
+            'source' => $source,
+            'external_id' => $externalId,
+            'occurred_at' => $occurredAt,
+            'payload' => $payload,
         ]);
     }
 
     /**
      * イベント登壇のタイムラインイベントを作成
+     * 
+     * @param User $user
+     * @param MissionForm|array $data MissionFormインスタンスまたは共通フォーマット配列
+     * @return TimelineEvent
      */
-    public function createEventSpeakingEvent(User $user, MissionForm $form): TimelineEvent
+    public function createEventSpeakingEvent(User $user, $data): TimelineEvent
     {
+        // MissionFormインスタンスの場合は共通フォーマットに変換
+        if ($data instanceof MissionForm) {
+            $payload = [
+                'source' => 'form',
+                'external_id' => null,
+                'title' => $data->title,
+                'description' => $data->details,
+                'started_at' => $data->occurred_on . ' 00:00:00',
+                'ended_at' => null,
+                'place' => null,
+                'address' => null,
+                'url' => $data->evidence_url,
+                'owner' => null,
+            ];
+            $source = 'form';
+            $externalId = null;
+            $occurredAt = $data->occurred_on . ' 00:00:00';
+        } else {
+            // 共通フォーマット配列の場合はそのまま使用
+            $payload = $data;
+            $source = $data['source'] ?? 'form';
+            $externalId = $data['external_id'] ?? null;
+            $occurredAt = $data['started_at'] ?? now();
+        }
+
         return TimelineEvent::create([
             'company_id' => $user->company_id,
             'user_id' => $user->id,
             'event_type' => 'event_speaking',
-            'occurred_at' => $form->occurred_on . ' 00:00:00',
-            'payload' => [
-                'title' => $form->title,
-                'occurred_on' => $form->occurred_on,
-                'details' => $form->details,
-                'evidence_url' => $form->evidence_url,
-            ],
+            'source' => $source,
+            'external_id' => $externalId,
+            'occurred_at' => $occurredAt,
+            'payload' => $payload,
         ]);
     }
 
@@ -78,12 +130,20 @@ class TimelineService
             'company_id' => $user->company_id,
             'user_id' => $user->id,
             'event_type' => 'certification',
+            'source' => 'form',
+            'external_id' => null,
             'occurred_at' => $form->occurred_on . ' 00:00:00',
             'payload' => [
+                'source' => 'form',
+                'external_id' => null,
                 'title' => $form->title,
-                'occurred_on' => $form->occurred_on,
-                'details' => $form->details,
-                'evidence_url' => $form->evidence_url,
+                'description' => $form->details,
+                'started_at' => $form->occurred_on . ' 00:00:00',
+                'ended_at' => null,
+                'place' => null,
+                'address' => null,
+                'url' => $form->evidence_url,
+                'owner' => null,
             ],
         ]);
     }
