@@ -3,53 +3,80 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Models\UserReward;
+use App\Models\Reward;
+use App\Models\RewardDistribution;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
-class RewardUsageController extends Controller
+class RewardDistributionController extends Controller
 {
+    // 一覧
     public function index()
     {
         $companyId = Auth::user()->company_id;
 
-        // 使用申請された報酬（used_atがある）を取得
-        $usedRewards = UserReward::with(['user', 'reward'])
+        $distributions = RewardDistribution::with('reward')
             ->where('company_id', $companyId)
-            ->whereNotNull('used_at')
-            ->orderByRaw('resolved_at IS NOT NULL')  // 未解決を上に
-            ->orderBy('used_at', 'desc')
+            ->latest()
             ->get();
 
-        return view('admin.rewards.usage', compact('usedRewards'));
+        $rewards = Reward::where('company_id', $companyId)->get();
+
+        return view('admin.reward_distributions.index', compact(
+            'distributions',
+            'rewards'
+        ));
     }
 
-    public function resolve($id)
+    // 新規作成
+    public function store(Request $request)
     {
-        $userReward = UserReward::findOrFail($id);
+        $request->validate([
+            'reward_id'         => 'required|exists:rewards,id',
+            'quantity'          => 'nullable|integer|min:1',
+            'starts_at'         => 'nullable|date',
+            'ends_at'           => 'nullable|date|after_or_equal:starts_at',
+            'reward_expires_at' => 'nullable|date',
+        ]);
 
-        // 自社の報酬かチェック
-        if ($userReward->company_id !== Auth::user()->company_id) {
+        RewardDistribution::create([
+            'company_id'         => Auth::user()->company_id,
+            'reward_id'          => $request->reward_id,
+            'quantity'           => $request->quantity,
+            'starts_at'          => $request->starts_at,
+            'ends_at'            => $request->ends_at,
+            'reward_expires_at'  => $request->reward_expires_at,
+            'is_active'          => true,
+        ]);
+
+        return back()->with('success', '報酬を決定し、配布を開始しました');
+    }
+
+
+    // ON / OFF 切り替え
+    public function toggle(RewardDistribution $distribution)
+    {
+        if ($distribution->is_expired) {
+            return back()->with('error', '期限切れの報酬は変更できません');
+        }
+
+        $distribution->update([
+            'is_active' => ! $distribution->is_active,
+        ]);
+
+        return back();
+    }
+
+    
+    //　削除
+    public function destroy(RewardDistribution $distribution)
+    {
+        if ($distribution->company_id !== Auth::user()->company_id) {
             abort(403);
         }
 
-        $userReward->resolved_at = now();
-        $userReward->save();
+        $distribution->delete();
 
-        return back()->with('success', '解決済みにしました');
-    }
-
-    public function unresolve($id)
-    {
-        $userReward = UserReward::findOrFail($id);
-
-        if ($userReward->company_id !== Auth::user()->company_id) {
-            abort(403);
-        }
-
-        $userReward->resolved_at = null;
-        $userReward->save();
-
-        return back()->with('success', '未解決に戻しました');
+        return back()->with('success', '配布候補を削除しました');
     }
 }
