@@ -249,28 +249,10 @@
         open: false,
         search: '',
         init() {
-            window.addEventListener('keydown', (e) => {
-                const key = (e.key || '').toLowerCase();
-
-                // ✅ Ctrl/⌘ + K（ブラウザに奪われやすいので capture + preventDefault）
-                if ((e.ctrlKey || e.metaKey) && key === 'k') {
-                    e.preventDefault();
-                    this.open = true;
-                    this.$nextTick(() => this.$refs.searchInput?.focus());
-                }
-
-                // ✅ 代替：Ctrl/⌘ + /（ブラウザに奪われにくい）
-                if ((e.ctrlKey || e.metaKey) && key === '/') {
-                    e.preventDefault();
-                    this.open = true;
-                    this.$nextTick(() => this.$refs.searchInput?.focus());
-                }
-
-                if (key === 'escape') {
-                    this.open = false;
-                    this.search = '';
-                }
-            }, { capture: true });
+            window.addEventListener('open-command-palette', () => {
+                this.open = true;
+                this.$nextTick(() => this.$refs.searchInput.focus());
+            });
         }
     }"
         x-init="init()"
