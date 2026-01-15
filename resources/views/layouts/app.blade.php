@@ -110,60 +110,54 @@
                     <div
                         class="relative"
                         x-data="{ open: false, ...longPressAdmin() }">
-
                         <button
                             class="flex items-center text-sm font-medium {{ $navText }} {{ $hoverText }}
-                   focus:outline-none select-none"
-
-                            <div
-                            class="relative"
-                            x-data="{ open: false, ...longPressAdmin() }">
-                            <button
-                                class="flex items-center text-sm font-medium {{ $navText }} {{ $hoverText }}
                focus:outline-none select-none"
 
-                                {{-- 👇 スマホ長押し --}}
-                                @pointerdown.prevent="start"
-                                @pointerup="cancel"
-                                @pointerleave="cancel"
-                                @pointercancel="cancel"
+                            {{-- 👇 スマホ長押し --}}
+                            @pointerdown.prevent="start"
+                            @pointerup="cancel"
+                            @pointerleave="cancel"
+                            @pointercancel="cancel"
 
-                                {{-- 👇 通常タップ --}}
-                                @click="open = !open"
+                            {{-- 👇 通常タップ --}}
+                            @click="open = !open"
 
-                                style="-webkit-touch-callout:none; touch-action:none;">
-                                <span>{{ auth()->user()->name }}</span>
+                            style="-webkit-touch-callout:none; touch-action:none;">
+                            <span>{{ auth()->user()->name }}</span>
 
-                                <svg class="ml-2 h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
-                                    <path fill-rule="evenodd"
-                                        d="M5.293 7.293a1 1 0 011.414 0
+                            <svg class="ml-2 h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd"
+                                    d="M5.293 7.293a1 1 0 011.414 0
                    L10 10.586l3.293-3.293
                    a1 1 0 111.414 1.414l-4 4
                    a1 1 0 01-1.414 0l-4-4
                    a1 1 0 010-1.414z"
-                                        clip-rule="evenodd" />
-                                </svg>
-                            </button>
+                                    clip-rule="evenodd" />
+                            </svg>
+                        </button>
 
-                            {{-- ユーザードロップダウン --}}
-                            <div
-                                x-show="open"
-                                @click.away="open = false"
-                                class="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-10">
-                                <a href="{{ route('profile.edit') }}" class="block px-4 py-2 text-sm hover:bg-gray-100">
-                                    プロフィール
-                                </a>
-                                <a href="{{ route('documents.specification') }}" class="block px-4 py-2 text-sm hover:bg-gray-100">
-                                    仕様書📥︎
-                                </a>
-                                <a href="/logout"
-                                    onclick="event.preventDefault(); document.getElementById('logout-form').submit();"
-                                    class="block px-4 py-2 text-sm hover:bg-gray-100">
-                                    ログアウト
-                                </a>
-                            </div>
+                        {{-- ユーザードロップダウン --}}
+                        <div
+                            x-show="open"
+                            @click.away="open = false"
+                            x-transition
+                            class="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-10">
+                            <a href="{{ route('profile.edit') }}"
+                                class="block px-4 py-2 text-sm hover:bg-gray-100">
+                                プロフィール
+                            </a>
+                            <a href="{{ route('documents.specification') }}"
+                                class="block px-4 py-2 text-sm hover:bg-gray-100">
+                                仕様書📥︎
+                            </a>
+                            <a href="/logout"
+                                onclick="event.preventDefault(); document.getElementById('logout-form').submit();"
+                                class="block px-4 py-2 text-sm hover:bg-gray-100">
+                                ログアウト
+                            </a>
+                        </div>
                     </div>
-                </div>
 
                 <form id="logout-form" action="{{ route('logout') }}" method="POST" class="hidden">
                     @csrf
@@ -221,7 +215,8 @@
         x-init="init()"
         x-show="open"
         x-cloak
-        class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50"
+        x-teleport="body"
+        class="fixed inset-0 z-[100] flex items-center justify-center bg-black bg-opacity-50"
         @click.self="open=false;search='';">
         <div class="bg-white rounded-lg shadow-xl w-full max-w-lg p-6">
             <input
