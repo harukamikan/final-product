@@ -90,7 +90,10 @@ class User extends Authenticatable
 
     public function getTotalMilesAttribute(): int
     {
-        return $this->mileHistories()->sum('miles');
+        $currentSemester = \App\Models\SemesterSetting::current();
+        return $this->mileHistories()
+            ->where('semester_id', $currentSemester->id)
+            ->sum('miles');
     }
 
     public function rewardSurviveyAnswers()

@@ -62,7 +62,13 @@ class DashboardController extends Controller
         | マイル
         |--------------------------------------------------------------------------
         */
-        $totalMiles = MileHistory::where('user_id', $userId)->sum('miles');
+        // 現在の半期のマイルのみ
+        $currentSemester = \App\Models\SemesterSetting::current();
+        $totalMiles = $currentSemester 
+            ? MileHistory::where('user_id', $userId)
+                ->where('semester_id', $currentSemester->id)
+                ->sum('miles')
+            : 0;
 
         $thisMonthMiles = MileHistory::where('user_id', $userId)
             ->whereMonth('created_at', now()->month)

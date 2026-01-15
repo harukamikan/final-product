@@ -13,22 +13,22 @@ return [
     */
 
     'write_tech_blog' => [
-        'min_miles' => 30,
-        'max_miles' => 60,
+        'min_miles' => 50,
+        'max_miles' => 80,
     ],
 
     'event_speaker' => [
-        'min_miles' => 60,
+        'min_miles' => 70,
         'max_miles' => 100,
     ],
 
     'event_organizer' => [
-        'min_miles' => 70,
+        'min_miles' => 80,
         'max_miles' => 120,
     ],
 
     'acquire_certificate' => [
-        'min_miles' => 80,
-        'max_miles' => 150,
+        'min_miles' => 30,
+        'max_miles' => 60,
     ],
 ];

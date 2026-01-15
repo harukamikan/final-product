@@ -113,6 +113,8 @@ Route::middleware(['auth'])->group(function () {
     // ===== 所有報酬一覧 =====
     Route::get('/rewards/my', [UserRewardController::class, 'index'])
         ->name('rewards.my');
+    Route::post('/rewards/{id}/use', [UserRewardController::class, 'use'])
+        ->name('rewards.use');
 });
 
 
@@ -314,6 +316,16 @@ Route::middleware(['auth', 'company'])->group(function () {
 
         Route::get('/dashboard', [AdminDashboardController::class, 'index'])
             ->name('dashboard');
+
+        // 半期設定
+        Route::get('/semester/settings', [App\Http\Controllers\SemesterSettingController::class, 'index'])
+            ->name('semester.index');
+        Route::post('/semester/settings', [App\Http\Controllers\SemesterSettingController::class, 'update'])
+            ->name('semester.update');
+        Route::post('/semester/reset', [App\Http\Controllers\SemesterSettingController::class, 'reset'])
+            ->name('semester.reset');
+        Route::delete('/semester/{semester}', [App\Http\Controllers\SemesterSettingController::class, 'destroy'])
+            ->name('semester.destroy');
 
         Route::post('/rewards/toggle', [AdminRewardController::class, 'toggle'])
             ->name('rewards.toggle');

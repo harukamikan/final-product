@@ -15,6 +15,7 @@ class MileHistory extends Model
         'user_id',
         'company_id',
         'mission_id',
+        'semester_id',  // ← 追加
         'miles',
         'type',
         'description',
@@ -40,6 +41,14 @@ class MileHistory extends Model
     public function mission()
     {
         return $this->belongsTo(Mission::class);
+    }
+
+    /**
+     * 半期とのリレーション
+     */
+    public function semester()
+    {
+        return $this->belongsTo(SemesterSetting::class, 'semester_id');
     }
 
     public function scopeForUser($query, $userId)

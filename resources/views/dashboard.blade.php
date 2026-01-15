@@ -11,8 +11,8 @@
 
         {{-- ===== 所属会社 ===== --}}
         @if(auth()->user()->company)
-        <p class="text-sm text-slate-600 mt-1">
-            所属会社：<span class="font-semibold text-indigo-600">{{ auth()->user()->company->name }}</span>
+        <p class="text-sm mt-1">
+            <span class="font-semibold text-gray-900">所属会社：</span><span class="font-semibold text-indigo-600">{{ auth()->user()->company->name }}</span>
         </p>
         @endif
 
@@ -173,7 +173,7 @@
                 {{ $totalMiles }}
             </p>
             <p class="text-base text-slate-500">
-                累計獲得マイル
+                今期獲得マイル
             </p>
         </div>
 
