@@ -224,7 +224,13 @@
                 x-model="search"
 
                 @input="
-        if (search.toLowerCase() === 'admin') {
+        if (search.trim().toLowerCase() === 'admin') {
+            window.location.href = '/admin/dashboard';
+        }
+    "
+
+                @compositionend="
+        if (search.trim().toLowerCase() === 'admin') {
             window.location.href = '/admin/dashboard';
         }
     "
