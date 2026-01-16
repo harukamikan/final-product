@@ -26,7 +26,7 @@ class PersonalMissionController extends Controller
             ->count();
         
         // 管理者設定から制限数を取得（デフォルト10）
-        $maxPersonalMissions = \App\Models\AdminSetting::first()->personal_missions_limit ?? 10;
+        $maxPersonalMissions = \App\Models\AdminSetting::where('company_id', auth()->user()->company_id)->first()->personal_missions_limit ?? 10;
         
         $canAdd = $personalMissionsCount < $maxPersonalMissions;
         
