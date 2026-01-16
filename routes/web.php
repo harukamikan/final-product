@@ -395,8 +395,8 @@ Route::middleware(['auth', 'company'])->group(function () {
 
         // 報酬使用申請一覧
         Route::get('/rewards/usage', [Admin\RewardUsageController::class, 'index'])->name('admin.rewards.usage');
-        Route::post('/rewards/{id}/resolve', [Admin\RewardUsageController::class, 'resolve'])->name('admin.rewards.resolve');
-        Route::post('/rewards/{id}/unresolve', [Admin\RewardUsageController::class, 'unresolve'])->name('admin.rewards.unresolve');
+        Route::post('/rewards/{id}/resolve', [Admin\RewardUsageController::class, 'resolve'])->name('rewards.resolve');
+        Route::post('/rewards/{id}/unresolve', [Admin\RewardUsageController::class, 'unresolve'])->name('rewards.unresolve');
     });
 });
 
