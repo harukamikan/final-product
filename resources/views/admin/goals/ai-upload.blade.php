@@ -72,11 +72,7 @@
                     </button>
                 </form>
 
-                <div class="mt-6 pt-6 border-t">
-                    <a href="{{ route('admin.goals.upload.index') }}" class="text-indigo-600 hover:text-indigo-800">
-                        ← Excelテンプレート形式のアップロードに戻る
-                    </a>
-                </div>
+                
             </div>
         </div>
     </div>
