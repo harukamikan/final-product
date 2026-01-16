@@ -82,7 +82,7 @@ class MissionService
         }
 
         // 現在のマイル数（ランク計算用）
-        $previousMiles = MileHistory::where('user_id', $user->id)->sum('miles');
+        $previousMiles = $user->earned_miles;
 
         // すでにクリア済みで、repeatable じゃない場合は何もしない
         if ($userMission->isCompleted() && !$mission->repeatable) {

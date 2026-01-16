@@ -43,10 +43,10 @@
                 <div class="mb-6">
                     <h3 class="font-semibold mb-2">📝 入力例</h3>
                     <div class="bg-gray-100 p-4 rounded text-sm">
-                        <pre>はるか
+                        <pre>花子
 ・今期はブログを頑張りたい！技術記事5本目指す
 ・期限は6月末まで
-・あと資格も取りたいな。一陸技を1月20日までに
+・あと資格も取りたいな。基本情報技術者を1月20日までに
 
 田中太郎
 目標：社内LTで登壇する
@@ -72,11 +72,7 @@
                     </button>
                 </form>
 
-                <div class="mt-6 pt-6 border-t">
-                    <a href="{{ route('admin.goals.upload.index') }}" class="text-indigo-600 hover:text-indigo-800">
-                        ← Excelテンプレート形式のアップロードに戻る
-                    </a>
-                </div>
+                
             </div>
         </div>
     </div>

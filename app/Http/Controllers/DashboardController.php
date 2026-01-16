@@ -62,16 +62,16 @@ class DashboardController extends Controller
         | マイル
         |--------------------------------------------------------------------------
         */
-        // 現在の半期のマイルのみ
-        $currentSemester = \App\Models\SemesterSetting::current();
-        $totalMiles = $currentSemester 
-            ? MileHistory::where('user_id', $userId)
-                ->where('semester_id', $currentSemester->id)
-                ->sum('miles')
-            : 0;
+        $totalMiles = $user->earned_miles;
 
         $thisMonthMiles = MileHistory::where('user_id', $userId)
             ->whereMonth('created_at', now()->month)
+            ->where('miles', '>', 0)
+            ->sum('miles');
+
+        $thisMonthMiles = MileHistory::where('user_id', $userId)
+            ->whereMonth('created_at', now()->month)
+            ->where('miles', '>', 0)
             ->sum('miles');
 
         // 週間活動データ（過去7日間：Goal + UserMission）

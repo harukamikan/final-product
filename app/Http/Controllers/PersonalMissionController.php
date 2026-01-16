@@ -26,7 +26,7 @@ class PersonalMissionController extends Controller
             ->count();
         
         // 管理者設定から制限数を取得（デフォルト10）
-        $maxPersonalMissions = \App\Models\AdminSetting::first()->personal_missions_limit ?? 10;
+        $maxPersonalMissions = \App\Models\AdminSetting::where('company_id', auth()->user()->company_id)->first()->personal_missions_limit ?? 10;
         
         $canAdd = $personalMissionsCount < $maxPersonalMissions;
         
@@ -170,31 +170,46 @@ class PersonalMissionController extends Controller
     /**
      * 個人ミッション完了（手動）
      */
-    public function complete(\App\Models\PersonalMission $personalMission)
+    public function complete(Request $request, \App\Models\PersonalMission $personalMission)
     {
         $user = auth()->user();
-        
         if ($personalMission->user_id !== $user->id) {
             abort(403);
         }
-        
+
         // すでに完了してたら何もしない
         if ($personalMission->completed_at) {
             return back()->with('error', 'すでに完了しています');
         }
-        
+
+        // 一言コメントを保存
+        $note = $request->input('completion_note');
+
         // 進捗+1
         $personalMission->increment('progress_count');
         $personalMission->refresh();
-        
+
         // 達成したか確認
         if ($personalMission->progress_count >= $personalMission->required_count) {
-            $personalMission->update(['completed_at' => now()]);
+            $personalMission->update([
+                'completed_at' => now(),
+                'completion_note' => $note,
+            ]);
             $user->increment('personal_mission_points', 1);
+
+            // 活動履歴に追加
+            \App\Models\Activity::create([
+                'user_id' => $user->id,
+                'type' => 'personal_mission',
+                'title' => $personalMission->title,
+                'date' => now(),
+                'url' => null,
+            ]);
+
             return redirect()->route('missions.personal')
                 ->with('success', 'ミッション達成！🎉');
         }
-        
+
         return redirect()->route('missions.personal')
             ->with('success', '進捗 +1！');
     }

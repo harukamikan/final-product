@@ -180,14 +180,32 @@
                     {{-- 個人ミッションのみ「完了 +1」ボタン --}}
                     @if ($mission->user_id)
                         @if (!$mission->linked_category)
-                            <form action="{{ route('personal-missions.complete', $mission) }}" method="POST">
-                                @csrf
-                                <button type="submit"
+                            <div x-data="{ showNote: false }">
+                                <button @click="showNote = !showNote"
                                         onclick="event.stopPropagation()"
                                         class="px-4 py-2 rounded-xl bg-gradient-to-r from-indigo-600 to-indigo-700 text-white text-sm font-medium hover:from-indigo-700 hover:to-indigo-800 transition shadow-sm">
                                     完了 +1
                                 </button>
-                            </form>
+                                <div x-show="showNote" x-cloak class="mt-2">
+                                    <form action="{{ route('personal-missions.complete', $mission) }}" method="POST">
+                                        @csrf
+                                        <textarea name="completion_note" 
+                                                  placeholder="一言コメント（任意）" 
+                                                  class="w-full p-2 border rounded-lg text-sm"
+                                                  rows="2"></textarea>
+                                        <div class="flex gap-2 mt-2">
+                                            <button type="submit"
+                                                    class="px-3 py-1 bg-green-500 text-white rounded-lg text-sm hover:bg-green-600">
+                                                送信
+                                            </button>
+                                            <button type="button" @click="showNote = false"
+                                                    class="px-3 py-1 bg-gray-300 text-gray-700 rounded-lg text-sm hover:bg-gray-400">
+                                                キャンセル
+                                            </button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
                         @endif
                     @endif
                 </div>

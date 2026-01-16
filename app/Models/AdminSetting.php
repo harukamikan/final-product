@@ -4,6 +4,7 @@ use Illuminate\Database\Eloquent\Model;
 class AdminSetting extends Model
 {
     protected $fillable = [
+        'company_id',
         'notification_type',
         'slack_id',
         'email',

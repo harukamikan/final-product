@@ -16,6 +16,7 @@ class PersonalMission extends Model
         'completed_at',
         'reward_miles',
         'repeatable',
+        'completion_note',
         'cycle_type',
         'cycle_streak',
         'cycle_last_completed_at',
