@@ -56,6 +56,7 @@ class StatsController extends Controller
         // 月別マイル獲得（現在の半期のみ）
         $monthlyMilesData = MileHistory::where('user_id', $userId)
             ->where('semester_id', $currentSemester->id)
+            ->where('miles', '>', 0)
             ->select(
                 DB::raw('DATE_FORMAT(created_at, "%Y-%m") as month'),
                 DB::raw('SUM(miles) as total')
@@ -74,6 +75,7 @@ class StatsController extends Controller
 
         // 累積マイル計算（過去の半期の合計を初期値にする）
         $previousSemestersMiles = MileHistory::where('user_id', $userId)
+            ->where('miles', '>', 0)
             ->whereHas('semester', function($query) use ($currentSemester) {
                 $query->where('start_date', '<', $currentSemester->start_date);
             })
@@ -92,6 +94,7 @@ class StatsController extends Controller
         // カテゴリ別マイル獲得（現在の半期のみ）
         $categoryMiles = MileHistory::where('mile_histories.user_id', $userId)
             ->where('mile_histories.semester_id', $currentSemester->id)
+            ->where('miles', '>', 0)
             ->join('missions', 'mile_histories.mission_id', '=', 'missions.id')
             ->select('missions.key', DB::raw('SUM(mile_histories.miles) as total'))
             ->groupBy('missions.key')
@@ -100,9 +103,11 @@ class StatsController extends Controller
         // 総統計（現在の半期のみ）
         $totalMiles = MileHistory::where('user_id', $userId)
             ->where('semester_id', $currentSemester->id)
+            ->where('miles', '>', 0)
             ->sum('miles');
         $totalActivities = MileHistory::where('user_id', $userId)
             ->where('semester_id', $currentSemester->id)
+            ->where('miles', '>', 0)
             ->count();
 
         return view('stats.index', compact(

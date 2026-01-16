@@ -18,7 +18,7 @@ class GachaService
             $user = User::lockForUpdate()->findOrFail($userId);
 
             // 現在のマイル確認
-            $currentMiles = $user->mileHistories()->sum('miles');
+            $currentMiles = $user->available_miles;
             if ($currentMiles < self::COST) {
                 return null;
             }
