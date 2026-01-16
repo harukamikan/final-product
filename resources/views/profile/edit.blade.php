@@ -116,7 +116,10 @@
                     deadlineEnabled: {{ old('reminder_deadline_enabled', $user->reminder_deadline_enabled) ? 'true' : 'false' }},
                     weeklyEnabled: {{ old('reminder_weekly_enabled', $user->reminder_weekly_enabled) ? 'true' : 'false' }}
                 }" x-init="$watch('allEnabled', value => {
-                    if (!value) {
+                    if (value) {
+                        deadlineEnabled = true;
+                        weeklyEnabled = true;
+                    } else {
                         deadlineEnabled = false;
                         weeklyEnabled = false;
                     }
