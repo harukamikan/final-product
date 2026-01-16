@@ -8,9 +8,11 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::table('notifications', function (Blueprint $table) {
-            $table->string('title')->nullable()->after('user_id');
-        });
+        if (!Schema::hasColumn('notifications', 'title')) {
+            Schema::table('notifications', function (Blueprint $table) {
+                $table->string('title')->nullable()->after('user_id');
+            });
+        }
     }
 
     public function down(): void
@@ -20,4 +22,3 @@ return new class extends Migration
         });
     }
 };
-

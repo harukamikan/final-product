@@ -111,7 +111,19 @@
                 @method('PATCH')
 
                 <!-- リマインド通知ON/OFF -->
-                <div class="space-y-3">
+                <div class="space-y-3" x-data="{
+                    allEnabled: {{ old('reminder_enabled', $user->reminder_enabled) ? 'true' : 'false' }},
+                    deadlineEnabled: {{ old('reminder_deadline_enabled', $user->reminder_deadline_enabled) ? 'true' : 'false' }},
+                    weeklyEnabled: {{ old('reminder_weekly_enabled', $user->reminder_weekly_enabled) ? 'true' : 'false' }}
+                }" x-init="$watch('allEnabled', value => {
+                    if (value) {
+                        deadlineEnabled = true;
+                        weeklyEnabled = true;
+                    } else {
+                        deadlineEnabled = false;
+                        weeklyEnabled = false;
+                    }
+                })">
                     <!-- 全体のON/OFF -->
                     <div>
                         <label class="flex items-center gap-3">
@@ -119,7 +131,7 @@
                                 type="checkbox"
                                 name="reminder_enabled"
                                 value="1"
-                                {{ old('reminder_enabled', $user->reminder_enabled) ? 'checked' : '' }}
+                                x-model="allEnabled"
                                 class="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500">
                             <span class="text-sm font-medium text-gray-700">
                                 リマインド通知を受け取る
@@ -137,9 +149,10 @@
                                 type="checkbox"
                                 name="reminder_deadline_enabled"
                                 value="1"
-                                {{ old('reminder_deadline_enabled', $user->reminder_deadline_enabled) ? 'checked' : '' }}
-                                class="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500">
-                            <span class="text-sm font-medium text-gray-700">
+                                x-model="deadlineEnabled"
+                                :disabled="!allEnabled"
+                                class="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 disabled:opacity-50">
+                            <span class="text-sm font-medium text-gray-700" :class="{ 'text-gray-400': !allEnabled }">
                                 期限リマインドを受け取る
                             </span>
                         </label>
@@ -155,9 +168,10 @@
                                 type="checkbox"
                                 name="reminder_weekly_enabled"
                                 value="1"
-                                {{ old('reminder_weekly_enabled', $user->reminder_weekly_enabled) ? 'checked' : '' }}
-                                class="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500">
-                            <span class="text-sm font-medium text-gray-700">
+                                x-model="weeklyEnabled"
+                                :disabled="!allEnabled"
+                                class="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 disabled:opacity-50">
+                            <span class="text-sm font-medium text-gray-700" :class="{ 'text-gray-400': !allEnabled }">
                                 週次リマインドを受け取る
                             </span>
                         </label>
@@ -175,13 +189,13 @@
                     <select
                         name="reminder_days_before"
                         class="rounded-md border-gray-300 text-sm">
-                        <option value="3" {{ old('reminder_days_before', $user->reminder_days_before) == 7 ? 'selected' : '' }}>
+                        <option value="3" {{ old('reminder_days_before', $user->reminder_days_before) == 3 ? 'selected' : '' }}>
                             3日前
                         </option>
                         <option value="5" {{ old('reminder_days_before', $user->reminder_days_before) == 5 ? 'selected' : '' }}>
                             5日前
                         </option>
-                        <option value="7" {{ old('reminder_days_before', $user->reminder_days_before) == 3 ? 'selected' : '' }}>
+                        <option value="7" {{ old('reminder_days_before', $user->reminder_days_before) == 7 ? 'selected' : '' }}>
                             7日前
                         </option>
                     </select>

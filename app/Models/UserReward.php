@@ -9,19 +9,21 @@ class UserReward extends Model
 {
     use HasFactory;
 
-    protected $fillable = [
+   protected $fillable = [
         'user_id',
         'reward_id',
         'company_id',
         'acquired_at',
         'expires_at',
         'used_at',
+        'resolved_at',
     ];
 
     protected $casts = [
         'acquired_at' => 'datetime',
         'expires_at'  => 'datetime',
         'used_at'     => 'datetime',
+        'resolved_at' => 'datetime',
     ];
 
     // 関連

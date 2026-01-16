@@ -3,90 +3,15 @@
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\SlackController;
-use App\Models\Activity;
-use App\Models\User;
 
 // Slack bot commands endpoint
 Route::post('/slack/commands', [SlackController::class, 'commands']);
 
-Route::post('/slack/test', function (Request $request) {
-    \Log::info('Slack command received:', $request->all());
-    
-    return response()->json([
-        'text' => 'Hello from Laravel! 🎉'
-    ]);
-});
+// 個人ミッション進捗確認
+Route::post('/slack/my-missions', [SlackController::class, 'myMissions']);
 
-Route::post('/slack/activity', function (Request $request) {
-    $slackUserId = $request->input('user_id');
-    $user = User::where('slack_id', $slackUserId)->first();
-    
-    if (!$user) {
-        return response()->json([
-            'text' => '❌ ユーザーが見つかりません。先にWebページでSlackログインしてください: https://final-product-production.up.railway.app/login'
-        ]);
-    }
-    
-    $text = $request->input('text');
-    $parts = explode(' ', $text, 2);
-    $type = $parts[0] ?? '';
-    $url = $parts[1] ?? '';
-    
-    // 修正: title と date も保存
-    $activity = Activity::create([
-        'user_id' => $user->id,
-        'type' => $type,
-        'title' => null,
-        'date' => null,
-        'url' => $url,
-    ]);
-    
-    \Log::info('Activity received:', [
-        'type' => $type,
-        'url' => $url,
-        'slack_user_id' => $slackUserId,
-        'user_id' => $user->id
-    ]);
-    
-    return response()->json([
-        'text' => "✅ 活動を登録しました！\n種別: {$type}\nURL: {$url}"
-    ]);
-});
-Route::post('/slack/list', function (Request $request) {
-    // Slackから送られてきたユーザーIDを取得
-    $slackUserId = $request->input('user_id');
-    
-    // SlackユーザーIDでLaravelユーザーを検索
-    $user = User::where('slack_id', $slackUserId)->first();
-    
-    if (!$user) {
-        return response()->json([
-            'text' => '❌ ユーザーが見つかりません。先にWebページでSlackログインしてください: https://final-product-production.up.railway.app/login'
-        ]);
-    }
-    
-    $activities = Activity::where('user_id', $user->id)
-        ->orderBy('created_at', 'desc')
-        ->limit(10)
-        ->get();
-    
-    if ($activities->isEmpty()) {
-        return response()->json([
-            'text' => "📝 登録されている活動はまだありません。\n`/activity [種別] [URL]` で登録できます！"
-        ]);
-    }
-    
-    $text = "📋 *あなたの最近の活動（最新10件）*\n\n";
-    foreach ($activities as $activity) {
-        $date = $activity->created_at->format('Y/m/d');
-        $text .= "• [{$activity->type}] {$activity->url}\n";
-        $text .= "  登録日: {$date}\n\n";
-    }
-    
-    return response()->json([
-        'response_type' => 'in_channel',
-        'text' => $text
-    ]);
+// 報酬一覧
+Route::post('/slack/my-rewards', [SlackController::class, 'myRewards']);
 
-    
-});
+// リンク集
+Route::post('/slack/links', [SlackController::class, 'links']);

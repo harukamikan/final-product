@@ -5,10 +5,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Halfway</title>
+
     <link rel="icon" href="/favicon.png">
     <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
 
-    {{-- Vite（Tailwind + Alpine + JS） --}}
+    {{-- Vite（Tailwind + Alpine） --}}
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 
@@ -24,390 +25,284 @@
     style="background-color: {{ config('app.default_background_color') }};"
     @endauth
     >
-    {{-- ナビゲーション --}}
 
     @php
-    $bgValue = auth()->user()->background_value
-    ?? config('app.default_background_color');
+    $bgValue = auth()->user()->background_value ?? config('app.default_background_color');
 
-    // グラデーションの場合は最初の色を取得
     if (auth()->check() && auth()->user()->background_type === 'gradient') {
     preg_match('/#[0-9A-Fa-f]{6}/', $bgValue, $matches);
     $bgValue = $matches[0] ?? config('app.default_background_color');
     }
 
-    // 明るさを計算（RGB → 0-255）
     $r = hexdec(substr($bgValue, 1, 2));
     $g = hexdec(substr($bgValue, 3, 2));
     $b = hexdec(substr($bgValue, 5, 2));
     $brightness = ($r * 299 + $g * 587 + $b * 114) / 1000;
 
-    // 明るい背景なら暗いナビゲーション、暗い背景なら明るいナビゲーション
     $navText = $brightness > 155 ? 'text-gray-900' : 'text-white';
     $navBorder = $brightness > 155 ? 'border-gray-200' : 'border-gray-700';
     $hoverText = $brightness > 155 ? 'hover:text-gray-700' : 'hover:text-gray-300';
     @endphp
 
-    <nav class="fixed top-0 left-0 right-0 z-50 backdrop-blur border-b {{ $navBorder }} shadow-sm" x-data="{ mobileMenuOpen: false }">
+    {{-- ================= ナビゲーション ================= --}}
+    <nav class="fixed top-0 left-0 right-0 z-50 backdrop-blur border-b {{ $navBorder }} shadow-sm"
+        x-data="{ mobileMenuOpen: false }">
+
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between items-center h-16">
 
-                {{-- ハンバーガーボタン（スマホのみ表示） --}}
-                <button @click="mobileMenuOpen = !mobileMenuOpen" class="md:hidden {{ $navText }} focus:outline-none">
+                {{-- ハンバーガー（SP） --}}
+                <button @click="mobileMenuOpen = !mobileMenuOpen"
+                    class="md:hidden {{ $navText }} focus:outline-none">
                     <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M4 6h16M4 12h16M4 18h16" />
                     </svg>
                 </button>
 
-                {{-- 左メニュー（PC表示） --}}
+                {{-- 左メニュー（PC） --}}
                 <div class="hidden md:flex space-x-8">
-                    <a href="/dashboard"
-                        class="inline-flex items-center px-1 pt-1 text-sm font-medium {{ $navText }}
-                       {{ request()->is('dashboard') && !request()->is('*/') ? 'border-b-2 border-indigo-500' : $hoverText }}">
-                        ホーム
-                    </a>
-
-                    <a href="/missions"
-                        class="inline-flex items-center px-1 pt-1 text-sm font-medium {{ $navText }}
-                       {{ request()->is('missions*') ? 'border-b-2 border-indigo-500' : $hoverText }}">
-                        ミッション
-                    </a>
-
-                    <a href="/stats"
-                        class="inline-flex items-center px-1 pt-1 text-sm font-medium {{ $navText }}
-                       {{ request()->is('stats*') ? 'border-b-2 border-indigo-500' : $hoverText }}">
-                        統計
-                    </a>
-
-                    <a href="/activities"
-                        class="inline-flex items-center px-1 pt-1 text-sm font-medium {{ $navText }}
-                       {{ request()->is('activities*') ? 'border-b-2 border-indigo-500' : $hoverText }}">
-                        活動履歴
-                    </a>
-
-                    {{-- タイムライン --}}
-                    <a href="{{ route('timeline.index') }}"
-                        class="inline-flex items-center px-1 pt-1 text-sm font-medium {{ $navText }}
-                       {{ request()->is('timeline*') ? 'border-b-2 border-indigo-500' : $hoverText }}">
-                        タイムライン
-                    </a>
-
-                    <a href="/ranking"
-                        class="inline-flex items-center px-1 pt-1 text-sm font-medium {{ $navText }}
-                       {{ request()->is('ranking*') ? 'border-b-2 border-indigo-500' : $hoverText }}">
-                        ランキング
-                    </a>
-
-                    {{-- 🎰 ガチャ --}}
-                    <a href="{{ route('rewards.gacha') }}"
-                        class="inline-flex items-center px-1 pt-1 text-sm font-medium {{ $navText }}
-   {{ request()->is('rewards/gacha*') || request()->is('rewards/play/*')
-        ? 'border-b-2 border-indigo-500'
-        : $hoverText }}">
-                        ガチャ
-                    </a>
-
-                    {{-- 🎁 有効報酬 --}}
-                    <a href="{{ route('rewards.my') }}"
-                        class="inline-flex items-center px-1 pt-1 text-sm font-medium {{ $navText }}
-                        {{ request()->is('rewards/my*') ? 'border-b-2 border-indigo-500' : $hoverText }}">
-                        有効報酬
-                    </a>
+                    <a href="/dashboard" class="nav-link {{ request()->is('dashboard') ? 'border-b-2 border-indigo-500' : $hoverText }}">ホーム</a>
+                    <a href="/missions" class="nav-link {{ request()->is('missions*') ? 'border-b-2 border-indigo-500' : $hoverText }}">ミッション</a>
+                    <a href="/stats" class="nav-link {{ request()->is('stats*') ? 'border-b-2 border-indigo-500' : $hoverText }}">統計</a>
+                    <a href="/activities" class="nav-link {{ request()->is('activities*') ? 'border-b-2 border-indigo-500' : $hoverText }}">活動履歴</a>
+                    <a href="{{ route('timeline.index') }}" class="nav-link {{ request()->is('timeline*') ? 'border-b-2 border-indigo-500' : $hoverText }}">タイムライン</a>
+                    <a href="/ranking" class="nav-link {{ request()->is('ranking*') ? 'border-b-2 border-indigo-500' : $hoverText }}">ランキング</a>
+                    <a href="{{ route('rewards.gacha') }}" class="nav-link {{ request()->is('rewards/gacha*') ? 'border-b-2 border-indigo-500' : $hoverText }}">ガチャ</a>
+                    <a href="{{ route('rewards.my') }}" class="nav-link {{ request()->is('rewards/my*') ? 'border-b-2 border-indigo-500' : $hoverText }}">有効報酬</a>
                 </div>
 
-                {{-- 右メニュー（ユーザー） --}}
-                <div class="flex items-center">
-                    @auth
-                    {{-- 通知ベル --}}
+                {{-- ================= 右メニュー（通知 + ユーザー） ================= --}}
+                @auth
+                <div class="flex items-center gap-4">
+
+                    {{-- 🔔 通知ベル --}}
                     <div class="relative" x-data="{ open: false }">
-                        <button @click="
-                        open = !open">
-                        
-                            <class="relative {{ $navText }} {{ $hoverText }} focus:outline-none">
+                        <button
+                            @click="open = !open"
+                            class="relative {{ $navText }} {{ $hoverText }} focus:outline-none">
                             <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+                                    d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11
+                                    a6.002 6.002 0 00-4-5.659V5
+                                    a2 2 0 10-4 0v.341
+                                    C7.67 6.165 6 8.388 6 11v3.159
+                                    c0 .538-.214 1.055-.595 1.436L4 17h5
+                                    m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
                             </svg>
 
                             @php
                             $unreadCount = \App\Models\Notification::where('user_id', auth()->id())
-                            ->where('is_read', false)
-                            ->count();
+                                ->where('is_read', false)
+                                ->count();
                             @endphp
 
                             @if($unreadCount > 0)
-                            <span class="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
+                            <span class="absolute -top-1 -right-1 bg-red-500 text-white text-xs
+                                        rounded-full h-5 w-5 flex items-center justify-center">
                                 {{ $unreadCount }}
                             </span>
                             @endif
                         </button>
 
                         {{-- 通知ドロップダウン --}}
-                        <div x-show="open"
+                        <div
+                            x-show="open"
                             @click.away="open = false"
-                            class="absolute right-0 mt-2 w-80 bg-white rounded-md shadow-lg py-1 z-10 max-h-96 overflow-y-auto">
+                            x-transition
+                            class="absolute right-0 mt-2 w-80 bg-white rounded-lg shadow-xl z-50 max-h-96 overflow-y-auto">
+                            
+                            <div class="p-3 border-b flex justify-between items-center">
+                                <h3 class="font-semibold text-gray-800">通知</h3>
+                                @if($unreadCount > 0)
+                                <form action="{{ route('notifications.mark-all-read') }}" method="POST" class="inline">
+                                    @csrf
+                                    <button type="submit" class="text-xs text-indigo-600 hover:text-indigo-800">
+                                        すべて既読にする
+                                    </button>
+                                </form>
+                                @endif
+                            </div>
 
                             @php
                             $notifications = \App\Models\Notification::where('user_id', auth()->id())
-                            ->where('is_read', false)
-                            ->orderBy('created_at', 'desc')
-                            ->get();
+                                ->orderBy('created_at', 'desc')
+                                ->take(10)
+                                ->get();
                             @endphp
 
-                           @if($notifications->isEmpty())
-                            <p class="px-4 py-3 text-sm text-gray-500 text-center">
+                            @forelse($notifications as $notification)
+                            <div class="p-3 border-b hover:bg-gray-50 {{ $notification->is_read ? 'opacity-60' : '' }}">
+                                <div class="flex items-start gap-2">
+                                    <div class="flex-1">
+                                        <p class="text-sm font-medium text-gray-800">
+                                            {{ $notification->title }}
+                                        </p>
+                                        <p class="text-xs text-gray-600 mt-1 whitespace-pre-line">
+                                            {{ Str::limit($notification->message, 100) }}
+                                        </p>
+                                        <p class="text-xs text-gray-400 mt-1">
+                                            {{ $notification->created_at->diffForHumans() }}
+                                        </p>
+                                    </div>
+                                    @if(!$notification->is_read)
+                                    <span class="w-2 h-2 bg-indigo-500 rounded-full mt-1"></span>
+                                    @endif
+                                </div>
+                            </div>
+                            @empty
+                            <div class="p-4 text-center text-gray-500 text-sm">
                                 通知はありません
-                            </p>
-                            @else
-                            <div class="px-4 py-2 border-b border-gray-200 flex justify-end">
-                                <button 
-                                    @click="fetch('{{ route('notifications.mark-all-read') }}', {
-                                        method: 'POST',
-                                        headers: {
-                                            'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                                            'Content-Type': 'application/json'
-                                        }
-                                    }).then(() => location.reload())"
-                                    class="text-xs text-blue-600 hover:text-blue-800">
-                                    すべて既読にする
-                                </button>
                             </div>
-                            @foreach($notifications as $notification)
-                            <div class="px-4 py-3 border-b border-gray-100 hover:bg-gray-50">
-                                @if($notification->title)
-                                <p class="text-sm font-semibold text-gray-800">
-                                    {{ $notification->title }}
-                                </p>
-                                @endif
-                                <p class="text-sm text-gray-700">
-                                    {{ $notification->message }}
-                                </p>
-                                <p class="text-xs text-gray-500 mt-1">
-                                    {{ $notification->created_at->diffForHumans() }}
-                                </p>
-                            </div>
-                            @endforeach
-                            @endif
+                            @endforelse
                         </div>
                     </div>
-                    <div class="relative" x-data="{ open: false }">
-                        @can('admin')
+
+                    {{-- 👤 ユーザー名（長押しでコマンドパレット） --}}
+                    <div
+                        class="relative"
+                        x-data="{ open: false, ...longPressAdmin() }">
                         <button
-                            x-data="longPressAdmin()"
+                            class="flex items-center text-sm font-medium {{ $navText }} {{ $hoverText }}
+               focus:outline-none select-none"
 
-                            {{-- iOS Safari 完全対策 --}}
-                            @touchstart.prevent="start"
-                            @touchend="cancel"
-                            @touchmove="cancel"
-                            @touchcancel="cancel"
-                            @contextmenu.prevent
+                            {{-- 👇 スマホ長押し --}}
+                            @pointerdown.prevent="start"
+                            @pointerup="cancel"
+                            @pointerleave="cancel"
+                            @pointercancel="cancel"
 
-                            {{-- PC用 --}}
-                            @mousedown="start"
-                            @mouseup="cancel"
-
+                            {{-- 👇 通常タップ --}}
                             @click="open = !open"
 
-                            class="flex items-center text-sm font-medium {{ $navText }} {{ $hoverText }} focus:outline-none select-none"
-                            style="-webkit-touch-callout: none;">
-                            @else
-                            <button
-                                @click="open = !open"
-                                class="flex items-center text-sm font-medium {{ $navText }} {{ $hoverText }} focus:outline-none">
-                                @endcan
+                            style="-webkit-touch-callout:none; touch-action:none;">
+                            <span>{{ auth()->user()->name }}</span>
 
-                                <span>{{ auth()->user()->name }}</span>
-                                <svg class="ml-2 h-4 w-4" xmlns="http://www.w3.org/2000/svg"
-                                    viewBox="0 0 20 20" fill="currentColor">
-                                    <path fill-rule="evenodd"
-                                        d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
-                                        clip-rule="evenodd" />
-                                </svg>
-                            </button>
+                            <svg class="ml-2 h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd"
+                                    d="M5.293 7.293a1 1 0 011.414 0
+                   L10 10.586l3.293-3.293
+                   a1 1 0 111.414 1.414l-4 4
+                   a1 1 0 01-1.414 0l-4-4
+                   a1 1 0 010-1.414z"
+                                    clip-rule="evenodd" />
+                            </svg>
+                        </button>
 
-                            <div x-show="open"
-                                @click.away="open = false"
-                                class="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-10">
-                                <a href="{{ route('profile.edit') }}"
-                                    class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
-                                    プロフィール
-                                </a>
-                                <a href="{{ route('documents.specification') }}"
-                                    class="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
-                                    仕様書📥︎
-                                </a>
-
-                                <a href="/logout"
-                                    onclick="event.preventDefault(); document.getElementById('logout-form').submit();"
-                                    class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
-                                    ログアウト
-                                </a>
-                                <form id="logout-form" action="{{ route('logout') }}" method="POST" class="hidden">
-                                    @csrf
-                                </form>
-                            </div>
+                        {{-- ユーザードロップダウン --}}
+                        <div
+                            x-show="open"
+                            @click.away="open = false"
+                            x-transition
+                            class="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-10">
+                            <a href="{{ route('profile.edit') }}"
+                                class="block px-4 py-2 text-sm hover:bg-gray-100">
+                                プロフィール
+                            </a>
+                            <a href="{{ route('documents.specification') }}"
+                                class="block px-4 py-2 text-sm hover:bg-gray-100">
+                                仕様書📥︎
+                            </a>
+                            <a href="/logout"
+                                onclick="event.preventDefault(); document.getElementById('logout-form').submit();"
+                                class="block px-4 py-2 text-sm hover:bg-gray-100">
+                                ログアウト
+                            </a>
+                        </div>
                     </div>
+
+                    <form id="logout-form" action="{{ route('logout') }}" method="POST" class="hidden">
+                        @csrf
+                    </form>
                     @endauth
                 </div>
-
             </div>
-        </div>
 
-        {{-- モバイルメニュー --}}
-        <div x-show="mobileMenuOpen"
-            x-transition:enter="transition ease-out duration-200"
-            x-transition:enter-start="-translate-x-full"
-            x-transition:enter-end="translate-x-0"
-            x-transition:leave="transition ease-in duration-150"
-            x-transition:leave-start="translate-x-0"
-            x-transition:leave-end="-translate-x-full"
-            @click.away="mobileMenuOpen = false"
-            class="md:hidden fixed top-0 left-0 h-screen w-64 @if($brightness > 155) bg-gray-800 @else bg-white @endif border-r {{ $navBorder }} shadow-xl z-50 overflow-y-auto">
-            <div class="h-full px-2 pt-2 pb-3 space-y-1 @if($brightness > 155) bg-gray-800 @else bg-white @endif">
-                <a href="/dashboard"
-                    class="block px-3 py-2 rounded-md text-base font-medium @if($brightness > 155) text-white hover:bg-gray-700 @else text-gray-900 hover:bg-gray-100 @endif
-                           {{ request()->is('dashboard') ? 'bg-indigo-500 bg-opacity-20' : '' }}">
-                    ホーム
-                </a>
-                <a href="/missions"
-                    class="block px-3 py-2 rounded-md text-base font-medium @if($brightness > 155) text-white hover:bg-gray-700 @else text-gray-900 hover:bg-gray-100 @endif
-                           {{ request()->is('missions*') ? 'bg-indigo-500 bg-opacity-20' : '' }}">
-                    ミッション
-                </a>
-                <a href="/stats"
-                    class="block px-3 py-2 rounded-md text-base font-medium @if($brightness > 155) text-white hover:bg-gray-700 @else text-gray-900 hover:bg-gray-100 @endif
-                           {{ request()->is('stats*') ? 'bg-indigo-500 bg-opacity-20' : '' }}">
-                    統計
-                </a>
-                <a href="/activities"
-                    class="block px-3 py-2 rounded-md text-base font-medium @if($brightness > 155) text-white hover:bg-gray-700 @else text-gray-900 hover:bg-gray-100 @endif
-                           {{ request()->is('activities*') ? 'bg-indigo-500 bg-opacity-20' : '' }}">
-                    活動履歴
-                </a>
-                <a href="{{ route('timeline.index') }}"
-                    class="block px-3 py-2 rounded-md text-base font-medium @if($brightness > 155) text-white hover:bg-gray-700 @else text-gray-900 hover:bg-gray-100 @endif
-                           {{ request()->is('timeline*') ? 'bg-indigo-500 bg-opacity-20' : '' }}">
-                    タイムライン
-                </a>
-                <a href="/ranking"
-                    class="block px-3 py-2 rounded-md text-base font-medium @if($brightness > 155) text-white hover:bg-gray-700 @else text-gray-900 hover:bg-gray-100 @endif
-                           {{ request()->is('ranking*') ? 'bg-indigo-500 bg-opacity-20' : '' }}">
-                    ランキング
-                </a>
-                <a href="{{ route('rewards.gacha') }}"
-                    class="block px-3 py-2 rounded-md text-base font-medium @if($brightness > 155) text-white hover:bg-gray-700 @else text-gray-900 hover:bg-gray-100 @endif
-                           {{ request()->is('rewards/gacha*') ? 'bg-indigo-500 bg-opacity-20' : '' }}">
-                    ガチャ
-                </a>
-                <a href="{{ route('rewards.my') }}"
-                    class="block px-3 py-2 rounded-md text-base font-medium
-   @if($brightness > 155)
-       text-white hover:bg-gray-700
-   @else
-       text-gray-900 hover:bg-gray-100
-   @endif
-   {{ request()->is('rewards/my*') ? 'bg-indigo-500 bg-opacity-20' : '' }}">
-                    有効報酬
-                </a>
-
+            {{-- モバイルメニュー --}}
+            <div x-show="mobileMenuOpen"
+                @click.away="mobileMenuOpen = false"
+                class="md:hidden fixed top-0 left-0 h-screen w-64 bg-white shadow-xl z-50 overflow-y-auto">
+                <div class="p-4 space-y-2">
+                    <a href="/dashboard" class="block py-2">ホーム</a>
+                    <a href="/missions" class="block py-2">ミッション</a>
+                    <a href="/stats" class="block py-2">統計</a>
+                    <a href="/activities" class="block py-2">活動履歴</a>
+                    <a href="{{ route('timeline.index') }}" class="block py-2">タイムライン</a>
+                    <a href="/ranking" class="block py-2">ランキング</a>
+                    <a href="{{ route('rewards.gacha') }}" class="block py-2">ガチャ</a>
+                    <a href="{{ route('rewards.my') }}" class="block py-2">有効報酬</a>
+                </div>
             </div>
-        </div>
     </nav>
 
-    {{-- フラッシュメッセージ --}}
-    @if (session('status') === 'account-deleted')
-    <div
-        x-data="{ show: true }"
-        x-init="
-            setTimeout(() => show = false, 2500);
-            setTimeout(() => window.location.href = '/', 3000);
-        "
-        x-show="show"
-        x-transition
-        class="mx-auto max-w-3xl mt-4 rounded-md bg-green-50 p-4 text-green-700 text-center">
-        <p class="font-medium">アカウントを削除しました。</p>
-        <p class="text-sm mt-1">トップページへ移動します…</p>
-    </div>
-    @endif
-
-
-
-
-    {{-- メインコンテンツ --}}
-    <main class="min-h-screen px-6 py-6 pt-20">
+    {{-- ================= メイン ================= --}}
+    <main class="pt-20 px-6 py-6 min-h-screen">
         @yield('content')
     </main>
 
-    <!-- コマンドパレット -->
+    {{-- ================= コマンドパレット ================= --}}
     <div
-        x-data="{ 
-        open: false, 
-        search: '',
-        init() {
-            document.addEventListener('keydown', (e) => {
-                if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
-                    e.preventDefault();
-                    this.open = true;
-                }
-                if (e.key === 'Escape') {
-                    this.open = false;
-                    this.search = '';
-                }
-            });
+        x-data="{
+    open: false,
+    search: '',
+    composing: false,
+    checkCommand() {
+        if (this.composing) return;
 
-            window.addEventListener('open-command-palette', () => {
-                this.open = true;
-                this.$nextTick(() => this.$refs.searchInput?.focus());
-            });
+        const s = this.search.trim().toLowerCase();
+        if (s === 'admin') {
+            window.location.href = '/admin/dashboard';
         }
-    }"
+    },
+    init() {
+        window.addEventListener('open-command-palette', () => {
+            this.open = true;
+            this.$nextTick(() => this.$refs.search.focus());
+        });
+    }
+}"
+        x-init="init()"
         x-show="open"
         x-cloak
-        class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50"
-        @click.self="open = false; search = ''">
+        class="fixed inset-0 z-[100] flex items-center justify-center bg-black bg-opacity-50"
+        @click.self="open=false; search='';">
+
         <div class="bg-white rounded-lg shadow-xl w-full max-w-lg p-6">
             <input
-                type="text"
+                x-ref="search"
                 x-model="search"
-                @input="
-                            if (search.toLowerCase() === 'admin') {
-                                window.location.href = '/admin/dashboard';
-                            }
-                        "
+
+                @compositionstart="composing = true"
+                @compositionend="composing = false; checkCommand()"
+                @input="checkCommand()"
+
                 placeholder="コマンドを入力..."
-                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                x-ref="searchInput"
-                @click.away="open = false; search = ''">
+                class="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-indigo-500">
         </div>
     </div>
 
+
     <style>
         [x-cloak] {
-            display: none !important;
+            display: none !important
         }
     </style>
 
     <script>
         function longPressAdmin() {
             let timer = null;
-
             return {
                 start() {
-                    console.log('touchstart / mousedown');
                     timer = setTimeout(() => {
-                        console.log('LONG PRESS FIRED');
-                        alert('long press detected'); // ★一時的
                         window.dispatchEvent(new Event('open-command-palette'));
                     }, 600);
                 },
                 cancel() {
-                    console.log('cancel');
                     clearTimeout(timer);
                 }
-            };
+            }
         }
     </script>
-
 </body>
 
 </html>

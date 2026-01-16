@@ -61,9 +61,10 @@
                         <label class="block text-sm font-medium text-gray-700 mb-2">
                             ファイルを選択（.txt, .xlsx, .xls, .docx）
                         </label>
-                        <input type="file" name="file" accept=".txt,.xlsx,.xls,.docx" required
+                        <input type="file" name="files[]" accept=".txt,.xlsx,.xls,.docx" required multiple
                             class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100">
-                    </div>
+                        <p class="text-xs text-gray-500 mt-1">※ 複数ファイルを選択できます</p>
+                        </div>
 
                     <button type="submit" 
                         class="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700">
