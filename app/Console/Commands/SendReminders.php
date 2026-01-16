@@ -37,7 +37,6 @@ class SendReminders extends Command
         // 期限リマインドONのユーザーを取得
         $users = \App\Models\User::where('reminder_enabled', true)
             ->where('reminder_deadline_enabled', true)
-            ->whereNotNull('slack_id')
             ->get();
         
         foreach ($users as $user) {
@@ -100,34 +99,38 @@ class SendReminders extends Command
     
     protected function sendDeadlineReminderToUser($goal, $daysLeft = null)
     {
-        // ユーザーにSlack IDが設定されていない場合はスキップ
-        if (!$goal->user || !$goal->user->slack_id) {
-            $this->info("Skipped (no Slack ID): {$goal->title}");
+        if (!$goal->user) {
             return;
         }
-        
-        $slackService = app(SlackService::class);
         
         if ($daysLeft === null) {
             $deadline = Carbon::parse($goal->deadline);
             $daysLeft = (int) Carbon::now()->startOfDay()->diffInDays($deadline->startOfDay(), false);
         }
         
-        $message = "⏰ 期限リマインド\n\n";
-        $message .= "目標: {$goal->title}\n";
-        $message .= "期限まで: あと{$daysLeft}日\n\n";
-        $message .= "頑張りましょう！💪";
+        $message = "目標: {$goal->title}\n期限まで: あと{$daysLeft}日\n頑張りましょう！💪";
         
-        // ユーザーのSlackボットにDM送信
-        $slackService->sendDM($goal->user->slack_id, $message);
+        // アプリ内通知を保存
+        \App\Models\Notification::create([
+            'user_id' => $goal->user->id,
+            'title' => '⏰ 期限リマインド',
+            'type' => 'deadline_reminder',
+            'message' => $message,
+            'is_read' => false,
+        ]);
+        
+        // Slack IDがあればSlackにも送信
+        if ($goal->user->slack_id) {
+            $slackService = app(SlackService::class);
+            $slackMessage = "⏰ 期限リマインド\n\n" . $message;
+            $slackService->sendDM($goal->user->slack_id, $slackMessage);
+        }
         
         $this->info("Sent deadline reminder to {$goal->user->name}: {$goal->title}");
     }
     
     protected function sendWeeklyReminder($user)
     {
-        $slackService = app(SlackService::class);
-        
         // 進行中のミッション取得
         $activeMissions = \App\Models\UserMission::where('user_id', $user->id)
             ->whereNull('completed_at')
@@ -151,21 +154,21 @@ class SendReminders extends Command
             })->orderBy('reward_miles', 'desc')->first();
         
         // メッセージ作成
-        $message = "📊 今週の進捗レポート\n\n";
+        $message = "";
         
         if ($activeMissions->isNotEmpty()) {
             $message .= "▼ 進行中のミッション\n";
             foreach ($activeMissions as $userMission) {
-                $progress = $userMission->progress_count;
-                $required = $userMission->mission->required_count;
-                $remaining = $required - $progress;
-                $message .= "・{$userMission->mission->title} → {$progress}/{$required}件完了（残り{$remaining}件）\n";
+                $progress = $userMission->progress_count ?? 0;
+                $required = $userMission->mission->required_count ?? 1;
+                $missionRemaining = $required - $progress;
+                $message .= "・{$userMission->mission->title} → {$progress}/{$required}件完了（残り{$missionRemaining}件）\n";
             }
             $message .= "\n";
         }
         
-        $message .= "▼ あなたのランク\n";
         $rankEmoji = $rank == 'ゴールド' ? '🥇' : ($rank == 'シルバー' ? '🥈' : '🥉');
+        $message .= "▼ あなたのランク\n";
         $message .= "現在: {$rankEmoji} {$rank}（{$totalMiles}マイル）\n";
         
         if ($rank != 'ゴールド') {
@@ -177,13 +180,24 @@ class SendReminders extends Command
         if ($topMission) {
             $message .= "💡 次のおすすめミッション\n";
             $message .= "{$topMission->title}\n";
-            $message .= "+{$topMission->reward_miles} マイル獲得\n\n";
+            $message .= "+{$topMission->reward_miles} マイル獲得";
         }
         
-        $message .= "頑張りましょう！💪";
+        // アプリ内通知を保存
+        \App\Models\Notification::create([
+            'user_id' => $user->id,
+            'title' => '📊 週次レポート',
+            'type' => 'weekly_reminder',
+            'message' => $message,
+            'is_read' => false,
+        ]);
         
-        // Slack DM送信
-        $slackService->sendDM($user->slack_id, $message);
+        // Slack IDがあればSlackにも送信
+        if ($user->slack_id) {
+            $slackService = app(SlackService::class);
+            $slackMessage = "📊 今週の進捗レポート\n\n" . $message . "\n\n頑張りましょう！💪";
+            $slackService->sendDM($user->slack_id, $slackMessage);
+        }
         
         $this->info("Sent weekly progress report to {$user->name}");
     }

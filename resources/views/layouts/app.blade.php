@@ -84,26 +84,78 @@
                             <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                     d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11
-                       a6.002 6.002 0 00-4-5.659V5
-                       a2 2 0 10-4 0v.341
-                       C7.67 6.165 6 8.388 6 11v3.159
-                       c0 .538-.214 1.055-.595 1.436L4 17h5
-                       m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+                                    a6.002 6.002 0 00-4-5.659V5
+                                    a2 2 0 10-4 0v.341
+                                    C7.67 6.165 6 8.388 6 11v3.159
+                                    c0 .538-.214 1.055-.595 1.436L4 17h5
+                                    m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
                             </svg>
 
                             @php
                             $unreadCount = \App\Models\Notification::where('user_id', auth()->id())
-                            ->where('is_read', false)
-                            ->count();
+                                ->where('is_read', false)
+                                ->count();
                             @endphp
 
                             @if($unreadCount > 0)
                             <span class="absolute -top-1 -right-1 bg-red-500 text-white text-xs
-                    rounded-full h-5 w-5 flex items-center justify-center">
+                                        rounded-full h-5 w-5 flex items-center justify-center">
                                 {{ $unreadCount }}
                             </span>
                             @endif
                         </button>
+
+                        {{-- 通知ドロップダウン --}}
+                        <div
+                            x-show="open"
+                            @click.away="open = false"
+                            x-transition
+                            class="absolute right-0 mt-2 w-80 bg-white rounded-lg shadow-xl z-50 max-h-96 overflow-y-auto">
+                            
+                            <div class="p-3 border-b flex justify-between items-center">
+                                <h3 class="font-semibold text-gray-800">通知</h3>
+                                @if($unreadCount > 0)
+                                <form action="{{ route('notifications.mark-all-read') }}" method="POST" class="inline">
+                                    @csrf
+                                    <button type="submit" class="text-xs text-indigo-600 hover:text-indigo-800">
+                                        すべて既読にする
+                                    </button>
+                                </form>
+                                @endif
+                            </div>
+
+                            @php
+                            $notifications = \App\Models\Notification::where('user_id', auth()->id())
+                                ->orderBy('created_at', 'desc')
+                                ->take(10)
+                                ->get();
+                            @endphp
+
+                            @forelse($notifications as $notification)
+                            <div class="p-3 border-b hover:bg-gray-50 {{ $notification->is_read ? 'opacity-60' : '' }}">
+                                <div class="flex items-start gap-2">
+                                    <div class="flex-1">
+                                        <p class="text-sm font-medium text-gray-800">
+                                            {{ $notification->title }}
+                                        </p>
+                                        <p class="text-xs text-gray-600 mt-1 whitespace-pre-line">
+                                            {{ Str::limit($notification->message, 100) }}
+                                        </p>
+                                        <p class="text-xs text-gray-400 mt-1">
+                                            {{ $notification->created_at->diffForHumans() }}
+                                        </p>
+                                    </div>
+                                    @if(!$notification->is_read)
+                                    <span class="w-2 h-2 bg-indigo-500 rounded-full mt-1"></span>
+                                    @endif
+                                </div>
+                            </div>
+                            @empty
+                            <div class="p-4 text-center text-gray-500 text-sm">
+                                通知はありません
+                            </div>
+                            @endforelse
+                        </div>
                     </div>
 
                     {{-- 👤 ユーザー名（長押しでコマンドパレット） --}}
