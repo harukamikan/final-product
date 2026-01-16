@@ -88,12 +88,41 @@ class User extends Authenticatable
         return $this->hasMany(MileHistory::class);
     }
 
-    public function getTotalMilesAttribute(): int
+    /**
+     * 獲得マイル（消費を除外） - 表示・ランク用
+     */
+    public function getEarnedMilesAttribute(): int
     {
         $currentSemester = \App\Models\SemesterSetting::current();
+        if (!$currentSemester) {
+            return 0;
+        }
+        return $this->mileHistories()
+            ->where('semester_id', $currentSemester->id)
+            ->where('miles', '>', 0)
+            ->sum('miles');
+    }
+
+    /**
+     * 使用可能マイル（消費も含めた残高） - ガチャ用
+     */
+    public function getAvailableMilesAttribute(): int
+    {
+        $currentSemester = \App\Models\SemesterSetting::current();
+        if (!$currentSemester) {
+            return 0;
+        }
         return $this->mileHistories()
             ->where('semester_id', $currentSemester->id)
             ->sum('miles');
+    }
+
+    /**
+     * 後方互換のため（既存コードが壊れないように）
+     */
+    public function getTotalMilesAttribute(): int
+    {
+        return $this->earned_miles;
     }
 
     public function rewardSurviveyAnswers()
