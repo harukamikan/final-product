@@ -111,7 +111,7 @@ class GoalAiUploadController extends Controller
                     
                 // 管理者にSlack通知を送信
                 $this->slackService->notifyDuplicateNameError($originalInput, $candidates);
-                $adminSetting = \App\Models\AdminSetting::first();
+                $adminSetting = \App\Models\AdminSetting::where('company_id', auth()->user()->company_id)->first();
                 // 管理者にWeb通知も保存（追加）
                 if ($adminSetting && $adminSetting->slack_id) {
                     $adminUser = User::where('slack_id', $adminSetting->slack_id)->first();
