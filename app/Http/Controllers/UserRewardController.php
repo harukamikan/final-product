@@ -55,7 +55,7 @@ class UserRewardController extends Controller
         $rewardName = $userReward->reward->name;
         
         // 管理者設定を取得
-        $adminSetting = AdminSetting::first();
+        $adminSetting = AdminSetting::where('company_id', $user->company_id)->first();
         
         if ($adminSetting) {
             // Slack通知
