@@ -188,7 +188,7 @@ class SlackController extends Controller
 
         $message = "🔗 *リンク集*\n\n";
         $message .= "📱 *Webアプリ*\n";
-        $message .= "{$appUrl}\n\n";
+        $message .= "{}/invite/NyCNxRDDNQ0ksiA4fMI0Rp4xl3swnZIySf5QYEUhjdD1dHL6b2R9sgRmd7Oi\n\n";
         $message .= "📄 *仕様書*\n";
         $message .= "{$appUrl}/documents/specification\n";
 
