@@ -30,28 +30,34 @@ class GoalAiUploadController extends Controller
     public function upload(Request $request)
     {
         $request->validate([
-            'file' => 'required|mimes:txt,xlsx,xls,docx'
+            'files' => 'required|array',
+            'files.*' => 'mimes:txt,xlsx,xls,docx'
         ]);
 
-        // ファイルの内容を取得
-        $file = $request->file('file');
-        $content = $this->extractContent($file);
+        // 全ファイルの内容を結合
+        $allContent = '';
+        foreach ($request->file('files') as $file) {
+            $content = $this->extractContent($file);
+            $allContent .= $content . "\n\n";
+        }
 
         // ユーザー一覧を取得（自社のみ）
         $companyId = \Illuminate\Support\Facades\Auth::user()->company_id;
         $availableUsers = \App\Models\User::where('company_id', $companyId)
             ->pluck('name')
             ->toArray();
+
         \Log::info('=== Available Users ===', $availableUsers);
 
         try {
             // AI で目標を分類（新メソッド使用）
-            $extractedData = $this->claudeService->classifyGoals($content, $availableUsers);
+            $extractedData = $this->claudeService->classifyGoals($allContent, $availableUsers);
 
             // セッションに保存して確認画面へ
             session(['extracted_goals' => $extractedData]);
 
             return redirect()->route('admin.goals.ai.confirm');
+
         } catch (\Exception $e) {
             return redirect()->back()->with('error', 'AI抽出に失敗しました: ' . $e->getMessage());
         }
